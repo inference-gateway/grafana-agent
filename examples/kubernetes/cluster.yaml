@@ -1,0 +1,37 @@
+---
+apiVersion: ctlptl.dev/v1alpha1
+kind: Registry
+metadata:
+  name: grafana-agent-registry
+spec:
+  port: 5005
+
+---
+apiVersion: ctlptl.dev/v1alpha1
+kind: Cluster
+metadata:
+  name: grafana-agent-k3d
+spec:
+  product: k3d
+  registry: grafana-agent-registry
+  kindV1Alpha4Cluster:
+    name: grafana-agent-k3d
+    nodes:
+      - role: control-plane
+        extraPortMappings:
+          # Grafana UI
+          - containerPort: 30000
+            hostPort: 3000
+            protocol: TCP
+          # Prometheus UI
+          - containerPort: 30090
+            hostPort: 9090
+            protocol: TCP
+          # Demo Service
+          - containerPort: 30082
+            hostPort: 8082
+            protocol: TCP
+          # Grafana Agent API
+          - containerPort: 30080
+            hostPort: 8080
+            protocol: TCP

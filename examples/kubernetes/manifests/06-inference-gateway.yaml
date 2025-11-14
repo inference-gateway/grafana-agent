@@ -1,0 +1,72 @@
+---
+apiVersion: core.inference-gateway.com/v1alpha1
+kind: Gateway
+metadata:
+  name: inference-gateway
+  namespace: grafana-agent
+spec:
+  replicas: 1
+  image: "ghcr.io/inference-gateway/inference-gateway:latest"
+  environment: development
+
+  telemetry:
+    enabled: true
+    metrics:
+      enabled: true
+      port: 9464
+
+  server:
+    host: "0.0.0.0"
+    port: 8080
+    readTimeout: 530s
+    writeTimeout: 530s
+
+  client:
+    timeout: 530s
+    idleConnTimeout: 130s
+    responseHeaderTimeout: 120s
+
+  providers:
+    - name: DeepSeek
+      env:
+        - name: DEEPSEEK_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: deepseek-api-key
+              optional: true
+
+    - name: Google
+      env:
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: google-api-key
+              optional: true
+
+    - name: Anthropic
+      env:
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: anthropic-api-key
+              optional: true
+
+    - name: OpenAI
+      env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: api-keys
+              key: openai-api-key
+              optional: true
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
