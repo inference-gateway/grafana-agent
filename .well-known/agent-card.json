@@ -1,0 +1,17 @@
+{
+	"name": "grafana-agent",
+	"version": "0.1.0",
+	"description": "A2A agent server for grafana dashboards automation tasks",
+	"protocolVersion": "0.3.0",
+	"url": "",
+	"preferredTransport": "JSONRPC",
+	"defaultInputModes": ["text"],
+	"defaultOutputModes": ["text"],
+	"capabilities": {
+		"streaming": true,
+		"pushNotifications": false,
+		"stateTransitionHistory": false
+	},
+	"skills": [
+	]
+}
