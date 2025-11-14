@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  CLUSTER_NAME: grafana-agent-k3d
+  CLUSTER_NAME: k3d-grafana-agent
   REGISTRY_PORT: 5005
   NAMESPACE: grafana-agent
 
@@ -53,7 +53,7 @@ tasks:
       - echo "📦 Installing Inference Gateway Operator..."
       - kubectl apply -f https://github.com/inference-gateway/operator/releases/latest/download/install.yaml
       - echo "⏳ Waiting for Inference Gateway Operator to be ready..."
-      - kubectl wait --for=condition=available --timeout=300s deployment/operator -n inference-gateway-system || true
+      - kubectl wait --for=condition=available --timeout=300s deployment/operator-inference-gateway -n inference-gateway-system || true
       - echo "✅ Inference Gateway Operator installed"
 
   build-images:

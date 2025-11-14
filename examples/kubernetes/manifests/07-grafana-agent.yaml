@@ -49,7 +49,7 @@ spec:
             - name: A2A_AGENT_CLIENT_MODEL
               value: "deepseek-chat"
             - name: A2A_AGENT_CLIENT_BASE_URL
-              value: "http://inference-gateway:8080/v1"
+              value: "http://inference-gateway.inference-gateway.svc.cluster.local:8080/v1"
             - name: A2A_AGENT_CLIENT_TIMEOUT
               value: "30s"
             - name: A2A_AGENT_CLIENT_MAX_RETRIES

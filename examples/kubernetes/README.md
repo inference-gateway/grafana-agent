@@ -31,20 +31,25 @@ Install the following tools:
 brew install docker k3d ctlptl kubectl go-task
 ```
 
-### Quick Installation (Linux)
+### Cross-Platform Installation (macOS/Linux)
 
 ```bash
 # k3d
 curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
 
 # ctlptl
-CTLPTL_VERSION="0.8.25"
-curl -fsSL https://github.com/tilt-dev/ctlptl/releases/download/v${CTLPTL_VERSION}/ctlptl.${CTLPTL_VERSION}.linux.x86_64.tar.gz | \
+CTLPTL_VERSION="0.8.43"
+CTLPTL_OS=$(uname -s | sed 's/Darwin/mac/; s/Linux/linux/')
+CTLPTL_ARCH=$(uname -m | sed 's/aarch64/arm64/')
+curl -fsSL "https://github.com/tilt-dev/ctlptl/releases/download/v${CTLPTL_VERSION}/ctlptl.${CTLPTL_VERSION}.${CTLPTL_OS}.${CTLPTL_ARCH}.tar.gz" | \
   sudo tar -xzv -C /usr/local/bin ctlptl
 
 # kubectl
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+KUBECTL_OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+KUBECTL_ARCH=$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/')
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/${KUBECTL_OS}/${KUBECTL_ARCH}/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
 
 # Task
 sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
@@ -140,18 +145,33 @@ Then try prompts like:
 Create a dashboard called "System Overview" showing CPU and memory usage from the demo-service. Use the agent.
 ```
 
-#### Option 2: Using curl (Direct A2A API)
+#### Option 2: Using Inference Gateway CLI (infer)
+
+Use the [Inference Gateway CLI](https://github.com/inference-gateway/cli) as a temporary pod to interact with the grafana-agent:
 
 ```bash
-# Submit a task
-curl -X POST http://localhost:8080/tasks \
-  -H "Content-Type: application/json" \
-  -d '{
-    "input": "Create a dashboard showing HTTP request rates and latencies from demo-service. Use the agent."
-  }'
+# Run the infer CLI as a temporary pod to delegate a task to grafana-agent
+kubectl run -n grafana-agent --rm -it infer-cli \
+  --image=ghcr.io/inference-gateway/cli:latest \
+  --restart=Never \
+  --env="INFER_GATEWAY_URL=http://inference-gateway.inference-gateway.svc.cluster.local:8080" \
+  --env="INFER_A2A_ENABLED=true" \
+  --env="INFER_A2A_AGENTS=http://grafana-agent.grafana-agent.svc.cluster.local:8080" \
+  -- agent --model deepseek/deepseek-chat \
+  "Create a dashboard showing HTTP request rates and latencies from demo-service"
+```
 
-# Get task status (replace TASK_ID)
-curl http://localhost:8080/tasks/TASK_ID
+Or use interactive chat mode:
+
+```bash
+# Interactive chat that can delegate to grafana-agent
+kubectl run -n grafana-agent --rm -it infer-cli \
+  --image=ghcr.io/inference-gateway/cli:latest \
+  --restart=Never \
+  --env="INFER_GATEWAY_URL=http://inference-gateway.inference-gateway.svc.cluster.local:8080" \
+  --env="INFER_A2A_ENABLED=true" \
+  --env="INFER_A2A_AGENTS=http://grafana-agent.grafana-agent.svc.cluster.local:8080" \
+  -- chat
 ```
 
 #### Option 3: Using kubectl port-forward
@@ -283,7 +303,7 @@ The [Inference Gateway Operator](https://github.com/inference-gateway/operator) 
 The `cluster.yaml` file defines:
 
 - **k3d cluster** with port mappings for services
-- **Local registry** at `localhost:5005` for image storage
+- **Local registry** at `localhost:5000` for image storage
 - **NodePort mappings**:
   - 3000 → Grafana (30000)
   - 9090 → Prometheus (30090)
@@ -427,7 +447,7 @@ docker ps | grep registry
 task build-images
 
 # Check images are in registry
-curl http://localhost:5005/v2/_catalog
+curl http://localhost:5000/v2/_catalog
 ```
 
 **Problem**: Image pull errors in pods
@@ -437,7 +457,7 @@ curl http://localhost:5005/v2/_catalog
 kubectl describe pod <pod-name> -n grafana-agent
 
 # Ensure images are pushed
-docker images | grep localhost:5005
+docker images | grep localhost:5000
 
 # Try rebuilding
 task rebuild-agent
