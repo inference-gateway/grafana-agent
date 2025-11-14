@@ -45,6 +45,7 @@ This agent provides 1 skills:
 The agent exposes the following HTTP endpoints:
 
 - `GET /.well-known/agent-card.json` - Agent metadata and capabilities
+- `GET /health` - Health check endpoint
 - `POST /a2a` - JSON-RPC endpoint for all A2A operations (skill execution, streaming, etc.)
 
 ## Environment Setup
