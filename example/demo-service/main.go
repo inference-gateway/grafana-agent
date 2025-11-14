@@ -10,15 +10,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/prometheus"
-	"go.opentelemetry.io/otel/metric"
+	prometheus "github.com/prometheus/client_golang/prometheus"
+	promauto "github.com/prometheus/client_golang/prometheus/promauto"
+	promhttp "github.com/prometheus/client_golang/prometheus/promhttp"
+	otel "go.opentelemetry.io/otel"
+	attribute "go.opentelemetry.io/otel/attribute"
+	otelprom "go.opentelemetry.io/otel/exporters/prometheus"
+	metric "go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
-	"go.opentelemetry.io/otel/sdk/resource"
+	resource "go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
@@ -82,7 +82,7 @@ func initOTEL() (*sdkmetric.MeterProvider, error) {
 	}
 
 	// Create Prometheus exporter
-	exporter, err := prometheus.New()
+	exporter, err := otelprom.New()
 	if err != nil {
 		return nil, err
 	}
