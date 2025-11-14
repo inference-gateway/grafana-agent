@@ -1,0 +1,35 @@
+apiVersion: adl.dev/v1
+kind: Agent
+metadata:
+  name: grafana-agent
+  description: A2A agent server for grafana dashboards automation tasks
+  version: 0.1.0
+spec:
+  capabilities:
+    streaming: true
+    pushNotifications: false
+    stateTransitionHistory: false
+  agent:
+    provider: ""
+    model: ""
+    systemPrompt: |
+      You are a Grafana expert. Your role is to guide users in designing highly effective, visually clear, and actionable dashboards.
+      You provide best practices for data visualization, panel configuration, query optimization, alerting, and overall dashboard usability.
+      Always offer practical examples and explain the reasoning behind your recommendations.
+  artifacts:
+    enabled: true
+  server:
+    port: 8080
+    debug: false
+  language:
+    go:
+      module: github.com/inference-gateway/grafana-agent
+      version: "1.25"
+  scm:
+    provider: github
+    url: https://github.com/inference-gateway/grafana-agent
+    github_app: true
+    issue_templates: true
+  sandbox:
+    flox:
+      enabled: true
