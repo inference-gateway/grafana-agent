@@ -13,5 +13,12 @@
 		"stateTransitionHistory": false
 	},
 	"skills": [
+		{
+			"id": "create_dashboard",
+			"name": "create_dashboard",
+			"description": "Creates a Grafana dashboard with specified panels, queries, and configurations",
+			"tags": ["grafana","dashboard","visualization"],
+			"schema": {"properties":{"dashboard_title":{"description":"The title of the Grafana dashboard","type":"string"},"description":{"description":"Description of what the dashboard monitors or displays","type":"string"},"panels":{"description":"Array of panel configurations (title, type, queries, etc.)","items":{"type":"object"},"type":"array"},"refresh_interval":{"description":"Auto-refresh interval (e.g., \"5s\", \"1m\", \"5m\")","type":"string"},"tags":{"description":"Tags to categorize the dashboard","items":{"type":"string"},"type":"array"},"time_range":{"description":"Default time range for the dashboard (from, to)","properties":{"from":{"type":"string"},"to":{"type":"string"}},"type":"object"},"variables":{"description":"Dashboard template variables for dynamic queries","items":{"type":"object"},"type":"array"}},"required":["dashboard_title","panels"],"type":"object"}
+		}
 	]
 }

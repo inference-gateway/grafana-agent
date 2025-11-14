@@ -73,7 +73,10 @@ The agent uses OpenAI-compatible LLM client. Configure with:
 ## Adding New Functionality
 
 ### Skills Implementation
-Currently no skills are defined. To add skills:
+The following skills are currently defined:
+- **create_dashboard**: Creates a Grafana dashboard with specified panels, queries, and configurations
+
+To modify skills:
 1. Update `agent.yaml` with skill definitions
 2. Run `task generate` to regenerate the codebase
 3. Implement skill logic in generated skill files (look for TODO placeholders)

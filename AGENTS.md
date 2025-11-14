@@ -44,7 +44,16 @@ Always offer practical examples and explain the reasoning behind your recommenda
 ## Skills
 
 
-No skills defined - this agent provides basic A2A communication without specialized capabilities.
+This agent provides 1 skills:
+
+
+### create_dashboard
+- **Description**: Creates a Grafana dashboard with specified panels, queries, and configurations
+- **Tags**: grafana, dashboard, visualization
+- **Input Schema**: Defined in agent configuration
+- **Output Schema**: Defined in agent configuration
+
+
 
 
 ## Server Configuration
@@ -109,6 +118,13 @@ The agent implements the A2A protocol and can be communicated with via HTTP requ
 curl http://localhost:8080/.well-known/agent-card.json
 
 
+
+# Execute create_dashboard skill
+curl -X POST http://localhost:8080/skills/create_dashboard \
+  -H "Content-Type: application/json" \
+  -d '{"input": "your_input_here"}'
+
+
 ```
 
 ## Deployment
@@ -138,6 +154,8 @@ docker run -p 8080:8080 grafana-agent
 .
 ├── main.go              # Server entry point
 ├── skills/              # Business logic skills
+
+│   └── create_dashboard.go   # Creates a Grafana dashboard with specified panels, queries, and configurations
 
 ├── .well-known/         # Agent configuration
 │   └── agent-card.json  # Agent metadata
