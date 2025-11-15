@@ -4,17 +4,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 
 	server "github.com/inference-gateway/adk/server"
+	"github.com/inference-gateway/grafana-agent/config"
 )
 
 // CreateDashboardSkill struct holds the skill with services
 type CreateDashboardSkill struct {
+	config *config.GrafanaConfig
 }
 
 // NewCreateDashboardSkill creates a new create_dashboard skill
-func NewCreateDashboardSkill() server.Tool {
-	skill := &CreateDashboardSkill{}
+func NewCreateDashboardSkill(grafanaConfig *config.GrafanaConfig) server.Tool {
+	skill := &CreateDashboardSkill{
+		config: grafanaConfig,
+	}
 	return server.NewBasicTool(
 		"create_dashboard",
 		"Creates a Grafana dashboard with specified panels, queries, and configurations",
@@ -27,6 +32,10 @@ func NewCreateDashboardSkill() server.Tool {
 				},
 				"description": map[string]any{
 					"description": "Description of what the dashboard monitors or displays",
+					"type":        "string",
+				},
+				"grafana_url": map[string]any{
+					"description": "Grafana server URL (overrides default configuration if provided)",
 					"type":        "string",
 				},
 				"panels": map[string]any{
@@ -62,6 +71,13 @@ func NewCreateDashboardSkill() server.Tool {
 
 // CreateDashboardHandler handles the create_dashboard skill execution
 func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args map[string]any) (string, error) {
+	// Safety check: Verify Grafana deployment is enabled
+	if s.config != nil && !s.config.DeployEnabled {
+		log.Printf("WARNING: Grafana deployment attempted but GRAFANA_DEPLOY_ENABLED=false")
+		return "", fmt.Errorf("grafana deployment is disabled - set GRAFANA_DEPLOY_ENABLED=true to enable dashboard deployments")
+	}
+
+	// Validate required parameters
 	dashboardTitle, ok := args["dashboard_title"].(string)
 	if !ok || dashboardTitle == "" {
 		return "", fmt.Errorf("dashboard_title is required and must be a string")
@@ -70,6 +86,22 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 	panels, ok := args["panels"].([]any)
 	if !ok {
 		return "", fmt.Errorf("panels is required and must be an array")
+	}
+
+	// Check for Grafana URL parameter (overrides config)
+	var grafanaURL string
+	if urlParam, ok := args["grafana_url"].(string); ok && urlParam != "" {
+		grafanaURL = urlParam
+	} else if s.config != nil && s.config.URL != "" {
+		grafanaURL = s.config.URL
+	}
+
+	// Log the configuration being used (but don't expose the API key)
+	if grafanaURL != "" {
+		log.Printf("INFO: Using Grafana URL: %s", grafanaURL)
+	}
+	if s.config != nil && s.config.APIKey != "" {
+		log.Printf("INFO: Grafana API key configured")
 	}
 
 	dashboard := map[string]any{

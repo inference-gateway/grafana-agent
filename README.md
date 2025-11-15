@@ -41,7 +41,7 @@ docker run -p 8080:8080 grafana-agent
 
 | Skill | Description | Parameters |
 |-------|-------------|------------|
-| `create_dashboard` | Creates a Grafana dashboard with specified panels, queries, and configurations | dashboard_title, description, panels, refresh_interval, tags, time_range, variables |
+| `create_dashboard` | Creates a Grafana dashboard with specified panels, queries, and configurations | dashboard_title, description, grafana_url, panels, refresh_interval, tags, time_range, variables |
 
 ## Configuration
 
@@ -92,6 +92,55 @@ Configure the agent via environment variables:
 | **Artifacts** | `ARTIFACTS_RETENTION_MAX_AGE` | Max artifact age (0 = no age limit) | `168h` |
 | **Artifacts** | `ARTIFACTS_RETENTION_CLEANUP_INTERVAL` | Cleanup frequency (0 = manual only) | `24h` |
 | **Authentication** | `A2A_AUTH_ENABLE` | Enable OIDC authentication | `false` |
+
+### Grafana Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GRAFANA_DEPLOY_ENABLED` | Enable/disable Grafana deployments (safety feature) | `false` |
+| `GRAFANA_URL` | Grafana server URL (can be overridden in prompts) | - |
+| `GRAFANA_API_KEY` | Grafana API key or service account token | - |
+| `GRAFANA_ORG_ID` | Organization ID | `1` |
+
+**Safety Feature**: Grafana deployment is disabled by default (`GRAFANA_DEPLOY_ENABLED=false`) to prevent accidental deployments. You must explicitly enable it.
+
+**Examples:**
+
+```bash
+# Enable Grafana deployments with configuration
+export GRAFANA_DEPLOY_ENABLED=true
+export GRAFANA_URL=http://localhost:3000
+export GRAFANA_API_KEY=your_grafana_api_key
+export GRAFANA_ORG_ID=1
+```
+
+```bash
+# Create dashboard with Prometheus metrics
+curl -X POST http://localhost:8080/a2a/tasks/submit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "instructions": "Create a dashboard for monitoring HTTP requests from http://prometheus:9090",
+    "metadata": {
+      "skill": "create_dashboard",
+      "params": {
+        "dashboard_title": "HTTP Monitoring",
+        "grafana_url": "http://grafana:3000",
+        "panels": [
+          {
+            "title": "Request Rate",
+            "type": "timeseries", 
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total[5m])) by (method)",
+                "refId": "A"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }'
+```
 
 ## Development
 

@@ -47,7 +47,7 @@ func main() {
 	toolBox := server.NewDefaultToolBox(&cfg.A2A.AgentConfig.ToolBoxConfig)
 
 	// Register create_dashboard skill
-	createDashboardSkill := skills.NewCreateDashboardSkill()
+	createDashboardSkill := skills.NewCreateDashboardSkill(&cfg.Grafana)
 	toolBox.AddTool(createDashboardSkill)
 	l.Info("registered skill: create_dashboard (Creates a Grafana dashboard with specified panels, queries, and configurations)")
 
