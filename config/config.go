@@ -15,4 +15,19 @@ type Config struct {
 
 	// A2A configuration (all A2A_ prefixed vars)
 	A2A serverConfig.Config `env:",prefix=A2A_"`
+
+	// Grafana configuration
+	Grafana GrafanaConfig `env:",prefix=GRAFANA_"`
+}
+
+// GrafanaConfig represents Grafana deployment configuration
+type GrafanaConfig struct {
+	// Enable/disable Grafana deployments (default: false for safety)
+	DeployEnabled bool `env:"DEPLOY_ENABLED" envDefault:"false"`
+	// Grafana server URL (optional, can be overridden in prompts)
+	URL string `env:"URL"`
+	// Grafana API key or service account token
+	APIKey string `env:"API_KEY"`
+	// Organization ID (default: 1)
+	OrgID int `env:"ORG_ID" envDefault:"1"`
 }

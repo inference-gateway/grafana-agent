@@ -35,6 +35,9 @@ spec:
           description:
             type: string
             description: Description of what the dashboard monitors or displays
+          grafana_url:
+            type: string
+            description: Grafana server URL (overrides default configuration if provided)
           tags:
             type: array
             items:
