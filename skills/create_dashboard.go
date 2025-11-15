@@ -77,7 +77,6 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 		return "", fmt.Errorf("grafana deployment is disabled - set GRAFANA_DEPLOY_ENABLED=true to enable dashboard deployments")
 	}
 
-	// Validate required parameters
 	dashboardTitle, ok := args["dashboard_title"].(string)
 	if !ok || dashboardTitle == "" {
 		return "", fmt.Errorf("dashboard_title is required and must be a string")
@@ -88,7 +87,6 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 		return "", fmt.Errorf("panels is required and must be an array")
 	}
 
-	// Check for Grafana URL parameter (overrides config)
 	var grafanaURL string
 	if urlParam, ok := args["grafana_url"].(string); ok && urlParam != "" {
 		grafanaURL = urlParam
@@ -96,7 +94,6 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 		grafanaURL = s.config.URL
 	}
 
-	// Log the configuration being used (but don't expose the API key)
 	if grafanaURL != "" {
 		log.Printf("INFO: Using Grafana URL: %s", grafanaURL)
 	}
