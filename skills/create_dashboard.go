@@ -71,7 +71,6 @@ func NewCreateDashboardSkill(grafanaConfig *config.GrafanaConfig) server.Tool {
 
 // CreateDashboardHandler handles the create_dashboard skill execution
 func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args map[string]any) (string, error) {
-	// Safety check: Verify Grafana deployment is enabled
 	if s.config != nil && !s.config.DeployEnabled {
 		log.Printf("WARNING: Grafana deployment attempted but GRAFANA_DEPLOY_ENABLED=false")
 		return "", fmt.Errorf("grafana deployment is disabled - set GRAFANA_DEPLOY_ENABLED=true to enable dashboard deployments")
