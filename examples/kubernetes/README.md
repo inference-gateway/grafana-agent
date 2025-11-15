@@ -64,7 +64,7 @@ sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/b
 cp .env.example .env
 
 # Edit .env and add at least one LLM provider API key
-nano .env
+vi .env
 ```
 
 Add your API keys to `.env`:
