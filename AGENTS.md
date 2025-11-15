@@ -11,78 +11,52 @@ This file describes the agents available in this A2A (Agent-to-Agent) system.
 This agent is built using the Agent Definition Language (ADL) and provides A2A communication capabilities.
 
 ## Agent Capabilities
-
-
-
 - **Streaming**: ✅ Real-time response streaming supported
-
-
 - **Push Notifications**: ❌ Server-sent events not supported
-
-
 - **State History**: ❌ State transition history not tracked
 
-
-
 ## AI Configuration
-
-
-
-
 
 **System Prompt**: You are a Grafana expert. Your role is to guide users in designing highly effective, visually clear, and actionable dashboards.
 You provide best practices for data visualization, panel configuration, query optimization, alerting, and overall dashboard usability.
 Always offer practical examples and explain the reasoning behind your recommendations.
 
 
-
 **Configuration:**
-
-
-
 
 ## Skills
 
+This agent provides 1 skills:
 
-No skills defined - this agent provides basic A2A communication without specialized capabilities.
-
+### create_dashboard
+- **Description**: Creates a Grafana dashboard with specified panels, queries, and configurations
+- **Tags**: grafana, dashboard, visualization
+- **Input Schema**: Defined in agent configuration
+- **Output Schema**: Defined in agent configuration
 
 ## Server Configuration
 
 **Port**: 8080
-
 **Debug Mode**: ❌ Disabled
-
-
-
 **Authentication**: ❌ Not required
-
 
 ## API Endpoints
 
 The agent exposes the following HTTP endpoints:
 
 - `GET /.well-known/agent-card.json` - Agent metadata and capabilities
-- `POST /skills/{skill_name}` - Execute a specific skill
-- `GET /skills/{skill_name}/stream` - Stream skill execution results
+- `GET /health` - Health check endpoint
+- `POST /a2a` - JSON-RPC endpoint for all A2A operations (skill execution, streaming, etc.)
 
 ## Environment Setup
 
 ### Required Environment Variables
 
 Key environment variables you'll need to configure:
-
-
-
-- `PORT` - Server port (default: 8080)
+- `PORT` - Server port (configured: 8080)
 
 ### Development Environment
-
-
 **Flox Environment**: ✅ Configured for reproducible development setup
-
-
-
 
 ## Usage
 
@@ -99,7 +73,6 @@ go run main.go
 task run
 ```
 
-
 ### Communicating with the Agent
 
 The agent implements the A2A protocol and can be communicated with via HTTP requests:
@@ -107,20 +80,18 @@ The agent implements the A2A protocol and can be communicated with via HTTP requ
 ```bash
 # Get agent information
 curl http://localhost:8080/.well-known/agent-card.json
-
-
 ```
 
-## Deployment
+Refer to the main README.md for specific skill execution examples and input schemas.
 
+## Deployment
 
 **Deployment Type**: Manual
 - Build and run the agent binary directly
 - Use provided Dockerfile for containerized deployment
 
-
-
 ### Docker Deployment
+
 ```bash
 # Build image
 docker build -t grafana-agent .
@@ -129,22 +100,20 @@ docker build -t grafana-agent .
 docker run -p 8080:8080 grafana-agent
 ```
 
-
 ## Development
 
 ### Project Structure
 
 ```
 .
-├── main.go              # Server entry point
-├── skills/              # Business logic skills
-
-├── .well-known/         # Agent configuration
-│   └── agent-card.json  # Agent metadata
-├── go.mod               # Go module definition
-└── README.md            # Project documentation
+├── main.go                       # Server entry point
+├── skills/                       # Business logic skills
+│   └── create_dashboard.go       # Creates a Grafana dashboard with specified panels, queries, and configurations
+├── .well-known/                  # Agent configuration
+│   └── agent-card.json           # Agent metadata
+├── go.mod                        # Go module definition
+└── README.md                     # Project documentation
 ```
-
 
 ### Testing
 
@@ -156,7 +125,6 @@ go test ./...
 # Run with coverage
 task test:coverage
 ```
-
 
 ## Contributing
 

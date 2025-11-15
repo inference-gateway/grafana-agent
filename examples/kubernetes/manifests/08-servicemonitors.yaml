@@ -1,0 +1,94 @@
+---
+# ServiceMonitor for Prometheus self-monitoring
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: prometheus
+  namespace: grafana-agent
+  labels:
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: prometheus
+  endpoints:
+    - port: http
+      interval: 15s
+      path: /metrics
+
+---
+# ServiceMonitor for Demo OTEL Service
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: demo-service
+  namespace: grafana-agent
+  labels:
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: demo-service
+  endpoints:
+    - port: http
+      interval: 15s
+      path: /metrics
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_service_name]
+          targetLabel: service
+        - targetLabel: environment
+          replacement: demo
+
+---
+# ServiceMonitor for Grafana
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: grafana
+  namespace: grafana-agent
+  labels:
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: grafana
+  endpoints:
+    - port: http
+      interval: 30s
+      path: /metrics
+
+---
+# ServiceMonitor for Inference Gateway
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: inference-gateway
+  namespace: grafana-agent
+  labels:
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inference-gateway
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+
+---
+# ServiceMonitor for Grafana Agent
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: grafana-agent
+  namespace: grafana-agent
+  labels:
+    prometheus: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: grafana-agent
+  endpoints:
+    - port: http
+      interval: 15s
+      path: /metrics

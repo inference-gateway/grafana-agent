@@ -18,6 +18,55 @@ spec:
       Always offer practical examples and explain the reasoning behind your recommendations.
   artifacts:
     enabled: true
+  skills:
+    - id: create_dashboard
+      name: create_dashboard
+      description: Creates a Grafana dashboard with specified panels, queries, and configurations
+      tags:
+        - grafana
+        - dashboard
+        - visualization
+      schema:
+        type: object
+        properties:
+          dashboard_title:
+            type: string
+            description: The title of the Grafana dashboard
+          description:
+            type: string
+            description: Description of what the dashboard monitors or displays
+          tags:
+            type: array
+            items:
+              type: string
+            description: Tags to categorize the dashboard
+          panels:
+            type: array
+            description: Array of panel configurations (title, type, queries, etc.)
+            items:
+              type: object
+          time_range:
+            type: object
+            description: Default time range for the dashboard (from, to)
+            properties:
+              from:
+                type: string
+              to:
+                type: string
+          refresh_interval:
+            type: string
+            description: Auto-refresh interval (e.g., "5s", "1m", "5m")
+          variables:
+            type: array
+            description: Dashboard template variables for dynamic queries
+            items:
+              type: object
+        required:
+          - dashboard_title
+          - panels
+      output:
+        type: artifact
+        description: Returns the dashboard JSON configuration as an artifact
   server:
     port: 8080
     debug: false

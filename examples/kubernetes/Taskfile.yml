@@ -1,0 +1,243 @@
+version: '3'
+
+vars:
+  CLUSTER_NAME: k3d-grafana-agent
+  REGISTRY_PORT: 5005
+  NAMESPACE: grafana-agent
+
+tasks:
+  check-requirements:
+    desc: Check if required tools are installed
+    cmds:
+      - command -v ctlptl >/dev/null 2>&1 || (echo "❌ ctlptl is not installed. Please install it first." && exit 1)
+      - command -v k3d >/dev/null 2>&1 || (echo "❌ k3d is not installed. Please install it first." && exit 1)
+      - command -v kubectl >/dev/null 2>&1 || (echo "❌ kubectl is not installed. Please install it first." && exit 1)
+      - command -v docker >/dev/null 2>&1 || (echo "❌ docker is not installed. Please install it first." && exit 1)
+      - echo "✅ All required tools are installed"
+
+  create-cluster:
+    desc: Create k3d cluster with ctlptl
+    deps:
+      - check-requirements
+    cmds:
+      - echo "🚀 Creating k3d cluster with ctlptl..."
+      - ctlptl apply -f cluster.yaml
+      - echo "✅ Cluster created successfully"
+    status:
+      - ctlptl get cluster {{.CLUSTER_NAME}} 2>/dev/null
+
+  delete-cluster:
+    desc: Delete k3d cluster
+    cmds:
+      - echo "🗑️  Deleting k3d cluster..."
+      - ctlptl delete -f cluster.yaml
+      - echo "✅ Cluster deleted successfully"
+
+  install-operators:
+    desc: Install Prometheus, Grafana, and Inference Gateway operators
+    deps:
+      - create-cluster
+    cmds:
+      - echo "📦 Installing Prometheus Operator..."
+      - kubectl apply --server-side -f https://github.com/prometheus-operator/prometheus-operator/releases/latest/download/bundle.yaml
+      - echo "⏳ Waiting for Prometheus Operator to be ready..."
+      - kubectl wait --for=condition=available --timeout=300s deployment/prometheus-operator -n default || true
+      - echo "✅ Prometheus Operator installed"
+      - echo ""
+      - echo "📦 Installing Grafana Operator (cluster-scoped)..."
+      - kubectl create -f https://github.com/grafana/grafana-operator/releases/latest/download/kustomize-cluster_scoped.yaml || kubectl replace -f https://github.com/grafana/grafana-operator/releases/latest/download/kustomize-cluster_scoped.yaml
+      - echo "⏳ Waiting for Grafana Operator to be ready..."
+      - kubectl wait --for=condition=available --timeout=300s deployment/grafana-operator-controller-manager -n grafana-operator-system || true
+      - echo "✅ Grafana Operator installed"
+      - echo ""
+      - echo "📦 Installing Inference Gateway Operator..."
+      - kubectl apply -f https://github.com/inference-gateway/operator/releases/latest/download/install.yaml
+      - echo "⏳ Waiting for Inference Gateway Operator to be ready..."
+      - kubectl wait --for=condition=available --timeout=300s deployment/operator-inference-gateway -n inference-gateway-system || true
+      - echo "✅ Inference Gateway Operator installed"
+
+  build-images:
+    desc: Build and push images to local registry
+    deps:
+      - create-cluster
+    cmds:
+      - echo "🏗️  Building grafana-agent image..."
+      - docker build -t localhost:{{.REGISTRY_PORT}}/grafana-agent:latest -f ../../Dockerfile ../..
+      - docker push localhost:{{.REGISTRY_PORT}}/grafana-agent:latest
+      - echo "✅ grafana-agent image built and pushed"
+      - echo ""
+      - echo "🏗️  Building demo-service image..."
+      - docker build -t localhost:{{.REGISTRY_PORT}}/demo-otel-service:latest -f ../../examples/docker-compose/demo-service/Dockerfile ../../examples/docker-compose/demo-service
+      - docker push localhost:{{.REGISTRY_PORT}}/demo-otel-service:latest
+      - echo "✅ demo-service image built and pushed"
+
+  create-secrets:
+    desc: Create secrets with API keys
+    deps:
+      - create-cluster
+    cmds:
+      - echo "🔐 Creating API keys secret..."
+      - |
+        if [ -f .env ]; then
+          source .env
+          kubectl create namespace {{.NAMESPACE}} --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret generic api-keys \
+            --from-literal=deepseek-api-key="${DEEPSEEK_API_KEY:-}" \
+            --from-literal=google-api-key="${GOOGLE_API_KEY:-}" \
+            --from-literal=anthropic-api-key="${ANTHROPIC_API_KEY:-}" \
+            --from-literal=openai-api-key="${OPENAI_API_KEY:-}" \
+            --from-literal=grafana-username="${GRAFANA_USERNAME:-admin}" \
+            --from-literal=grafana-password="${GRAFANA_PASSWORD:-admin}" \
+            --namespace={{.NAMESPACE}} \
+            --dry-run=client -o yaml | kubectl apply -f -
+          echo "✅ Secrets created successfully"
+        else
+          echo "⚠️  .env file not found. Applying manifests/07-secrets.yaml with empty values..."
+          kubectl apply -f manifests/07-secrets.yaml
+          echo "⚠️  Please update the secret with your actual API keys:"
+          echo "   kubectl edit secret api-keys -n {{.NAMESPACE}}"
+        fi
+
+  deploy:
+    desc: Deploy all manifests to the cluster
+    deps:
+      - install-operators
+      - build-images
+      - create-secrets
+    cmds:
+      - echo "🚀 Deploying application manifests..."
+      - kubectl apply -f manifests/00-namespace.yaml
+      - echo "⏳ Waiting for operators to be ready before deploying CRDs..."
+      - sleep 10
+      - kubectl apply -f manifests/01-grafana.yaml
+      - kubectl apply -f manifests/02-dashboard.yaml
+      - kubectl apply -f manifests/03-prometheus.yaml
+      - kubectl apply -f manifests/04-demo-service.yaml
+      - kubectl apply -f manifests/06-inference-gateway.yaml
+      - kubectl apply -f manifests/07-grafana-agent.yaml
+      - echo "⏳ Waiting a moment before deploying ServiceMonitors..."
+      - sleep 5
+      - kubectl apply -f manifests/08-servicemonitors.yaml
+      - echo "✅ All manifests deployed"
+
+  wait-ready:
+    desc: Wait for all services to be ready
+    cmds:
+      - echo "⏳ Waiting for all services to be ready..."
+      - echo "⏳ Waiting for Prometheus (StatefulSet)..."
+      - kubectl wait --for=jsonpath='{.status.availableReplicas}'=1 --timeout=300s statefulset/prometheus-prometheus -n {{.NAMESPACE}} || true
+      - kubectl wait --for=condition=available --timeout=300s deployment/demo-service -n {{.NAMESPACE}} || true
+      - kubectl wait --for=condition=available --timeout=300s deployment/grafana-agent -n {{.NAMESPACE}} || true
+      - echo "⏳ Waiting for Grafana to be ready (this may take a minute)..."
+      - kubectl wait --for=condition=available --timeout=300s deployment/grafana-deployment -n {{.NAMESPACE}} || true
+      - echo "⏳ Waiting for Inference Gateway to be ready..."
+      - kubectl wait --for=condition=available --timeout=300s deployment/inference-gateway -n {{.NAMESPACE}} || true
+      - echo "✅ All services are ready!"
+
+  show-urls:
+    desc: Show access URLs for services
+    cmds:
+      - echo ""
+      - echo "🌐 Service URLs:"
+      - 'echo "   Grafana:          http://localhost:3000 (admin/admin)"'
+      - 'echo "   Prometheus:       http://localhost:9090"'
+      - 'echo "   Demo Service:     http://localhost:8082"'
+      - 'echo "   Grafana Agent:    http://localhost:8080"'
+      - echo ""
+      - echo "📊 Quick checks:"
+      - 'echo "   kubectl get all -n {{.NAMESPACE}}"'
+      - 'echo "   kubectl logs -f deployment/grafana-agent -n {{.NAMESPACE}}"'
+      - echo ""
+
+  up:
+    desc: Complete setup - create cluster, install operators, build images, and deploy
+    cmds:
+      - task: deploy
+      - task: wait-ready
+      - task: show-urls
+
+  down:
+    desc: Tear down everything
+    cmds:
+      - task: delete-cluster
+
+  restart:
+    desc: Restart the grafana-agent deployment
+    cmds:
+      - echo "🔄 Restarting grafana-agent..."
+      - kubectl rollout restart deployment/grafana-agent -n {{.NAMESPACE}}
+      - kubectl rollout status deployment/grafana-agent -n {{.NAMESPACE}}
+      - echo "✅ grafana-agent restarted"
+
+  logs:
+    desc: Show logs for grafana-agent
+    cmds:
+      - kubectl logs -f deployment/grafana-agent -n {{.NAMESPACE}}
+
+  logs-gateway:
+    desc: Show logs for inference-gateway
+    cmds:
+      - kubectl logs -f deployment/inference-gateway -n {{.NAMESPACE}}
+
+  logs-grafana:
+    desc: Show logs for Grafana
+    cmds:
+      - kubectl logs -f deployment/grafana-deployment -n {{.NAMESPACE}}
+
+  status:
+    desc: Show status of all resources
+    cmds:
+      - echo "📊 Cluster status:"
+      - kubectl get nodes
+      - echo ""
+      - echo "📦 Pods in {{.NAMESPACE}}:"
+      - kubectl get pods -n {{.NAMESPACE}}
+      - echo ""
+      - echo "🔌 Services in {{.NAMESPACE}}:"
+      - kubectl get svc -n {{.NAMESPACE}}
+      - echo ""
+      - echo "🎯 Gateway resources:"
+      - kubectl get gateway -n {{.NAMESPACE}}
+      - echo ""
+      - echo "📊 Grafana resources:"
+      - kubectl get grafana,grafanadatasource,grafanadashboard -n {{.NAMESPACE}}
+
+  rebuild-agent:
+    desc: Rebuild and redeploy grafana-agent
+    cmds:
+      - echo "🏗️  Rebuilding grafana-agent..."
+      - docker build -t localhost:{{.REGISTRY_PORT}}/grafana-agent:latest -f ../../Dockerfile ../..
+      - docker push localhost:{{.REGISTRY_PORT}}/grafana-agent:latest
+      - echo "♻️  Restarting grafana-agent deployment..."
+      - kubectl rollout restart deployment/grafana-agent -n {{.NAMESPACE}}
+      - kubectl rollout status deployment/grafana-agent -n {{.NAMESPACE}}
+      - echo "✅ grafana-agent rebuilt and redeployed"
+
+  port-forward-grafana:
+    desc: Port forward Grafana (if NodePort doesn't work)
+    cmds:
+      - kubectl port-forward -n {{.NAMESPACE}} svc/grafana-service 3000:3000
+
+  port-forward-prometheus:
+    desc: Port forward Prometheus (if NodePort doesn't work)
+    cmds:
+      - kubectl port-forward -n {{.NAMESPACE}} svc/prometheus 9090:9090
+
+  clean:
+    desc: Clean up resources without deleting the cluster
+    cmds:
+      - echo "🧹 Cleaning up resources..."
+      - kubectl delete -f manifests/08-servicemonitors.yaml --ignore-not-found=true
+      - kubectl delete -f manifests/07-grafana-agent.yaml --ignore-not-found=true
+      - kubectl delete -f manifests/06-inference-gateway.yaml --ignore-not-found=true
+      - kubectl delete -f manifests/04-demo-service.yaml --ignore-not-found=true
+      - kubectl delete -f manifests/03-prometheus.yaml --ignore-not-found=true
+      - kubectl delete -f manifests/02-dashboard.yaml --ignore-not-found=true
+      - kubectl delete -f manifests/01-grafana.yaml --ignore-not-found=true
+      - kubectl delete -f manifests/00-namespace.yaml --ignore-not-found=true
+      - echo "✅ Resources cleaned up"
+
+  help:
+    desc: Show available tasks
+    cmds:
+      - task --list

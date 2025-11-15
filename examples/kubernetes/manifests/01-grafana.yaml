@@ -1,0 +1,61 @@
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana
+  namespace: grafana-agent
+  labels:
+    dashboards: "grafana"
+spec:
+  config:
+    log:
+      mode: "console"
+    auth:
+      disable_login_form: "false"
+    auth.anonymous:
+      enabled: "true"
+      org_role: "Admin"
+    security:
+      admin_user: "admin"
+      admin_password: "admin"
+  deployment:
+    spec:
+      replicas: 1
+      template:
+        spec:
+          containers:
+            - name: grafana
+              image: grafana/grafana:latest
+  service:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      type: NodePort
+      ports:
+        - name: http
+          port: 3000
+          protocol: TCP
+          targetPort: 3000
+          nodePort: 30000
+
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: prometheus-datasource
+  namespace: grafana-agent
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: "grafana"
+  datasource:
+    name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      tlsSkipVerify: true
+      timeInterval: "15s"

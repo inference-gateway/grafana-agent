@@ -1,0 +1,58 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-service
+  namespace: grafana-agent
+  labels:
+    app: demo-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-service
+  template:
+    metadata:
+      labels:
+        app: demo-service
+    spec:
+      containers:
+        - name: demo-service
+          image: localhost:5005/demo-otel-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: OTEL_SERVICE_NAME
+              value: "demo-service"
+            - name: OTEL_EXPORTER_PROMETHEUS_PORT
+              value: "8080"
+            - name: METRICS_INTERVAL
+              value: "5s"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-service
+  namespace: grafana-agent
+  labels:
+    app: demo-service
+spec:
+  type: NodePort
+  selector:
+    app: demo-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      nodePort: 30082
+      protocol: TCP

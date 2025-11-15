@@ -1,0 +1,292 @@
+package skills
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+
+	server "github.com/inference-gateway/adk/server"
+)
+
+// CreateDashboardSkill struct holds the skill with services
+type CreateDashboardSkill struct {
+}
+
+// NewCreateDashboardSkill creates a new create_dashboard skill
+func NewCreateDashboardSkill() server.Tool {
+	skill := &CreateDashboardSkill{}
+	return server.NewBasicTool(
+		"create_dashboard",
+		"Creates a Grafana dashboard with specified panels, queries, and configurations",
+		map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"dashboard_title": map[string]any{
+					"description": "The title of the Grafana dashboard",
+					"type":        "string",
+				},
+				"description": map[string]any{
+					"description": "Description of what the dashboard monitors or displays",
+					"type":        "string",
+				},
+				"panels": map[string]any{
+					"description": "Array of panel configurations (title, type, queries, etc.)",
+					"items":       map[string]any{"type": "object"},
+					"type":        "array",
+				},
+				"refresh_interval": map[string]any{
+					"description": "Auto-refresh interval (e.g., \"5s\", \"1m\", \"5m\")",
+					"type":        "string",
+				},
+				"tags": map[string]any{
+					"description": "Tags to categorize the dashboard",
+					"items":       map[string]any{"type": "string"},
+					"type":        "array",
+				},
+				"time_range": map[string]any{
+					"description": "Default time range for the dashboard (from, to)",
+					"properties":  map[string]any{"from": map[string]any{"type": "string"}, "to": map[string]any{"type": "string"}},
+					"type":        "object",
+				},
+				"variables": map[string]any{
+					"description": "Dashboard template variables for dynamic queries",
+					"items":       map[string]any{"type": "object"},
+					"type":        "array",
+				},
+			},
+			"required": []string{"dashboard_title", "panels"},
+		},
+		skill.CreateDashboardHandler,
+	)
+}
+
+// CreateDashboardHandler handles the create_dashboard skill execution
+func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args map[string]any) (string, error) {
+	dashboardTitle, ok := args["dashboard_title"].(string)
+	if !ok || dashboardTitle == "" {
+		return "", fmt.Errorf("dashboard_title is required and must be a string")
+	}
+
+	panels, ok := args["panels"].([]any)
+	if !ok {
+		return "", fmt.Errorf("panels is required and must be an array")
+	}
+
+	dashboard := map[string]any{
+		"dashboard": map[string]any{
+			"title":                dashboardTitle,
+			"tags":                 extractTags(args),
+			"timezone":             "browser",
+			"panels":               processPanels(panels),
+			"time":                 extractTimeRange(args),
+			"refresh":              extractRefreshInterval(args),
+			"schemaVersion":        36,
+			"version":              0,
+			"editable":             true,
+			"fiscalYearStartMonth": 0,
+			"graphTooltip":         0,
+			"links":                []any{},
+			"liveNow":              false,
+		},
+		"folderUid": "",
+		"message":   "",
+		"overwrite": false,
+	}
+
+	if description, ok := args["description"].(string); ok && description != "" {
+		dashboard["dashboard"].(map[string]any)["description"] = description
+	}
+
+	if variables, ok := args["variables"].([]any); ok && len(variables) > 0 {
+		dashboard["dashboard"].(map[string]any)["templating"] = map[string]any{
+			"list": processVariables(variables),
+		}
+	}
+
+	jsonBytes, err := json.MarshalIndent(dashboard, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal dashboard JSON: %w", err)
+	}
+
+	return string(jsonBytes), nil
+}
+
+// extractTags extracts and validates tags from args
+func extractTags(args map[string]any) []string {
+	tags := []string{}
+	if tagsRaw, ok := args["tags"].([]any); ok {
+		for _, tag := range tagsRaw {
+			if tagStr, ok := tag.(string); ok {
+				tags = append(tags, tagStr)
+			}
+		}
+	}
+	return tags
+}
+
+// extractTimeRange extracts time range or returns defaults
+func extractTimeRange(args map[string]any) map[string]string {
+	defaultTimeRange := map[string]string{
+		"from": "now-6h",
+		"to":   "now",
+	}
+
+	if timeRange, ok := args["time_range"].(map[string]any); ok {
+		result := make(map[string]string)
+		if from, ok := timeRange["from"].(string); ok && from != "" {
+			result["from"] = from
+		} else {
+			result["from"] = defaultTimeRange["from"]
+		}
+		if to, ok := timeRange["to"].(string); ok && to != "" {
+			result["to"] = to
+		} else {
+			result["to"] = defaultTimeRange["to"]
+		}
+		return result
+	}
+
+	return defaultTimeRange
+}
+
+// extractRefreshInterval extracts refresh interval or returns default
+func extractRefreshInterval(args map[string]any) string {
+	if refresh, ok := args["refresh_interval"].(string); ok && refresh != "" {
+		return refresh
+	}
+	return "5s"
+}
+
+// processPanels converts panel definitions to Grafana panel format
+func processPanels(panels []any) []any {
+	result := []any{}
+
+	for i, panelRaw := range panels {
+		panelMap, ok := panelRaw.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		panel := map[string]any{
+			"id":          i + 1,
+			"type":        getStringOrDefault(panelMap, "type", "timeseries"),
+			"title":       getStringOrDefault(panelMap, "title", fmt.Sprintf("Panel %d", i+1)),
+			"gridPos":     extractGridPos(panelMap, i),
+			"targets":     extractTargets(panelMap),
+			"options":     extractOptions(panelMap),
+			"fieldConfig": extractFieldConfig(panelMap),
+		}
+
+		if description, ok := panelMap["description"].(string); ok && description != "" {
+			panel["description"] = description
+		}
+
+		result = append(result, panel)
+	}
+
+	return result
+}
+
+// extractGridPos extracts grid position or calculates default
+func extractGridPos(panel map[string]any, index int) map[string]any {
+	if gridPos, ok := panel["gridPos"].(map[string]any); ok {
+		return gridPos
+	}
+
+	row := index / 2
+	col := (index % 2) * 12
+
+	return map[string]any{
+		"x": col,
+		"y": row * 8,
+		"w": 12,
+		"h": 8,
+	}
+}
+
+// extractTargets extracts query targets from panel
+func extractTargets(panel map[string]any) []any {
+	if targets, ok := panel["targets"].([]any); ok {
+		return targets
+	}
+
+	return []any{
+		map[string]any{
+			"refId": "A",
+			"expr":  "",
+		},
+	}
+}
+
+// extractOptions extracts panel options
+func extractOptions(panel map[string]any) map[string]any {
+	if options, ok := panel["options"].(map[string]any); ok {
+		return options
+	}
+
+	return map[string]any{
+		"legend": map[string]any{
+			"displayMode": "list",
+			"placement":   "bottom",
+		},
+	}
+}
+
+// extractFieldConfig extracts field configuration
+func extractFieldConfig(panel map[string]any) map[string]any {
+	if fieldConfig, ok := panel["fieldConfig"].(map[string]any); ok {
+		return fieldConfig
+	}
+
+	return map[string]any{
+		"defaults": map[string]any{
+			"color": map[string]any{
+				"mode": "palette-classic",
+			},
+			"custom": map[string]any{
+				"drawStyle":         "line",
+				"lineInterpolation": "linear",
+				"fillOpacity":       0,
+			},
+		},
+		"overrides": []any{},
+	}
+}
+
+// processVariables converts variable definitions to Grafana template variables
+func processVariables(variables []any) []any {
+	result := []any{}
+
+	for _, varRaw := range variables {
+		varMap, ok := varRaw.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		variable := map[string]any{
+			"name":  getStringOrDefault(varMap, "name", "var"),
+			"type":  getStringOrDefault(varMap, "type", "query"),
+			"label": getStringOrDefault(varMap, "label", ""),
+		}
+
+		if query, ok := varMap["query"].(string); ok && query != "" {
+			variable["query"] = query
+		}
+
+		if datasource, ok := varMap["datasource"].(string); ok && datasource != "" {
+			variable["datasource"] = datasource
+		}
+
+		result = append(result, variable)
+	}
+
+	return result
+}
+
+// getStringOrDefault safely extracts a string value or returns default
+func getStringOrDefault(m map[string]any, key, defaultValue string) string {
+	if val, ok := m[key].(string); ok && val != "" {
+		return val
+	}
+	return defaultValue
+}

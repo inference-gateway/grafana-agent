@@ -1,0 +1,150 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-agent
+  namespace: grafana-agent
+  labels:
+    app: grafana-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-agent
+  template:
+    metadata:
+      labels:
+        app: grafana-agent
+    spec:
+      containers:
+        - name: grafana-agent
+          image: localhost:5005/grafana-agent:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 8081
+              name: artifacts
+          env:
+            - name: A2A_PORT
+              value: "8080"
+            - name: A2A_DEBUG
+              value: "true"
+            - name: A2A_AGENT_URL
+              value: "http://grafana-agent:8080"
+            - name: A2A_STREAMING_STATUS_UPDATE_INTERVAL
+              value: "1s"
+            - name: A2A_SERVER_READ_TIMEOUT
+              value: "120s"
+            - name: A2A_SERVER_WRITE_TIMEOUT
+              value: "120s"
+            - name: A2A_SERVER_IDLE_TIMEOUT
+              value: "120s"
+            - name: A2A_SERVER_DISABLE_HEALTHCHECK_LOG
+              value: "true"
+            - name: A2A_AGENT_CARD_FILE_PATH
+              value: ".well-known/agent-card.json"
+            - name: A2A_AGENT_CLIENT_PROVIDER
+              value: "deepseek"
+            - name: A2A_AGENT_CLIENT_MODEL
+              value: "deepseek-chat"
+            - name: A2A_AGENT_CLIENT_BASE_URL
+              value: "http://inference-gateway.inference-gateway.svc.cluster.local:8080/v1"
+            - name: A2A_AGENT_CLIENT_TIMEOUT
+              value: "30s"
+            - name: A2A_AGENT_CLIENT_MAX_RETRIES
+              value: "3"
+            - name: A2A_AGENT_CLIENT_MAX_CHAT_COMPLETION_ITERATIONS
+              value: "20"
+            - name: A2A_AGENT_CLIENT_MAX_TOKENS
+              value: "4096"
+            - name: A2A_AGENT_CLIENT_TEMPERATURE
+              value: "0.7"
+            - name: A2A_AGENT_CLIENT_TOOLS_CREATE_ARTIFACT
+              value: "true"
+            - name: A2A_CAPABILITIES_STREAMING
+              value: "true"
+            - name: A2A_CAPABILITIES_PUSH_NOTIFICATIONS
+              value: "false"
+            - name: A2A_CAPABILITIES_STATE_TRANSITION_HISTORY
+              value: "false"
+            - name: A2A_TASK_RETENTION_MAX_COMPLETED_TASKS
+              value: "100"
+            - name: A2A_TASK_RETENTION_MAX_FAILED_TASKS
+              value: "50"
+            - name: A2A_TASK_RETENTION_CLEANUP_INTERVAL
+              value: "5m"
+            - name: A2A_QUEUE_PROVIDER
+              value: "memory"
+            - name: A2A_QUEUE_URL
+              value: ""
+            - name: A2A_QUEUE_MAX_SIZE
+              value: "100"
+            - name: A2A_QUEUE_CLEANUP_INTERVAL
+              value: "500s"
+            - name: A2A_AUTH_ENABLE
+              value: "false"
+            - name: A2A_ARTIFACTS_ENABLE
+              value: "true"
+            - name: A2A_ARTIFACTS_SERVER_HOST
+              value: "grafana-agent"
+            - name: A2A_ARTIFACTS_SERVER_PORT
+              value: "8081"
+            - name: A2A_ARTIFACTS_STORAGE_PROVIDER
+              value: "filesystem"
+            - name: A2A_ARTIFACTS_STORAGE_BASE_PATH
+              value: "/tmp/artifacts"
+            - name: A2A_ARTIFACTS_RETENTION_MAX_ARTIFACTS
+              value: "10"
+            - name: A2A_ARTIFACTS_RETENTION_MAX_AGE
+              value: "24h"
+            - name: A2A_ARTIFACTS_RETENTION_CLEANUP_INTERVAL
+              value: "24h"
+            - name: GRAFANA_URL
+              value: "http://grafana-service:3000"
+            - name: GRAFANA_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys
+                  key: grafana-username
+            - name: GRAFANA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: api-keys
+                  key: grafana-password
+          volumeMounts:
+            - name: artifacts
+              mountPath: /tmp/artifacts
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: artifacts
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-agent
+  namespace: grafana-agent
+  labels:
+    app: grafana-agent
+spec:
+  type: NodePort
+  selector:
+    app: grafana-agent
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080
+      protocol: TCP
+    - name: artifacts
+      port: 8081
+      targetPort: 8081
+      protocol: TCP

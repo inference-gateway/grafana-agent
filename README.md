@@ -28,7 +28,7 @@ docker run -p 8080:8080 grafana-agent
 - ✅ A2A protocol compliant
 - ✅ AI-powered capabilities
 - ✅ Streaming support
-- ✅ Production ready
+- ✅ Enterprise-ready
 - ✅ Minimal dependencies
 
 ## Endpoints
@@ -41,6 +41,7 @@ docker run -p 8080:8080 grafana-agent
 
 | Skill | Description | Parameters |
 |-------|-------------|------------|
+| `create_dashboard` | Creates a Grafana dashboard with specified panels, queries, and configurations | dashboard_title, description, panels, refresh_interval, tags, time_range, variables |
 
 ## Configuration
 
