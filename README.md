@@ -41,11 +41,22 @@ docker run -p 8080:8080 grafana-agent
 
 | Skill | Description | Parameters |
 |-------|-------------|------------|
-| `create_dashboard` | Creates a Grafana dashboard with specified panels, queries, and configurations | dashboard_title, description, panels, refresh_interval, tags, time_range, variables |
+| `create_dashboard` | Creates a Grafana dashboard with specified panels, queries, and configurations | dashboard_title, description, grafana_url, panels, refresh_interval, tags, time_range, variables |
 
 ## Configuration
 
 Configure the agent via environment variables:
+
+### Custom Configuration
+
+The following custom configuration variables are available:
+
+| Category | Variable | Description | Default |
+|----------|----------|-------------|---------|
+| **Grafana** | `GRAFANA_API_KEY` | ApiKey configuration | `` |
+| **Grafana** | `GRAFANA_DEPLOY_ENABLED` | DeployEnabled configuration | `false` |
+| **Grafana** | `GRAFANA_ORG_ID` | OrgID configuration | `` |
+| **Grafana** | `GRAFANA_URL` | Url configuration | `` |
 
 | Category | Variable | Description | Default |
 |----------|----------|-------------|---------|
