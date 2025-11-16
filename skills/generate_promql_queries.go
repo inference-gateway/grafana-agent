@@ -83,7 +83,6 @@ func (s *GeneratePromqlQueriesSkill) GeneratePromqlQueriesHandler(ctx context.Co
 		return "", fmt.Errorf("metric_names cannot be empty")
 	}
 
-	// Convert to string slice
 	metricNames := make([]string, 0, len(metricNamesSlice))
 	for _, mn := range metricNamesSlice {
 		if metricName, ok := mn.(string); ok {
@@ -96,7 +95,6 @@ func (s *GeneratePromqlQueriesSkill) GeneratePromqlQueriesHandler(ctx context.Co
 		Results:       make([]QueryGenerationResult, 0, len(metricNames)),
 	}
 
-	// Generate queries for each metric
 	for _, metricName := range metricNames {
 		s.logger.Debug("processing metric", zap.String("metric", metricName))
 
@@ -104,7 +102,6 @@ func (s *GeneratePromqlQueriesSkill) GeneratePromqlQueriesHandler(ctx context.Co
 			MetricName: metricName,
 		}
 
-		// Get metric metadata from Prometheus
 		metricInfo, err := s.promql.GetMetricMetadata(ctx, prometheusURL, metricName)
 		if err != nil {
 			s.logger.Warn("failed to get metric metadata",
@@ -119,7 +116,6 @@ func (s *GeneratePromqlQueriesSkill) GeneratePromqlQueriesHandler(ctx context.Co
 		result.MetricHelp = metricInfo.Help
 		result.Labels = metricInfo.Labels
 
-		// Generate query suggestions
 		suggestions := s.promql.GenerateQueries(metricInfo)
 		if len(suggestions) == 0 {
 			s.logger.Warn("no suggestions generated",
@@ -137,7 +133,6 @@ func (s *GeneratePromqlQueriesSkill) GeneratePromqlQueriesHandler(ctx context.Co
 			zap.Int("suggestion_count", len(suggestions)))
 	}
 
-	// Marshal response to JSON
 	jsonData, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal response: %w", err)

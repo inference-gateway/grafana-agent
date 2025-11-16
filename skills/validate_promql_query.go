@@ -75,7 +75,6 @@ func (s *ValidatePromqlQuerySkill) ValidatePromqlQueryHandler(ctx context.Contex
 		Valid:         false,
 	}
 
-	// Validate the query
 	err := s.promql.ValidateQuery(ctx, prometheusURL, query)
 	if err != nil {
 		s.logger.Warn("query validation failed",
@@ -89,7 +88,6 @@ func (s *ValidatePromqlQuerySkill) ValidatePromqlQueryHandler(ctx context.Contex
 		response.Valid = true
 	}
 
-	// Marshal response to JSON
 	jsonData, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal response: %w", err)
