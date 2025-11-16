@@ -45,6 +45,10 @@ jobs:
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v2.6.0
 
+      - name: Install Agent Definition Language (ADL) CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/inference-gateway/adl-cli/main/install.sh | bash
+
       - name: Install task
         run: |
           curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.45.4
