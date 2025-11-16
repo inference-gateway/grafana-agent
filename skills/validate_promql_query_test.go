@@ -6,39 +6,15 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/inference-gateway/grafana-agent/internal/promql"
+	"github.com/inference-gateway/grafana-agent/internal/promql/promqlfakes"
 	"go.uber.org/zap"
 )
 
-// mockPromQLServiceForValidate is a mock implementation for testing validate_promql_query
-type mockPromQLServiceForValidate struct {
-	validateQueryFunc func(ctx context.Context, prometheusURL, query string) error
-}
-
-func (m *mockPromQLServiceForValidate) GetMetricMetadata(ctx context.Context, prometheusURL, metricName string) (*promql.MetricInfo, error) {
-	return nil, nil
-}
-
-func (m *mockPromQLServiceForValidate) GenerateQueries(metricInfo *promql.MetricInfo) []promql.QuerySuggestion {
-	return nil
-}
-
-func (m *mockPromQLServiceForValidate) ValidateQuery(ctx context.Context, prometheusURL, query string) error {
-	if m.validateQueryFunc != nil {
-		return m.validateQueryFunc(ctx, prometheusURL, query)
-	}
-	return nil
-}
-
-func (m *mockPromQLServiceForValidate) GetBestQuery(suggestions []promql.QuerySuggestion) promql.QuerySuggestion {
-	return promql.QuerySuggestion{}
-}
-
 func TestNewValidatePromqlQuerySkill(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
-	mockPromQL := &mockPromQLServiceForValidate{}
+	fakePromQL := &promqlfakes.FakePromQL{}
 
-	skill := NewValidatePromqlQuerySkill(logger, mockPromQL)
+	skill := NewValidatePromqlQuerySkill(logger, fakePromQL)
 
 	if skill == nil {
 		t.Error("Expected non-nil skill")
@@ -51,7 +27,7 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          map[string]any
-		mockPromQL    *mockPromQLServiceForValidate
+		setupMock     func(*promqlfakes.FakePromQL)
 		wantErr       bool
 		expectedError string
 		validateFunc  func(t *testing.T, result string)
@@ -62,8 +38,10 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"query":          "up",
 			},
-			mockPromQL: &mockPromQLServiceForValidate{},
-			wantErr:    false,
+			setupMock: func(fake *promqlfakes.FakePromQL) {
+				fake.ValidateQueryReturns(nil)
+			},
+			wantErr: false,
 			validateFunc: func(t *testing.T, result string) {
 				var response ValidateQueryResponse
 				if err := json.Unmarshal([]byte(result), &response); err != nil {
@@ -89,10 +67,8 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"query":          "invalid{syntax",
 			},
-			mockPromQL: &mockPromQLServiceForValidate{
-				validateQueryFunc: func(ctx context.Context, prometheusURL, query string) error {
-					return errors.New("parse error: unexpected left brace")
-				},
+			setupMock: func(fake *promqlfakes.FakePromQL) {
+				fake.ValidateQueryReturns(errors.New("parse error: unexpected left brace"))
 			},
 			wantErr: false,
 			validateFunc: func(t *testing.T, result string) {
@@ -116,7 +92,7 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 			args: map[string]any{
 				"query": "up",
 			},
-			mockPromQL:    &mockPromQLServiceForValidate{},
+			setupMock:     func(fake *promqlfakes.FakePromQL) {},
 			wantErr:       true,
 			expectedError: "prometheus_url is required and must be a string",
 		},
@@ -126,7 +102,7 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 				"prometheus_url": "",
 				"query":          "up",
 			},
-			mockPromQL:    &mockPromQLServiceForValidate{},
+			setupMock:     func(fake *promqlfakes.FakePromQL) {},
 			wantErr:       true,
 			expectedError: "prometheus_url is required and must be a string",
 		},
@@ -135,7 +111,7 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 			args: map[string]any{
 				"prometheus_url": "http://prometheus.test:9090",
 			},
-			mockPromQL:    &mockPromQLServiceForValidate{},
+			setupMock:     func(fake *promqlfakes.FakePromQL) {},
 			wantErr:       true,
 			expectedError: "query is required and must be a string",
 		},
@@ -145,7 +121,7 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"query":          "",
 			},
-			mockPromQL:    &mockPromQLServiceForValidate{},
+			setupMock:     func(fake *promqlfakes.FakePromQL) {},
 			wantErr:       true,
 			expectedError: "query is required and must be a string",
 		},
@@ -155,8 +131,10 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"query":          "rate(http_requests_total{status=\"200\"}[5m])",
 			},
-			mockPromQL: &mockPromQLServiceForValidate{},
-			wantErr:    false,
+			setupMock: func(fake *promqlfakes.FakePromQL) {
+				fake.ValidateQueryReturns(nil)
+			},
+			wantErr: false,
 			validateFunc: func(t *testing.T, result string) {
 				var response ValidateQueryResponse
 				if err := json.Unmarshal([]byte(result), &response); err != nil {
@@ -173,8 +151,10 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"query":          "histogram_quantile(0.95, rate(http_duration_bucket[5m]))",
 			},
-			mockPromQL: &mockPromQLServiceForValidate{},
-			wantErr:    false,
+			setupMock: func(fake *promqlfakes.FakePromQL) {
+				fake.ValidateQueryReturns(nil)
+			},
+			wantErr: false,
 			validateFunc: func(t *testing.T, result string) {
 				var response ValidateQueryResponse
 				if err := json.Unmarshal([]byte(result), &response); err != nil {
@@ -191,10 +171,8 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"query":          "up",
 			},
-			mockPromQL: &mockPromQLServiceForValidate{
-				validateQueryFunc: func(ctx context.Context, prometheusURL, query string) error {
-					return errors.New("connection refused")
-				},
+			setupMock: func(fake *promqlfakes.FakePromQL) {
+				fake.ValidateQueryReturns(errors.New("connection refused"))
 			},
 			wantErr: false,
 			validateFunc: func(t *testing.T, result string) {
@@ -216,8 +194,10 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"query":          "sum by (instance) (rate(cpu_usage[5m]))",
 			},
-			mockPromQL: &mockPromQLServiceForValidate{},
-			wantErr:    false,
+			setupMock: func(fake *promqlfakes.FakePromQL) {
+				fake.ValidateQueryReturns(nil)
+			},
+			wantErr: false,
 			validateFunc: func(t *testing.T, result string) {
 				var response ValidateQueryResponse
 				if err := json.Unmarshal([]byte(result), &response); err != nil {
@@ -232,9 +212,12 @@ func TestValidatePromqlQueryHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			fakePromQL := &promqlfakes.FakePromQL{}
+			tt.setupMock(fakePromQL)
+
 			skill := &ValidatePromqlQuerySkill{
 				logger: logger,
-				promql: tt.mockPromQL,
+				promql: fakePromQL,
 			}
 
 			result, err := skill.ValidatePromqlQueryHandler(context.Background(), tt.args)

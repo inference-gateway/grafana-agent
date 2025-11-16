@@ -7,57 +7,15 @@ import (
 	"testing"
 
 	"github.com/inference-gateway/grafana-agent/internal/promql"
+	"github.com/inference-gateway/grafana-agent/internal/promql/promqlfakes"
 	"go.uber.org/zap"
 )
 
-// mockPromQLServiceForGenerate is a mock implementation for testing generate_promql_queries
-type mockPromQLServiceForGenerate struct {
-	getMetricMetadataFunc func(ctx context.Context, prometheusURL, metricName string) (*promql.MetricInfo, error)
-	generateQueriesFunc   func(metricInfo *promql.MetricInfo) []promql.QuerySuggestion
-}
-
-func (m *mockPromQLServiceForGenerate) GetMetricMetadata(ctx context.Context, prometheusURL, metricName string) (*promql.MetricInfo, error) {
-	if m.getMetricMetadataFunc != nil {
-		return m.getMetricMetadataFunc(ctx, prometheusURL, metricName)
-	}
-	return &promql.MetricInfo{
-		Name:   metricName,
-		Type:   promql.MetricTypeCounter,
-		Help:   "Test metric",
-		Labels: []string{"instance", "job"},
-	}, nil
-}
-
-func (m *mockPromQLServiceForGenerate) GenerateQueries(metricInfo *promql.MetricInfo) []promql.QuerySuggestion {
-	if m.generateQueriesFunc != nil {
-		return m.generateQueriesFunc(metricInfo)
-	}
-	return []promql.QuerySuggestion{
-		{
-			Query:             "rate(" + metricInfo.Name + "[5m])",
-			Description:       "Rate of change",
-			VisualizationType: "timeseries",
-			YAxisLabel:        "rate",
-		},
-	}
-}
-
-func (m *mockPromQLServiceForGenerate) ValidateQuery(ctx context.Context, prometheusURL, query string) error {
-	return nil
-}
-
-func (m *mockPromQLServiceForGenerate) GetBestQuery(suggestions []promql.QuerySuggestion) promql.QuerySuggestion {
-	if len(suggestions) > 0 {
-		return suggestions[0]
-	}
-	return promql.QuerySuggestion{}
-}
-
 func TestNewGeneratePromqlQueriesSkill(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
-	mockPromQL := &mockPromQLServiceForGenerate{}
+	fakePromQL := &promqlfakes.FakePromQL{}
 
-	skill := NewGeneratePromqlQueriesSkill(logger, mockPromQL)
+	skill := NewGeneratePromqlQueriesSkill(logger, fakePromQL)
 
 	if skill == nil {
 		t.Error("Expected non-nil skill")
@@ -70,7 +28,7 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          map[string]any
-		mockPromQL    *mockPromQLServiceForGenerate
+		setupMock     func(*promqlfakes.FakePromQL)
 		wantErr       bool
 		expectedError string
 		validateFunc  func(t *testing.T, result string)
@@ -81,8 +39,23 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"metric_names":   []any{"http_requests_total", "http_duration_seconds"},
 			},
-			mockPromQL: &mockPromQLServiceForGenerate{},
-			wantErr:    false,
+			setupMock: func(fake *promqlfakes.FakePromQL) {
+				fake.GetMetricMetadataReturns(&promql.MetricInfo{
+					Name:   "test_metric",
+					Type:   promql.MetricTypeCounter,
+					Help:   "Test metric",
+					Labels: []string{"instance", "job"},
+				}, nil)
+				fake.GenerateQueriesReturns([]promql.QuerySuggestion{
+					{
+						Query:             "rate(test_metric[5m])",
+						Description:       "Rate of change",
+						VisualizationType: "timeseries",
+						YAxisLabel:        "rate",
+					},
+				})
+			},
+			wantErr: false,
 			validateFunc: func(t *testing.T, result string) {
 				var response GeneratePromqlQueriesResponse
 				if err := json.Unmarshal([]byte(result), &response); err != nil {
@@ -109,7 +82,7 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 			args: map[string]any{
 				"metric_names": []any{"http_requests_total"},
 			},
-			mockPromQL:    &mockPromQLServiceForGenerate{},
+			setupMock:     func(fake *promqlfakes.FakePromQL) {},
 			wantErr:       true,
 			expectedError: "prometheus_url is required and must be a string",
 		},
@@ -118,7 +91,7 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 			args: map[string]any{
 				"prometheus_url": "http://prometheus.test:9090",
 			},
-			mockPromQL:    &mockPromQLServiceForGenerate{},
+			setupMock:     func(fake *promqlfakes.FakePromQL) {},
 			wantErr:       true,
 			expectedError: "metric_names is required",
 		},
@@ -128,7 +101,7 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"metric_names":   []any{},
 			},
-			mockPromQL:    &mockPromQLServiceForGenerate{},
+			setupMock:     func(fake *promqlfakes.FakePromQL) {},
 			wantErr:       true,
 			expectedError: "metric_names cannot be empty",
 		},
@@ -138,7 +111,7 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"metric_names":   "not_an_array",
 			},
-			mockPromQL:    &mockPromQLServiceForGenerate{},
+			setupMock:     func(fake *promqlfakes.FakePromQL) {},
 			wantErr:       true,
 			expectedError: "metric_names must be an array",
 		},
@@ -148,10 +121,8 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"metric_names":   []any{"http_requests_total"},
 			},
-			mockPromQL: &mockPromQLServiceForGenerate{
-				getMetricMetadataFunc: func(ctx context.Context, prometheusURL, metricName string) (*promql.MetricInfo, error) {
-					return nil, errors.New("prometheus connection error")
-				},
+			setupMock: func(fake *promqlfakes.FakePromQL) {
+				fake.GetMetricMetadataReturns(nil, errors.New("prometheus connection error"))
 			},
 			wantErr: false,
 			validateFunc: func(t *testing.T, result string) {
@@ -173,10 +144,13 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"metric_names":   []any{"unknown_metric"},
 			},
-			mockPromQL: &mockPromQLServiceForGenerate{
-				generateQueriesFunc: func(metricInfo *promql.MetricInfo) []promql.QuerySuggestion {
-					return []promql.QuerySuggestion{}
-				},
+			setupMock: func(fake *promqlfakes.FakePromQL) {
+				fake.GetMetricMetadataReturns(&promql.MetricInfo{
+					Name: "unknown_metric",
+					Type: promql.MetricTypeUnknown,
+					Help: "Unknown metric",
+				}, nil)
+				fake.GenerateQueriesReturns([]promql.QuerySuggestion{})
 			},
 			wantErr: false,
 			validateFunc: func(t *testing.T, result string) {
@@ -202,8 +176,8 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 				"prometheus_url": "http://prometheus.test:9090",
 				"metric_names":   []any{"counter_metric", "gauge_metric", "histogram_metric"},
 			},
-			mockPromQL: &mockPromQLServiceForGenerate{
-				getMetricMetadataFunc: func(ctx context.Context, prometheusURL, metricName string) (*promql.MetricInfo, error) {
+			setupMock: func(fake *promqlfakes.FakePromQL) {
+				fake.GetMetricMetadataStub = func(ctx context.Context, prometheusURL, metricName string) (*promql.MetricInfo, error) {
 					typeMap := map[string]promql.MetricType{
 						"counter_metric":   promql.MetricTypeCounter,
 						"gauge_metric":     promql.MetricTypeGauge,
@@ -215,7 +189,15 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 						Help:   "Test metric " + metricName,
 						Labels: []string{"instance"},
 					}, nil
-				},
+				}
+				fake.GenerateQueriesReturns([]promql.QuerySuggestion{
+					{
+						Query:             "test_query",
+						Description:       "Test description",
+						VisualizationType: "timeseries",
+						YAxisLabel:        "value",
+					},
+				})
 			},
 			wantErr: false,
 			validateFunc: func(t *testing.T, result string) {
@@ -247,9 +229,12 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			fakePromQL := &promqlfakes.FakePromQL{}
+			tt.setupMock(fakePromQL)
+
 			skill := &GeneratePromqlQueriesSkill{
 				logger: logger,
-				promql: tt.mockPromQL,
+				promql: fakePromQL,
 			}
 
 			result, err := skill.GeneratePromqlQueriesHandler(context.Background(), tt.args)

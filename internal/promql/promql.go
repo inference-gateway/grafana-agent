@@ -7,8 +7,11 @@ import (
 	zap "go.uber.org/zap"
 )
 
+//go:generate go tool counterfeiter -generate
+
 // PromQL represents the promql service interface
 // PromQL service for building and validating Prometheus queries
+//counterfeiter:generate . PromQL
 type PromQL interface {
 	// GetMetricMetadata fetches metadata for a specific metric from Prometheus
 	GetMetricMetadata(ctx context.Context, prometheusURL, metricName string) (*MetricInfo, error)
