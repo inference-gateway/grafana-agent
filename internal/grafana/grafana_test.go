@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/inference-gateway/grafana-agent/config"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
@@ -72,7 +73,7 @@ func TestCreateDashboard(t *testing.T) {
 					Version: 1,
 					Slug:    "test-dashboard",
 				}
-				json.NewEncoder(w).Encode(response)
+				require.NoError(t, json.NewEncoder(w).Encode(response))
 			},
 			wantErr:     false,
 			expectedUID: "test-uid-123",
@@ -95,9 +96,9 @@ func TestCreateDashboard(t *testing.T) {
 			},
 			serverResponse: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
-				json.NewEncoder(w).Encode(map[string]string{
+				require.NoError(t, json.NewEncoder(w).Encode(map[string]string{
 					"message": "Invalid dashboard",
-				})
+				}))
 			},
 			wantErr: true,
 		},
@@ -110,7 +111,8 @@ func TestCreateDashboard(t *testing.T) {
 			},
 			serverResponse: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte("invalid json"))
+				_, err := w.Write([]byte("invalid json"))
+				require.NoError(t, err)
 			},
 			wantErr: true,
 		},
@@ -189,7 +191,7 @@ func TestUpdateDashboard(t *testing.T) {
 					Status:  "success",
 					Version: 2,
 				}
-				json.NewEncoder(w).Encode(response)
+				require.NoError(t, json.NewEncoder(w).Encode(response))
 			},
 			wantErr: false,
 		},
@@ -254,7 +256,7 @@ func TestGetDashboard(t *testing.T) {
 						"version": 1,
 					},
 				}
-				json.NewEncoder(w).Encode(response)
+				require.NoError(t, json.NewEncoder(w).Encode(response))
 			},
 			wantErr: false,
 			validateFunc: func(t *testing.T, dashboard *Dashboard) {
@@ -268,9 +270,9 @@ func TestGetDashboard(t *testing.T) {
 			uid:  "nonexistent-uid",
 			serverResponse: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusNotFound)
-				json.NewEncoder(w).Encode(map[string]string{
+				require.NoError(t, json.NewEncoder(w).Encode(map[string]string{
 					"message": "Dashboard not found",
-				})
+				}))
 			},
 			wantErr:       true,
 			expectedError: "dashboard not found",
@@ -288,7 +290,8 @@ func TestGetDashboard(t *testing.T) {
 			uid:  "test-uid",
 			serverResponse: func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte("invalid json"))
+				_, err := w.Write([]byte("invalid json"))
+				require.NoError(t, err)
 			},
 			wantErr: true,
 		},
@@ -345,9 +348,9 @@ func TestDeleteDashboard(t *testing.T) {
 				}
 
 				w.WriteHeader(http.StatusOK)
-				json.NewEncoder(w).Encode(map[string]string{
+				require.NoError(t, json.NewEncoder(w).Encode(map[string]string{
 					"message": "Dashboard deleted",
-				})
+				}))
 			},
 			wantErr: false,
 		},
