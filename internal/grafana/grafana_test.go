@@ -155,11 +155,11 @@ func TestUpdateDashboard(t *testing.T) {
 	logger := zap.NewNop()
 
 	tests := []struct {
-		name             string
-		dashboard        Dashboard
-		expectOverwrite  bool
-		serverResponse   func(w http.ResponseWriter, r *http.Request)
-		wantErr          bool
+		name            string
+		dashboard       Dashboard
+		expectOverwrite bool
+		serverResponse  func(w http.ResponseWriter, r *http.Request)
+		wantErr         bool
 	}{
 		{
 			name: "update sets overwrite to true",

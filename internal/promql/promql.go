@@ -11,6 +11,7 @@ import (
 
 // PromQL represents the promql service interface
 // PromQL service for building and validating Prometheus queries
+//
 //counterfeiter:generate . PromQL
 type PromQL interface {
 	// GetMetricMetadata fetches metadata for a specific metric from Prometheus
