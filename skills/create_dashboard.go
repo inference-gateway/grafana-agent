@@ -97,28 +97,25 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 		return "", fmt.Errorf("dashboard_title is required and must be a string")
 	}
 
-	// Check if deploy flag is set and validate deployment prerequisites
 	deploy, deployRequested := args["deploy"].(bool)
 	if deployRequested && deploy {
 		if s.config != nil && !s.config.DeployEnabled {
 			log.Printf("WARNING: Grafana deployment attempted but GRAFANA_DEPLOY_ENABLED=false")
 			return "", fmt.Errorf("grafana deployment is disabled - set GRAFANA_DEPLOY_ENABLED=true to enable dashboard deployments")
 		}
-		
-		// For deployment, we need either grafana_url parameter or config.URL
+
 		var grafanaURL string
 		if urlParam, ok := args["grafana_url"].(string); ok && urlParam != "" {
 			grafanaURL = urlParam
 		} else if s.config != nil && s.config.URL != "" {
 			grafanaURL = s.config.URL
 		}
-		
+
 		if grafanaURL == "" {
 			return "", fmt.Errorf("deployment requested but no grafana_url provided")
 		}
 	}
 
-	// Handle intelligent query generation from metric names
 	if metricNames, ok := args["metric_names"].([]any); ok && len(metricNames) > 0 {
 		prometheusURL, hasPrometheusURL := args["prometheus_url"].(string)
 		if !hasPrometheusURL || prometheusURL == "" {
@@ -132,7 +129,6 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 		args["panels"] = panels
 	}
 
-	// Validate that panels exist (either provided or generated)
 	panels, ok := args["panels"].([]any)
 	if !ok || len(panels) == 0 {
 		return "", fmt.Errorf("panels are required - provide either 'panels' array or 'metric_names' with 'prometheus_url'")
@@ -183,19 +179,16 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 		}
 	}
 
-	// Handle deployment if requested
 	if deployRequested && deploy {
 		var grafanaURL string
 		var apiKey string
 
-		// Get Grafana URL
 		if urlParam, ok := args["grafana_url"].(string); ok && urlParam != "" {
 			grafanaURL = urlParam
 		} else if s.config != nil && s.config.URL != "" {
 			grafanaURL = s.config.URL
 		}
 
-		// Get API key from config
 		if s.config != nil && s.config.APIKey != "" {
 			apiKey = s.config.APIKey
 		}
@@ -204,7 +197,6 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 			return "", fmt.Errorf("deployment requested but no API key configured - set GRAFANA_API_KEY")
 		}
 
-		// Create Grafana dashboard object
 		grafanaDashboard := grafana.Dashboard{
 			Dashboard: dashboard["dashboard"].(map[string]any),
 			FolderUID: "",
@@ -212,18 +204,16 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 			Overwrite: true,
 		}
 
-		// Deploy to Grafana
 		resp, err := s.grafana.CreateDashboard(ctx, grafanaDashboard, grafanaURL, apiKey)
 		if err != nil {
 			return "", fmt.Errorf("failed to deploy dashboard to Grafana: %w", err)
 		}
 
-		s.logger.Info("Dashboard deployed successfully", 
+		s.logger.Info("Dashboard deployed successfully",
 			zap.String("grafana_url", grafanaURL),
 			zap.String("dashboard_uid", resp.UID),
 			zap.Int("dashboard_id", resp.ID))
 
-		// Return deployment information
 		deploymentInfo := map[string]any{
 			"status":      "deployed",
 			"grafana_url": grafanaURL,
@@ -243,7 +233,6 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 		return string(jsonBytes), nil
 	}
 
-	// Return dashboard JSON if not deploying
 	jsonBytes, err := json.MarshalIndent(dashboard, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal dashboard JSON: %w", err)
@@ -252,7 +241,6 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 	return string(jsonBytes), nil
 }
 
-// extractTags extracts and validates tags from args
 func extractTags(args map[string]any) []string {
 	tags := []string{}
 	if tagsRaw, ok := args["tags"].([]any); ok {
@@ -444,14 +432,12 @@ func (s *CreateDashboardSkill) generatePanelsFromMetrics(ctx context.Context, me
 			continue
 		}
 
-		// Get metric metadata from Prometheus
 		metricInfo, err := prometheusClient.GetMetricMetadata(ctx, metricName)
 		if err != nil {
-			s.logger.Warn("Failed to get metadata for metric", 
-				zap.String("metric", metricName), 
+			s.logger.Warn("Failed to get metadata for metric",
+				zap.String("metric", metricName),
 				zap.Error(err))
-			
-			// Create a basic panel with simple query if metadata fails
+
 			panel := map[string]any{
 				"title": metricName,
 				"type":  "timeseries",
@@ -466,30 +452,24 @@ func (s *CreateDashboardSkill) generatePanelsFromMetrics(ctx context.Context, me
 			continue
 		}
 
-		// Generate query suggestions based on metric type
 		suggestions := promql.GenerateQueries(metricInfo)
 		if len(suggestions) == 0 {
 			continue
 		}
 
-		// Enhance queries with LLM assistance
 		enhancer := promql.NewLLMQueryEnhancer()
 		enhancedSuggestions := enhancer.EnhanceQueries(ctx, metricInfo, suggestions)
 
-		// Use the best enhanced query suggestion
 		bestQuery := promql.GetBestQuery(enhancedSuggestions)
 
-		// Validate the query against Prometheus
 		if err := prometheusClient.ValidateQuery(ctx, bestQuery.Query); err != nil {
-			s.logger.Warn("Generated query failed validation, using fallback", 
+			s.logger.Warn("Generated query failed validation, using fallback",
 				zap.String("metric", metricName),
 				zap.String("query", bestQuery.Query),
 				zap.Error(err))
-			// Fall back to simple metric name query
 			bestQuery.Query = metricName
 		}
 
-		// Create panel configuration
 		panel := map[string]any{
 			"title": fmt.Sprintf("%s - %s", metricName, bestQuery.Description),
 			"type":  mapVisualizationType(bestQuery.VisualizationType),
@@ -509,29 +489,26 @@ func (s *CreateDashboardSkill) generatePanelsFromMetrics(ctx context.Context, me
 			},
 		}
 
-		// Add description if available from metadata
 		if metricInfo.Help != "" && metricInfo.Help != "No metadata available" {
 			panel["description"] = metricInfo.Help
 		}
 
-		// Add multiple query suggestions as additional targets if available
 		if len(enhancedSuggestions) > 1 {
 			targets := []any{
 				map[string]any{
-					"refId": "A",
-					"expr":  bestQuery.Query,
+					"refId":        "A",
+					"expr":         bestQuery.Query,
 					"legendFormat": bestQuery.Description,
 				},
 			}
 
-			// Add up to 3 additional enhanced queries
 			for j, suggestion := range enhancedSuggestions[1:] {
 				if j >= 3 {
 					break
 				}
-				
+
 				if err := prometheusClient.ValidateQuery(ctx, suggestion.Query); err != nil {
-					continue // Skip invalid queries
+					continue
 				}
 
 				refId := string(rune('B' + j))
@@ -541,7 +518,7 @@ func (s *CreateDashboardSkill) generatePanelsFromMetrics(ctx context.Context, me
 					"legendFormat": suggestion.Description,
 				})
 			}
-			
+
 			panel["targets"] = targets
 		}
 
@@ -552,7 +529,7 @@ func (s *CreateDashboardSkill) generatePanelsFromMetrics(ctx context.Context, me
 		return nil, fmt.Errorf("no valid panels could be generated from the provided metric names")
 	}
 
-	s.logger.Info("Generated panels from metrics", 
+	s.logger.Info("Generated panels from metrics",
 		zap.Int("metric_count", len(metricNames)),
 		zap.Int("panel_count", len(panels)))
 
@@ -577,34 +554,28 @@ func mapVisualizationType(vizType string) string {
 
 // inferUnit attempts to infer the appropriate unit from metric name and axis label
 func inferUnit(metricName, yAxisLabel string) string {
-	// Check for time-based metrics
 	if strings.Contains(metricName, "duration") || strings.Contains(metricName, "latency") ||
 		strings.Contains(yAxisLabel, "duration") || strings.Contains(yAxisLabel, "time") {
-		return "s" // seconds
+		return "s"
 	}
 
-	// Check for rate metrics
 	if strings.Contains(yAxisLabel, "per second") || strings.Contains(yAxisLabel, "requests/sec") {
-		return "reqps" // requests per second
+		return "reqps"
 	}
 
-	// Check for percentage metrics
 	if strings.Contains(metricName, "ratio") || strings.Contains(metricName, "percent") ||
 		strings.Contains(yAxisLabel, "percent") {
 		return "percent"
 	}
 
-	// Check for byte metrics
 	if strings.Contains(metricName, "bytes") || strings.Contains(metricName, "size") ||
 		strings.Contains(metricName, "memory") {
 		return "bytes"
 	}
 
-	// Check for CPU metrics
 	if strings.Contains(metricName, "cpu") {
 		return "percent"
 	}
 
-	// Default to short format
 	return "short"
 }

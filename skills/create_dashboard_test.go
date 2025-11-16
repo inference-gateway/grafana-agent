@@ -48,7 +48,7 @@ func TestNewCreateDashboardSkill(t *testing.T) {
 	}
 
 	skill := NewCreateDashboardSkill(logger, mockGrafana, config)
-	
+
 	if skill == nil {
 		t.Error("Expected non-nil skill")
 	}
@@ -58,7 +58,7 @@ func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	mockGrafana := &mockGrafanaService{}
 	config := &config.GrafanaConfig{
-		DeployEnabled: false, // Disable deployment for this test
+		DeployEnabled: false,
 	}
 
 	skill := &CreateDashboardSkill{
@@ -88,13 +88,11 @@ func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
 
-	// Verify the result is valid JSON
 	var dashboard map[string]any
 	if err := json.Unmarshal([]byte(result), &dashboard); err != nil {
 		t.Fatalf("Expected valid JSON result, got error: %v", err)
 	}
 
-	// Check dashboard structure
 	dashboardData, ok := dashboard["dashboard"].(map[string]any)
 	if !ok {
 		t.Error("Expected dashboard object in result")
@@ -190,7 +188,6 @@ func TestCreateDashboardHandler_MetricNames(t *testing.T) {
 	}
 
 	_, err := skill.CreateDashboardHandler(context.Background(), args)
-	// This should fail because prometheus_url is required
 	if err == nil {
 		t.Error("Expected error when metric_names provided without prometheus_url")
 	}
@@ -231,7 +228,7 @@ func TestExtractTags(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := extractTags(tt.args)
-			
+
 			if len(result) != len(tt.expected) {
 				t.Errorf("Expected %d tags, got %d", len(tt.expected), len(result))
 			}
@@ -277,8 +274,8 @@ func TestExtractTimeRange(t *testing.T) {
 			},
 		},
 		{
-			name:     "no time range",
-			args:     map[string]any{},
+			name: "no time range",
+			args: map[string]any{},
 			expected: map[string]string{
 				"from": "now-6h",
 				"to":   "now",
@@ -289,11 +286,11 @@ func TestExtractTimeRange(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := extractTimeRange(tt.args)
-			
+
 			if result["from"] != tt.expected["from"] {
 				t.Errorf("Expected from = %s, got %s", tt.expected["from"], result["from"])
 			}
-			
+
 			if result["to"] != tt.expected["to"] {
 				t.Errorf("Expected to = %s, got %s", tt.expected["to"], result["to"])
 			}
@@ -401,8 +398,8 @@ func TestMapVisualizationType(t *testing.T) {
 		{"stat", "stat"},
 		{"gauge", "gauge"},
 		{"table", "table"},
-		{"unknown", "timeseries"}, // default case
-		{"", "timeseries"},        // empty string
+		{"unknown", "timeseries"},
+		{"", "timeseries"},
 	}
 
 	for _, tt := range tests {
