@@ -21,6 +21,11 @@ spec:
       interface: Grafana
       factory: NewGrafanaService
       description: Grafana service for accessing Grafana API
+    promql:
+      type: service
+      interface: PromQL
+      factory: NewPromQLService
+      description: PromQL service for building and optimizing Prometheus queries with LLM assistance
   agent:
     provider: ""
     model: ""
@@ -36,6 +41,7 @@ spec:
       inject:
         - logger
         - grafana
+        - promql
         - config.grafana
       description: Creates a Grafana dashboard with specified panels, queries, and configurations
       tags:

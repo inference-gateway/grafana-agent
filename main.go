@@ -20,6 +20,7 @@ import (
 
 	grafana "github.com/inference-gateway/grafana-agent/internal/grafana"
 	logger "github.com/inference-gateway/grafana-agent/internal/logger"
+	promql "github.com/inference-gateway/grafana-agent/internal/promql"
 )
 
 var (
@@ -49,12 +50,16 @@ func main() {
 	if err != nil {
 		l.Fatal("failed to initialize grafana service", zap.Error(err))
 	}
+	promqlSvc, err := promql.NewPromQLService(l, &cfg)
+	if err != nil {
+		l.Fatal("failed to initialize promql service", zap.Error(err))
+	}
 
 	// Create toolbox with default tools (like input_required, create_artifact etc)
 	toolBox := server.NewDefaultToolBox(&cfg.A2A.AgentConfig.ToolBoxConfig)
 
 	// Register create_dashboard skill
-	createDashboardSkill := skills.NewCreateDashboardSkill(l, grafanaSvc, &cfg.Grafana)
+	createDashboardSkill := skills.NewCreateDashboardSkill(l, grafanaSvc, promqlSvc, &cfg.Grafana)
 	toolBox.AddTool(createDashboardSkill)
 	l.Info("registered skill: create_dashboard (Creates a Grafana dashboard with specified panels, queries, and configurations)")
 

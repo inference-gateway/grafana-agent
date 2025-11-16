@@ -18,7 +18,7 @@ type Dashboard struct {
 	Dashboard map[string]any `json:"dashboard"`
 	FolderUID string         `json:"folderUid"`
 	Message   string         `json:"message"`
-	Overwrite bool          `json:"overwrite"`
+	Overwrite bool           `json:"overwrite"`
 }
 
 // DashboardResponse represents the response from dashboard creation
@@ -48,11 +48,11 @@ type grafanaImpl struct {
 // NewGrafanaService creates a new instance of Grafana
 func NewGrafanaService(logger *zap.Logger, cfg *config.Config) (Grafana, error) {
 	logger.Info("initializing grafana service")
-	
+
 	client := &http.Client{
 		Timeout: 30 * time.Second,
 	}
-	
+
 	return &grafanaImpl{
 		logger: logger,
 		client: client,
@@ -62,7 +62,7 @@ func NewGrafanaService(logger *zap.Logger, cfg *config.Config) (Grafana, error) 
 // CreateDashboard creates a new dashboard in Grafana
 func (g *grafanaImpl) CreateDashboard(ctx context.Context, dashboard Dashboard, grafanaURL, apiKey string) (*DashboardResponse, error) {
 	url := fmt.Sprintf("%s/api/dashboards/db", strings.TrimRight(grafanaURL, "/"))
-	
+
 	jsonData, err := json.Marshal(dashboard)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal dashboard: %w", err)
@@ -91,7 +91,7 @@ func (g *grafanaImpl) CreateDashboard(ctx context.Context, dashboard Dashboard, 
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	g.logger.Info("Dashboard created successfully", 
+	g.logger.Info("Dashboard created successfully",
 		zap.Int("id", dashboardResp.ID),
 		zap.String("uid", dashboardResp.UID),
 		zap.String("url", dashboardResp.URL))
@@ -109,7 +109,7 @@ func (g *grafanaImpl) UpdateDashboard(ctx context.Context, dashboard Dashboard, 
 // GetDashboard retrieves a dashboard from Grafana
 func (g *grafanaImpl) GetDashboard(ctx context.Context, uid, grafanaURL, apiKey string) (*Dashboard, error) {
 	url := fmt.Sprintf("%s/api/dashboards/uid/%s", strings.TrimRight(grafanaURL, "/"), uid)
-	
+
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -148,7 +148,7 @@ func (g *grafanaImpl) GetDashboard(ctx context.Context, uid, grafanaURL, apiKey 
 // DeleteDashboard deletes a dashboard from Grafana
 func (g *grafanaImpl) DeleteDashboard(ctx context.Context, uid, grafanaURL, apiKey string) error {
 	url := fmt.Sprintf("%s/api/dashboards/uid/%s", strings.TrimRight(grafanaURL, "/"), uid)
-	
+
 	req, err := http.NewRequestWithContext(ctx, "DELETE", url, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)

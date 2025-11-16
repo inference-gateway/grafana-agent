@@ -31,21 +31,21 @@ type MetricInfo struct {
 
 // QuerySuggestion represents a suggested PromQL query for a metric
 type QuerySuggestion struct {
-	Query           string `json:"query"`
-	Description     string `json:"description"`
+	Query             string `json:"query"`
+	Description       string `json:"description"`
 	VisualizationType string `json:"visualization_type"`
-	YAxisLabel      string `json:"y_axis_label"`
+	YAxisLabel        string `json:"y_axis_label"`
 }
 
-// PrometheusClient handles communication with Prometheus API
-type PrometheusClient struct {
+// prometheusClient handles communication with Prometheus API
+type prometheusClient struct {
 	baseURL string
 	client  *http.Client
 }
 
-// NewPrometheusClient creates a new Prometheus client
-func NewPrometheusClient(baseURL string) *PrometheusClient {
-	return &PrometheusClient{
+// newPrometheusClient creates a new Prometheus client
+func newPrometheusClient(baseURL string) *prometheusClient {
+	return &prometheusClient{
 		baseURL: strings.TrimRight(baseURL, "/"),
 		client: &http.Client{
 			Timeout: 30 * time.Second,
@@ -53,10 +53,10 @@ func NewPrometheusClient(baseURL string) *PrometheusClient {
 	}
 }
 
-// GetMetricMetadata fetches metadata for a specific metric from Prometheus
-func (c *PrometheusClient) GetMetricMetadata(ctx context.Context, metricName string) (*MetricInfo, error) {
+// getMetricMetadata fetches metadata for a specific metric from Prometheus
+func (c *prometheusClient) getMetricMetadata(ctx context.Context, metricName string) (*MetricInfo, error) {
 	metadataURL := fmt.Sprintf("%s/api/v1/metadata?metric=%s", c.baseURL, url.QueryEscape(metricName))
-	
+
 	req, err := http.NewRequestWithContext(ctx, "GET", metadataURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -90,7 +90,6 @@ func (c *PrometheusClient) GetMetricMetadata(ctx context.Context, metricName str
 
 	data, exists := metadataResp.Data[metricName]
 	if !exists || len(data) == 0 {
-		// If metadata is not available, try to infer type from metric name
 		inferredType := inferMetricType(metricName)
 		return &MetricInfo{
 			Name: metricName,
@@ -99,10 +98,8 @@ func (c *PrometheusClient) GetMetricMetadata(ctx context.Context, metricName str
 		}, nil
 	}
 
-	// Get labels for the metric
 	labels, err := c.getMetricLabels(ctx, metricName)
 	if err != nil {
-		// Non-fatal error, continue without labels
 		labels = []string{}
 	}
 
@@ -115,9 +112,9 @@ func (c *PrometheusClient) GetMetricMetadata(ctx context.Context, metricName str
 }
 
 // getMetricLabels fetches available labels for a metric
-func (c *PrometheusClient) getMetricLabels(ctx context.Context, metricName string) ([]string, error) {
+func (c *prometheusClient) getMetricLabels(ctx context.Context, metricName string) ([]string, error) {
 	labelsURL := fmt.Sprintf("%s/api/v1/labels", c.baseURL)
-	
+
 	req, err := http.NewRequestWithContext(ctx, "GET", labelsURL, nil)
 	if err != nil {
 		return nil, err
@@ -149,10 +146,10 @@ func (c *PrometheusClient) getMetricLabels(ctx context.Context, metricName strin
 	return labelsResp.Data, nil
 }
 
-// ValidateQuery validates a PromQL query against Prometheus
-func (c *PrometheusClient) ValidateQuery(ctx context.Context, query string) error {
+// validateQuery validates a PromQL query against Prometheus
+func (c *prometheusClient) validateQuery(ctx context.Context, query string) error {
 	queryURL := fmt.Sprintf("%s/api/v1/query", c.baseURL)
-	
+
 	data := url.Values{}
 	data.Set("query", query)
 	data.Set("time", "0") // Use epoch time for validation
@@ -161,7 +158,7 @@ func (c *PrometheusClient) ValidateQuery(ctx context.Context, query string) erro
 	if err != nil {
 		return fmt.Errorf("failed to create validation request: %w", err)
 	}
-	
+
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := c.client.Do(req)
@@ -187,8 +184,8 @@ func (c *PrometheusClient) ValidateQuery(ctx context.Context, query string) erro
 	return nil
 }
 
-// GenerateQueries generates appropriate PromQL queries based on metric type and name
-func GenerateQueries(metricInfo *MetricInfo) []QuerySuggestion {
+// generateQueries generates appropriate PromQL queries based on metric type and name
+func generateQueries(metricInfo *MetricInfo) []QuerySuggestion {
 	var suggestions []QuerySuggestion
 
 	switch metricInfo.Type {
@@ -226,7 +223,6 @@ func generateCounterQueries(metricInfo *MetricInfo) []QuerySuggestion {
 		},
 	}
 
-	// Add sum by aggregations if labels are available
 	if len(metricInfo.Labels) > 0 {
 		for _, label := range metricInfo.Labels {
 			if label != "__name__" && !strings.HasPrefix(label, "__") {
@@ -262,7 +258,6 @@ func generateGaugeQueries(metricInfo *MetricInfo) []QuerySuggestion {
 		},
 	}
 
-	// Add aggregations if labels are available
 	if len(metricInfo.Labels) > 0 {
 		suggestions = append(suggestions,
 			QuerySuggestion{
@@ -285,7 +280,6 @@ func generateGaugeQueries(metricInfo *MetricInfo) []QuerySuggestion {
 			},
 		)
 
-		// Add group by aggregations
 		for _, label := range metricInfo.Labels {
 			if label != "__name__" && !strings.HasPrefix(label, "__") {
 				suggestions = append(suggestions, QuerySuggestion{
@@ -383,15 +377,13 @@ func generateSummaryQueries(metricInfo *MetricInfo) []QuerySuggestion {
 func generateDefaultQueries(metricInfo *MetricInfo) []QuerySuggestion {
 	metricName := metricInfo.Name
 
-	// Try to infer if it's a counter-like metric
-	if strings.HasSuffix(metricName, "_total") || 
-	   strings.Contains(metricName, "_count") ||
-	   strings.Contains(metricName, "requests") ||
-	   strings.Contains(metricName, "errors") {
+	if strings.HasSuffix(metricName, "_total") ||
+		strings.Contains(metricName, "_count") ||
+		strings.Contains(metricName, "requests") ||
+		strings.Contains(metricName, "errors") {
 		return generateCounterQueries(metricInfo)
 	}
 
-	// Default to gauge-like behavior
 	return []QuerySuggestion{
 		{
 			Query:             metricName,
@@ -433,8 +425,8 @@ func inferMetricType(metricName string) MetricType {
 	return MetricTypeUnknown
 }
 
-// GetBestQuery selects the most appropriate query for visualization
-func GetBestQuery(suggestions []QuerySuggestion) QuerySuggestion {
+// getBestQuery selects the most appropriate query for visualization
+func getBestQuery(suggestions []QuerySuggestion) QuerySuggestion {
 	if len(suggestions) == 0 {
 		return QuerySuggestion{
 			Query:             "up",
@@ -444,6 +436,5 @@ func GetBestQuery(suggestions []QuerySuggestion) QuerySuggestion {
 		}
 	}
 
-	// Return the first suggestion as it's typically the most relevant
 	return suggestions[0]
 }

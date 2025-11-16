@@ -7,6 +7,7 @@ import (
 
 	"github.com/inference-gateway/grafana-agent/config"
 	"github.com/inference-gateway/grafana-agent/internal/grafana"
+	"github.com/inference-gateway/grafana-agent/internal/promql"
 	"go.uber.org/zap"
 )
 
@@ -38,16 +39,80 @@ func (m *mockGrafanaService) DeleteDashboard(ctx context.Context, uid, grafanaUR
 	return nil
 }
 
+// mockPromQLService is a mock implementation of the PromQL interface for testing
+type mockPromQLService struct {
+	getMetricMetadataFunc func(ctx context.Context, prometheusURL, metricName string) (*promql.MetricInfo, error)
+	generateQueriesFunc   func(metricInfo *promql.MetricInfo) []promql.QuerySuggestion
+	enhanceQueriesFunc    func(ctx context.Context, metricInfo *promql.MetricInfo, suggestions []promql.QuerySuggestion) []promql.QuerySuggestion
+	validateQueryFunc     func(ctx context.Context, prometheusURL, query string) error
+	getBestQueryFunc      func(suggestions []promql.QuerySuggestion) promql.QuerySuggestion
+}
+
+func (m *mockPromQLService) GetMetricMetadata(ctx context.Context, prometheusURL, metricName string) (*promql.MetricInfo, error) {
+	if m.getMetricMetadataFunc != nil {
+		return m.getMetricMetadataFunc(ctx, prometheusURL, metricName)
+	}
+	return &promql.MetricInfo{
+		Name: metricName,
+		Type: promql.MetricTypeGauge,
+		Help: "Mock metric",
+	}, nil
+}
+
+func (m *mockPromQLService) GenerateQueries(metricInfo *promql.MetricInfo) []promql.QuerySuggestion {
+	if m.generateQueriesFunc != nil {
+		return m.generateQueriesFunc(metricInfo)
+	}
+	return []promql.QuerySuggestion{
+		{
+			Query:             metricInfo.Name,
+			Description:       "Current value",
+			VisualizationType: "timeseries",
+			YAxisLabel:        "value",
+		},
+	}
+}
+
+func (m *mockPromQLService) EnhanceQueries(ctx context.Context, metricInfo *promql.MetricInfo, suggestions []promql.QuerySuggestion) []promql.QuerySuggestion {
+	if m.enhanceQueriesFunc != nil {
+		return m.enhanceQueriesFunc(ctx, metricInfo, suggestions)
+	}
+	return suggestions
+}
+
+func (m *mockPromQLService) ValidateQuery(ctx context.Context, prometheusURL, query string) error {
+	if m.validateQueryFunc != nil {
+		return m.validateQueryFunc(ctx, prometheusURL, query)
+	}
+	return nil
+}
+
+func (m *mockPromQLService) GetBestQuery(suggestions []promql.QuerySuggestion) promql.QuerySuggestion {
+	if m.getBestQueryFunc != nil {
+		return m.getBestQueryFunc(suggestions)
+	}
+	if len(suggestions) > 0 {
+		return suggestions[0]
+	}
+	return promql.QuerySuggestion{
+		Query:             "up",
+		Description:       "Default query",
+		VisualizationType: "timeseries",
+		YAxisLabel:        "value",
+	}
+}
+
 func TestNewCreateDashboardSkill(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	mockGrafana := &mockGrafanaService{}
+	mockPromQL := &mockPromQLService{}
 	config := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "http://grafana.test",
 		APIKey:        "test-key",
 	}
 
-	skill := NewCreateDashboardSkill(logger, mockGrafana, config)
+	skill := NewCreateDashboardSkill(logger, mockGrafana, mockPromQL, config)
 
 	if skill == nil {
 		t.Error("Expected non-nil skill")
@@ -57,6 +122,7 @@ func TestNewCreateDashboardSkill(t *testing.T) {
 func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	mockGrafana := &mockGrafanaService{}
+	mockPromQL := &mockPromQLService{}
 	config := &config.GrafanaConfig{
 		DeployEnabled: false,
 	}
@@ -64,6 +130,7 @@ func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 	skill := &CreateDashboardSkill{
 		logger:  logger,
 		grafana: mockGrafana,
+		promql:  mockPromQL,
 		config:  config,
 	}
 
@@ -107,11 +174,13 @@ func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 func TestCreateDashboardHandler_MissingTitle(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	mockGrafana := &mockGrafanaService{}
+	mockPromQL := &mockPromQLService{}
 	config := &config.GrafanaConfig{}
 
 	skill := &CreateDashboardSkill{
 		logger:  logger,
 		grafana: mockGrafana,
+		promql:  mockPromQL,
 		config:  config,
 	}
 
@@ -137,6 +206,7 @@ func TestCreateDashboardHandler_MissingTitle(t *testing.T) {
 func TestCreateDashboardHandler_DeploymentDisabled(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	mockGrafana := &mockGrafanaService{}
+	mockPromQL := &mockPromQLService{}
 	config := &config.GrafanaConfig{
 		DeployEnabled: false,
 	}
@@ -144,6 +214,7 @@ func TestCreateDashboardHandler_DeploymentDisabled(t *testing.T) {
 	skill := &CreateDashboardSkill{
 		logger:  logger,
 		grafana: mockGrafana,
+		promql:  mockPromQL,
 		config:  config,
 	}
 
@@ -172,6 +243,7 @@ func TestCreateDashboardHandler_DeploymentDisabled(t *testing.T) {
 func TestCreateDashboardHandler_MetricNames(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	mockGrafana := &mockGrafanaService{}
+	mockPromQL := &mockPromQLService{}
 	config := &config.GrafanaConfig{
 		DeployEnabled: false,
 	}
@@ -179,6 +251,7 @@ func TestCreateDashboardHandler_MetricNames(t *testing.T) {
 	skill := &CreateDashboardSkill{
 		logger:  logger,
 		grafana: mockGrafana,
+		promql:  mockPromQL,
 		config:  config,
 	}
 

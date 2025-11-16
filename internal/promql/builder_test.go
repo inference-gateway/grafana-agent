@@ -66,7 +66,6 @@ func TestGenerateCounterQueries(t *testing.T) {
 		t.Errorf("Expected at least 2 suggestions, got %d", len(suggestions))
 	}
 
-	// Check that rate query exists
 	foundRate := false
 	foundIncrease := false
 	for _, suggestion := range suggestions {
@@ -103,7 +102,6 @@ func TestGenerateGaugeQueries(t *testing.T) {
 		t.Errorf("Expected at least 3 suggestions, got %d", len(suggestions))
 	}
 
-	// Check that basic gauge query exists
 	found := false
 	for _, suggestion := range suggestions {
 		if suggestion.Query == "memory_usage_bytes" {
@@ -160,29 +158,26 @@ func TestGetBestQuery(t *testing.T) {
 		},
 	}
 
-	best := GetBestQuery(suggestions)
+	best := getBestQuery(suggestions)
 	if best.Query != "rate(metric[5m])" {
 		t.Errorf("Expected first query as best, got %s", best.Query)
 	}
 
 	// Test empty suggestions
-	empty := GetBestQuery([]QuerySuggestion{})
+	empty := getBestQuery([]QuerySuggestion{})
 	if empty.Query != "up" {
 		t.Errorf("Expected default 'up' query for empty suggestions, got %s", empty.Query)
 	}
 }
 
 func TestPrometheusClientValidateQuery(t *testing.T) {
-	// This test would require a mock Prometheus server
-	// For now, we'll test the client construction
-	client := NewPrometheusClient("http://localhost:9090")
-	
+	client := newPrometheusClient("http://localhost:9090")
+
 	if client.baseURL != "http://localhost:9090" {
 		t.Errorf("Expected baseURL to be http://localhost:9090, got %s", client.baseURL)
 	}
 
-	// Test URL trimming
-	clientWithSlash := NewPrometheusClient("http://localhost:9090/")
+	clientWithSlash := newPrometheusClient("http://localhost:9090/")
 	if clientWithSlash.baseURL != "http://localhost:9090" {
 		t.Errorf("Expected trailing slash to be trimmed, got %s", clientWithSlash.baseURL)
 	}

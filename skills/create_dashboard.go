@@ -18,14 +18,16 @@ import (
 type CreateDashboardSkill struct {
 	logger  *zap.Logger
 	grafana grafana.Grafana
+	promql  promql.PromQL
 	config  *config.GrafanaConfig
 }
 
 // NewCreateDashboardSkill creates a new create_dashboard skill
-func NewCreateDashboardSkill(logger *zap.Logger, grafana grafana.Grafana, grafanaConfig *config.GrafanaConfig) server.Tool {
+func NewCreateDashboardSkill(logger *zap.Logger, grafana grafana.Grafana, promql promql.PromQL, grafanaConfig *config.GrafanaConfig) server.Tool {
 	skill := &CreateDashboardSkill{
 		logger:  logger,
 		grafana: grafana,
+		promql:  promql,
 		config:  grafanaConfig,
 	}
 	return server.NewBasicTool(
@@ -422,7 +424,6 @@ func getStringOrDefault(m map[string]any, key, defaultValue string) string {
 
 // generatePanelsFromMetrics creates panels from metric names using Prometheus metadata
 func (s *CreateDashboardSkill) generatePanelsFromMetrics(ctx context.Context, metricNames []any, prometheusURL string) ([]any, error) {
-	prometheusClient := promql.NewPrometheusClient(prometheusURL)
 	var panels []any
 
 	for _, metricNameRaw := range metricNames {
@@ -432,7 +433,7 @@ func (s *CreateDashboardSkill) generatePanelsFromMetrics(ctx context.Context, me
 			continue
 		}
 
-		metricInfo, err := prometheusClient.GetMetricMetadata(ctx, metricName)
+		metricInfo, err := s.promql.GetMetricMetadata(ctx, prometheusURL, metricName)
 		if err != nil {
 			s.logger.Warn("Failed to get metadata for metric",
 				zap.String("metric", metricName),
@@ -452,17 +453,16 @@ func (s *CreateDashboardSkill) generatePanelsFromMetrics(ctx context.Context, me
 			continue
 		}
 
-		suggestions := promql.GenerateQueries(metricInfo)
+		suggestions := s.promql.GenerateQueries(metricInfo)
 		if len(suggestions) == 0 {
 			continue
 		}
 
-		enhancer := promql.NewLLMQueryEnhancer()
-		enhancedSuggestions := enhancer.EnhanceQueries(ctx, metricInfo, suggestions)
+		enhancedSuggestions := s.promql.EnhanceQueries(ctx, metricInfo, suggestions)
 
-		bestQuery := promql.GetBestQuery(enhancedSuggestions)
+		bestQuery := s.promql.GetBestQuery(enhancedSuggestions)
 
-		if err := prometheusClient.ValidateQuery(ctx, bestQuery.Query); err != nil {
+		if err := s.promql.ValidateQuery(ctx, prometheusURL, bestQuery.Query); err != nil {
 			s.logger.Warn("Generated query failed validation, using fallback",
 				zap.String("metric", metricName),
 				zap.String("query", bestQuery.Query),
@@ -507,7 +507,7 @@ func (s *CreateDashboardSkill) generatePanelsFromMetrics(ctx context.Context, me
 					break
 				}
 
-				if err := prometheusClient.ValidateQuery(ctx, suggestion.Query); err != nil {
+				if err := s.promql.ValidateQuery(ctx, prometheusURL, suggestion.Query); err != nil {
 					continue
 				}
 

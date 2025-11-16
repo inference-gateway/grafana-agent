@@ -6,22 +6,22 @@ import (
 )
 
 func TestLLMQueryEnhancer(t *testing.T) {
-	enhancer := NewLLMQueryEnhancer()
-	
+	enhancer := newLLMQueryEnhancer()
+
 	if enhancer == nil {
 		t.Error("Expected non-nil LLM query enhancer")
 	}
 }
 
 func TestEnhanceQueries(t *testing.T) {
-	enhancer := NewLLMQueryEnhancer()
-	
+	enhancer := newLLMQueryEnhancer()
+
 	metricInfo := &MetricInfo{
 		Name: "http_requests_total",
 		Type: MetricTypeCounter,
 		Help: "Total HTTP requests",
 	}
-	
+
 	suggestions := []QuerySuggestion{
 		{
 			Query:             "rate(http_requests_total[5m])",
@@ -30,9 +30,9 @@ func TestEnhanceQueries(t *testing.T) {
 			YAxisLabel:        "per second",
 		},
 	}
-	
-	enhanced := enhancer.EnhanceQueries(context.Background(), metricInfo, suggestions)
-	
+
+	enhanced := enhancer.enhanceQueries(context.Background(), metricInfo, suggestions)
+
 	// Should have at least the original suggestion plus contextual ones
 	if len(enhanced) < len(suggestions) {
 		t.Errorf("Enhanced suggestions should be >= original, got %d vs %d", len(enhanced), len(suggestions))
@@ -40,12 +40,12 @@ func TestEnhanceQueries(t *testing.T) {
 }
 
 func TestEnhanceDescription(t *testing.T) {
-	enhancer := NewLLMQueryEnhancer()
-	
+	enhancer := newLLMQueryEnhancer()
+
 	tests := []struct {
-		name        string
-		metricInfo  *MetricInfo
-		suggestion  QuerySuggestion
+		name           string
+		metricInfo     *MetricInfo
+		suggestion     QuerySuggestion
 		expectContains string
 	}{
 		{
@@ -84,16 +84,15 @@ func TestEnhanceDescription(t *testing.T) {
 			expectContains: "Resource Usage",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			enhanced := enhancer.enhanceDescription(tt.metricInfo, tt.suggestion)
-			
+
 			if enhanced == "" {
 				t.Error("Enhanced description should not be empty")
 			}
-			
-			// For these specific tests, we expect some enhancement
+
 			if enhanced == tt.suggestion.Description && tt.expectContains != "" {
 				t.Errorf("Expected description to be enhanced with %s, but got original: %s", tt.expectContains, enhanced)
 			}
@@ -102,8 +101,8 @@ func TestEnhanceDescription(t *testing.T) {
 }
 
 func TestOptimizeQuery(t *testing.T) {
-	enhancer := NewLLMQueryEnhancer()
-	
+	enhancer := newLLMQueryEnhancer()
+
 	tests := []struct {
 		name       string
 		metricInfo *MetricInfo
@@ -138,19 +137,19 @@ func TestOptimizeQuery(t *testing.T) {
 			expectDiff: false, // Should remain unchanged
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			optimized := enhancer.optimizeQuery(tt.metricInfo, tt.query)
-			
+
 			if optimized == "" {
 				t.Error("Optimized query should not be empty")
 			}
-			
+
 			if tt.expectDiff && optimized == tt.query {
 				t.Errorf("Expected query to be optimized, but got same: %s", optimized)
 			}
-			
+
 			if !tt.expectDiff && optimized != tt.query {
 				t.Errorf("Expected query to remain unchanged, but got: %s (original: %s)", optimized, tt.query)
 			}
@@ -159,8 +158,8 @@ func TestOptimizeQuery(t *testing.T) {
 }
 
 func TestSuggestVisualizationType(t *testing.T) {
-	enhancer := NewLLMQueryEnhancer()
-	
+	enhancer := newLLMQueryEnhancer()
+
 	tests := []struct {
 		name       string
 		metricInfo *MetricInfo
@@ -199,11 +198,11 @@ func TestSuggestVisualizationType(t *testing.T) {
 			expected: "gauge",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := enhancer.suggestVisualizationType(tt.metricInfo, tt.suggestion)
-			
+
 			if result != tt.expected {
 				t.Errorf("Expected visualization type %s, got %s", tt.expected, result)
 			}
@@ -212,8 +211,8 @@ func TestSuggestVisualizationType(t *testing.T) {
 }
 
 func TestGenerateContextualQueries(t *testing.T) {
-	enhancer := NewLLMQueryEnhancer()
-	
+	enhancer := newLLMQueryEnhancer()
+
 	tests := []struct {
 		name       string
 		metricInfo *MetricInfo
@@ -260,15 +259,15 @@ func TestGenerateContextualQueries(t *testing.T) {
 			expectMin: 0, // No specific contextual queries
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			contextual := enhancer.generateContextualQueries(tt.metricInfo)
-			
+
 			if len(contextual) < tt.expectMin {
 				t.Errorf("Expected at least %d contextual queries, got %d", tt.expectMin, len(contextual))
 			}
-			
+
 			// Verify query structure
 			for _, query := range contextual {
 				if query.Query == "" {
@@ -311,7 +310,7 @@ func TestExtractPercentile(t *testing.T) {
 			expected: "",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.query, func(t *testing.T) {
 			result := extractPercentile(tt.query)
@@ -340,7 +339,7 @@ func TestExtractMetricNameFromHistogramQuery(t *testing.T) {
 			expected: "api_latency",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.query, func(t *testing.T) {
 			result := extractMetricNameFromHistogramQuery(tt.query)
@@ -353,7 +352,7 @@ func TestExtractMetricNameFromHistogramQuery(t *testing.T) {
 
 // Benchmark tests for performance verification
 func BenchmarkEnhanceQueries(b *testing.B) {
-	enhancer := NewLLMQueryEnhancer()
+	enhancer := newLLMQueryEnhancer()
 	metricInfo := &MetricInfo{
 		Name: "http_requests_total",
 		Type: MetricTypeCounter,
@@ -365,20 +364,20 @@ func BenchmarkEnhanceQueries(b *testing.B) {
 			VisualizationType: "timeseries",
 		},
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		enhancer.EnhanceQueries(context.Background(), metricInfo, suggestions)
+		enhancer.enhanceQueries(context.Background(), metricInfo, suggestions)
 	}
 }
 
 func BenchmarkGenerateContextualQueries(b *testing.B) {
-	enhancer := NewLLMQueryEnhancer()
+	enhancer := newLLMQueryEnhancer()
 	metricInfo := &MetricInfo{
 		Name: "http_requests_total",
 		Type: MetricTypeCounter,
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		enhancer.generateContextualQueries(metricInfo)
