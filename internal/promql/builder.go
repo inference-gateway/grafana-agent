@@ -357,9 +357,7 @@ func generateSummaryQueries(metricInfo *MetricInfo) []QuerySuggestion {
 		},
 	}
 
-	// Add quantile queries if available
 	if strings.Contains(metricInfo.Name, "_count") || strings.Contains(metricInfo.Name, "_sum") {
-		// Try common quantiles
 		for _, quantile := range []string{"0.5", "0.9", "0.95", "0.99"} {
 			suggestions = append(suggestions, QuerySuggestion{
 				Query:             fmt.Sprintf("%s{quantile=\"%s\"}", baseName, quantile),

@@ -128,7 +128,6 @@ func TestGenerateHistogramQueries(t *testing.T) {
 		t.Errorf("Expected at least 3 suggestions, got %d", len(suggestions))
 	}
 
-	// Check for histogram_quantile queries
 	foundQuantile := false
 	for _, suggestion := range suggestions {
 		if suggestion.Query == "histogram_quantile(0.50, rate(http_duration_bucket[5m]))" {
@@ -163,7 +162,6 @@ func TestGetBestQuery(t *testing.T) {
 		t.Errorf("Expected first query as best, got %s", best.Query)
 	}
 
-	// Test empty suggestions
 	empty := getBestQuery([]QuerySuggestion{})
 	if empty.Query != "up" {
 		t.Errorf("Expected default 'up' query for empty suggestions, got %s", empty.Query)

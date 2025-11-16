@@ -101,7 +101,6 @@ func (g *grafanaImpl) CreateDashboard(ctx context.Context, dashboard Dashboard, 
 
 // UpdateDashboard updates an existing dashboard in Grafana
 func (g *grafanaImpl) UpdateDashboard(ctx context.Context, dashboard Dashboard, grafanaURL, apiKey string) (*DashboardResponse, error) {
-	// Set overwrite to true for updates
 	dashboard.Overwrite = true
 	return g.CreateDashboard(ctx, dashboard, grafanaURL, apiKey)
 }
