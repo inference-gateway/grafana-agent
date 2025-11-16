@@ -46,12 +46,12 @@ func NewGeneratePromqlQueriesSkill(logger *zap.Logger, promql promql.PromQL) ser
 
 // QueryGenerationResult represents the result for a single metric
 type QueryGenerationResult struct {
-	MetricName  string                    `json:"metric_name"`
-	MetricType  string                    `json:"metric_type"`
-	MetricHelp  string                    `json:"metric_help"`
-	Labels      []string                  `json:"labels,omitempty"`
-	Suggestions []promql.QuerySuggestion  `json:"suggestions"`
-	Error       string                    `json:"error,omitempty"`
+	MetricName  string                   `json:"metric_name"`
+	MetricType  string                   `json:"metric_type"`
+	MetricHelp  string                   `json:"metric_help"`
+	Labels      []string                 `json:"labels,omitempty"`
+	Suggestions []promql.QuerySuggestion `json:"suggestions"`
+	Error       string                   `json:"error,omitempty"`
 }
 
 // GeneratePromqlQueriesResponse represents the overall response
@@ -64,7 +64,6 @@ type GeneratePromqlQueriesResponse struct {
 func (s *GeneratePromqlQueriesSkill) GeneratePromqlQueriesHandler(ctx context.Context, args map[string]any) (string, error) {
 	s.logger.Info("generating promql queries")
 
-	// Extract parameters
 	prometheusURL, ok := args["prometheus_url"].(string)
 	if !ok || prometheusURL == "" {
 		return "", fmt.Errorf("prometheus_url is required and must be a string")

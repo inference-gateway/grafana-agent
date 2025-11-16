@@ -55,7 +55,6 @@ type ValidateQueryResponse struct {
 func (s *ValidatePromqlQuerySkill) ValidatePromqlQueryHandler(ctx context.Context, args map[string]any) (string, error) {
 	s.logger.Info("validating promql query")
 
-	// Extract parameters
 	prometheusURL, ok := args["prometheus_url"].(string)
 	if !ok || prometheusURL == "" {
 		return "", fmt.Errorf("prometheus_url is required and must be a string")

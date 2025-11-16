@@ -25,7 +25,7 @@ spec:
       type: service
       interface: PromQL
       factory: NewPromQLService
-      description: PromQL service for building and optimizing Prometheus queries with LLM assistance
+      description: PromQL service for building and validating Prometheus queries
   agent:
     provider: ""
     model: ""
