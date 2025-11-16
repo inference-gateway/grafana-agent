@@ -44,6 +44,10 @@ func NewCreateDashboardSkill(logger *zap.Logger, grafana grafana.Grafana, grafan
 					"description": "Grafana server URL (overrides default configuration if provided)",
 					"type":        "string",
 				},
+				"deploy": map[string]any{
+					"description": "Whether to deploy the dashboard to Grafana (requires grafana_url and GRAFANA_DEPLOY_ENABLED=true)",
+					"type":        "boolean",
+				},
 				"panels": map[string]any{
 					"description": "Array of panel configurations (title, type, queries, etc.)",
 					"items":       map[string]any{"type": "object"},
@@ -77,19 +81,33 @@ func NewCreateDashboardSkill(logger *zap.Logger, grafana grafana.Grafana, grafan
 
 // CreateDashboardHandler handles the create_dashboard skill execution
 func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args map[string]any) (string, error) {
-	if s.config != nil && !s.config.DeployEnabled {
-		log.Printf("WARNING: Grafana deployment attempted but GRAFANA_DEPLOY_ENABLED=false")
-		return "", fmt.Errorf("grafana deployment is disabled - set GRAFANA_DEPLOY_ENABLED=true to enable dashboard deployments")
-	}
-
 	dashboardTitle, ok := args["dashboard_title"].(string)
 	if !ok || dashboardTitle == "" {
 		return "", fmt.Errorf("dashboard_title is required and must be a string")
 	}
 
 	panels, ok := args["panels"].([]any)
-	if !ok {
-		return "", fmt.Errorf("panels is required and must be an array")
+	if !ok || len(panels) == 0 {
+		return "", fmt.Errorf("panels are required")
+	}
+
+	deploy, deployRequested := args["deploy"].(bool)
+	if deployRequested && deploy {
+		if s.config != nil && !s.config.DeployEnabled {
+			log.Printf("WARNING: Grafana deployment attempted but GRAFANA_DEPLOY_ENABLED=false")
+			return "", fmt.Errorf("grafana deployment is disabled - set GRAFANA_DEPLOY_ENABLED=true to enable dashboard deployments")
+		}
+
+		var grafanaURL string
+		if urlParam, ok := args["grafana_url"].(string); ok && urlParam != "" {
+			grafanaURL = urlParam
+		} else if s.config != nil && s.config.URL != "" {
+			grafanaURL = s.config.URL
+		}
+
+		if grafanaURL == "" {
+			return "", fmt.Errorf("deployment requested but no grafana_url provided")
+		}
 	}
 
 	var grafanaURL string
@@ -137,6 +155,60 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 		}
 	}
 
+	if deployRequested && deploy {
+		var grafanaURL string
+		var apiKey string
+
+		if urlParam, ok := args["grafana_url"].(string); ok && urlParam != "" {
+			grafanaURL = urlParam
+		} else if s.config != nil && s.config.URL != "" {
+			grafanaURL = s.config.URL
+		}
+
+		if s.config != nil && s.config.APIKey != "" {
+			apiKey = s.config.APIKey
+		}
+
+		if apiKey == "" {
+			return "", fmt.Errorf("deployment requested but no API key configured - set GRAFANA_API_KEY")
+		}
+
+		grafanaDashboard := grafana.Dashboard{
+			Dashboard: dashboard["dashboard"].(map[string]any),
+			FolderUID: "",
+			Message:   "Dashboard created via grafana-agent",
+			Overwrite: true,
+		}
+
+		resp, err := s.grafana.CreateDashboard(ctx, grafanaDashboard, grafanaURL, apiKey)
+		if err != nil {
+			return "", fmt.Errorf("failed to deploy dashboard to Grafana: %w", err)
+		}
+
+		s.logger.Info("Dashboard deployed successfully",
+			zap.String("grafana_url", grafanaURL),
+			zap.String("dashboard_uid", resp.UID),
+			zap.Int("dashboard_id", resp.ID))
+
+		deploymentInfo := map[string]any{
+			"status":      "deployed",
+			"grafana_url": grafanaURL,
+			"dashboard": map[string]any{
+				"id":  resp.ID,
+				"uid": resp.UID,
+				"url": resp.URL,
+			},
+			"dashboard_json": dashboard,
+		}
+
+		jsonBytes, err := json.MarshalIndent(deploymentInfo, "", "  ")
+		if err != nil {
+			return "", fmt.Errorf("failed to marshal deployment info JSON: %w", err)
+		}
+
+		return string(jsonBytes), nil
+	}
+
 	jsonBytes, err := json.MarshalIndent(dashboard, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal dashboard JSON: %w", err)
@@ -145,7 +217,6 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 	return string(jsonBytes), nil
 }
 
-// extractTags extracts and validates tags from args
 func extractTags(args map[string]any) []string {
 	tags := []string{}
 	if tagsRaw, ok := args["tags"].([]any); ok {

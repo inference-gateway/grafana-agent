@@ -26,7 +26,19 @@ Always offer practical examples and explain the reasoning behind your recommenda
 
 ## Skills
 
-This agent provides 1 skills:
+This agent provides 3 skills:
+
+### generate_promql_queries
+- **Description**: Generates PromQL query suggestions for given metric names by querying Prometheus metadata
+- **Tags**: promql, prometheus, query, metrics
+- **Input Schema**: Defined in agent configuration
+- **Output Schema**: Defined in agent configuration
+
+### validate_promql_query
+- **Description**: Validates a PromQL query against a Prometheus server
+- **Tags**: promql, prometheus, validation
+- **Input Schema**: Defined in agent configuration
+- **Output Schema**: Defined in agent configuration
 
 ### create_dashboard
 - **Description**: Creates a Grafana dashboard with specified panels, queries, and configurations
@@ -108,6 +120,8 @@ docker run -p 8080:8080 grafana-agent
 .
 ├── main.go                       # Server entry point
 ├── skills/                       # Business logic skills
+│   └── generate_promql_queries.go # Generates PromQL query suggestions for given metric names by querying Prometheus metadata
+│   └── validate_promql_query.go  # Validates a PromQL query against a Prometheus server
 │   └── create_dashboard.go       # Creates a Grafana dashboard with specified panels, queries, and configurations
 ├── .well-known/                  # Agent configuration
 │   └── agent-card.json           # Agent metadata

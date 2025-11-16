@@ -10,10 +10,17 @@
 # - Comments: lines starting with #
 
 skills/create_dashboard.go
+skills/generate_promql_queries.go
+skills/validate_promql_query.go
+internal/grafana/grafana.go
+internal/promql/promql.go
 
 # Go dependency files
+go.mod
 go.sum
 
 # Add your own files to ignore here:
 # my-custom-file.go
 # config/secrets.yaml
+
+Taskfile.yml

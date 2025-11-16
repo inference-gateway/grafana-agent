@@ -41,7 +41,9 @@ docker run -p 8080:8080 grafana-agent
 
 | Skill | Description | Parameters |
 |-------|-------------|------------|
-| `create_dashboard` | Creates a Grafana dashboard with specified panels, queries, and configurations | dashboard_title, description, grafana_url, panels, refresh_interval, tags, time_range, variables |
+| `generate_promql_queries` | Generates PromQL query suggestions for given metric names by querying Prometheus metadata | metric_names, prometheus_url |
+| `validate_promql_query` | Validates a PromQL query against a Prometheus server | prometheus_url, query |
+| `create_dashboard` | Creates a Grafana dashboard with specified panels, queries, and configurations | dashboard_title, deploy, description, grafana_url, panels, refresh_interval, tags, time_range, variables |
 
 ## Configuration
 
