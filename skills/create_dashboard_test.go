@@ -7,7 +7,6 @@ import (
 
 	"github.com/inference-gateway/grafana-agent/config"
 	"github.com/inference-gateway/grafana-agent/internal/grafana"
-	"github.com/inference-gateway/grafana-agent/internal/promql"
 	"go.uber.org/zap"
 )
 
@@ -39,80 +38,16 @@ func (m *mockGrafanaService) DeleteDashboard(ctx context.Context, uid, grafanaUR
 	return nil
 }
 
-// mockPromQLService is a mock implementation of the PromQL interface for testing
-type mockPromQLService struct {
-	getMetricMetadataFunc func(ctx context.Context, prometheusURL, metricName string) (*promql.MetricInfo, error)
-	generateQueriesFunc   func(metricInfo *promql.MetricInfo) []promql.QuerySuggestion
-	enhanceQueriesFunc    func(ctx context.Context, metricInfo *promql.MetricInfo, suggestions []promql.QuerySuggestion) []promql.QuerySuggestion
-	validateQueryFunc     func(ctx context.Context, prometheusURL, query string) error
-	getBestQueryFunc      func(suggestions []promql.QuerySuggestion) promql.QuerySuggestion
-}
-
-func (m *mockPromQLService) GetMetricMetadata(ctx context.Context, prometheusURL, metricName string) (*promql.MetricInfo, error) {
-	if m.getMetricMetadataFunc != nil {
-		return m.getMetricMetadataFunc(ctx, prometheusURL, metricName)
-	}
-	return &promql.MetricInfo{
-		Name: metricName,
-		Type: promql.MetricTypeGauge,
-		Help: "Mock metric",
-	}, nil
-}
-
-func (m *mockPromQLService) GenerateQueries(metricInfo *promql.MetricInfo) []promql.QuerySuggestion {
-	if m.generateQueriesFunc != nil {
-		return m.generateQueriesFunc(metricInfo)
-	}
-	return []promql.QuerySuggestion{
-		{
-			Query:             metricInfo.Name,
-			Description:       "Current value",
-			VisualizationType: "timeseries",
-			YAxisLabel:        "value",
-		},
-	}
-}
-
-func (m *mockPromQLService) EnhanceQueries(ctx context.Context, metricInfo *promql.MetricInfo, suggestions []promql.QuerySuggestion) []promql.QuerySuggestion {
-	if m.enhanceQueriesFunc != nil {
-		return m.enhanceQueriesFunc(ctx, metricInfo, suggestions)
-	}
-	return suggestions
-}
-
-func (m *mockPromQLService) ValidateQuery(ctx context.Context, prometheusURL, query string) error {
-	if m.validateQueryFunc != nil {
-		return m.validateQueryFunc(ctx, prometheusURL, query)
-	}
-	return nil
-}
-
-func (m *mockPromQLService) GetBestQuery(suggestions []promql.QuerySuggestion) promql.QuerySuggestion {
-	if m.getBestQueryFunc != nil {
-		return m.getBestQueryFunc(suggestions)
-	}
-	if len(suggestions) > 0 {
-		return suggestions[0]
-	}
-	return promql.QuerySuggestion{
-		Query:             "up",
-		Description:       "Default query",
-		VisualizationType: "timeseries",
-		YAxisLabel:        "value",
-	}
-}
-
 func TestNewCreateDashboardSkill(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	mockGrafana := &mockGrafanaService{}
-	mockPromQL := &mockPromQLService{}
 	config := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "http://grafana.test",
 		APIKey:        "test-key",
 	}
 
-	skill := NewCreateDashboardSkill(logger, mockGrafana, mockPromQL, config)
+	skill := NewCreateDashboardSkill(logger, mockGrafana, config)
 
 	if skill == nil {
 		t.Error("Expected non-nil skill")
@@ -122,7 +57,6 @@ func TestNewCreateDashboardSkill(t *testing.T) {
 func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	mockGrafana := &mockGrafanaService{}
-	mockPromQL := &mockPromQLService{}
 	config := &config.GrafanaConfig{
 		DeployEnabled: false,
 	}
@@ -130,7 +64,6 @@ func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 	skill := &CreateDashboardSkill{
 		logger:  logger,
 		grafana: mockGrafana,
-		promql:  mockPromQL,
 		config:  config,
 	}
 
@@ -174,13 +107,11 @@ func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 func TestCreateDashboardHandler_MissingTitle(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	mockGrafana := &mockGrafanaService{}
-	mockPromQL := &mockPromQLService{}
 	config := &config.GrafanaConfig{}
 
 	skill := &CreateDashboardSkill{
 		logger:  logger,
 		grafana: mockGrafana,
-		promql:  mockPromQL,
 		config:  config,
 	}
 
@@ -203,10 +134,35 @@ func TestCreateDashboardHandler_MissingTitle(t *testing.T) {
 	}
 }
 
+func TestCreateDashboardHandler_MissingPanels(t *testing.T) {
+	logger, _ := zap.NewDevelopment()
+	mockGrafana := &mockGrafanaService{}
+	config := &config.GrafanaConfig{}
+
+	skill := &CreateDashboardSkill{
+		logger:  logger,
+		grafana: mockGrafana,
+		config:  config,
+	}
+
+	args := map[string]any{
+		"dashboard_title": "Test Dashboard",
+	}
+
+	_, err := skill.CreateDashboardHandler(context.Background(), args)
+	if err == nil {
+		t.Error("Expected error for missing panels")
+	}
+
+	expectedError := "panels are required"
+	if err.Error() != expectedError {
+		t.Errorf("Expected error '%s', got '%s'", expectedError, err.Error())
+	}
+}
+
 func TestCreateDashboardHandler_DeploymentDisabled(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	mockGrafana := &mockGrafanaService{}
-	mockPromQL := &mockPromQLService{}
 	config := &config.GrafanaConfig{
 		DeployEnabled: false,
 	}
@@ -214,7 +170,6 @@ func TestCreateDashboardHandler_DeploymentDisabled(t *testing.T) {
 	skill := &CreateDashboardSkill{
 		logger:  logger,
 		grafana: mockGrafana,
-		promql:  mockPromQL,
 		config:  config,
 	}
 
@@ -235,37 +190,6 @@ func TestCreateDashboardHandler_DeploymentDisabled(t *testing.T) {
 	}
 
 	expectedError := "grafana deployment is disabled - set GRAFANA_DEPLOY_ENABLED=true to enable dashboard deployments"
-	if err.Error() != expectedError {
-		t.Errorf("Expected error '%s', got '%s'", expectedError, err.Error())
-	}
-}
-
-func TestCreateDashboardHandler_MetricNames(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
-	mockGrafana := &mockGrafanaService{}
-	mockPromQL := &mockPromQLService{}
-	config := &config.GrafanaConfig{
-		DeployEnabled: false,
-	}
-
-	skill := &CreateDashboardSkill{
-		logger:  logger,
-		grafana: mockGrafana,
-		promql:  mockPromQL,
-		config:  config,
-	}
-
-	args := map[string]any{
-		"dashboard_title": "Metrics Dashboard",
-		"metric_names":    []any{"up", "prometheus_notifications_total"},
-	}
-
-	_, err := skill.CreateDashboardHandler(context.Background(), args)
-	if err == nil {
-		t.Error("Expected error when metric_names provided without prometheus_url")
-	}
-
-	expectedError := "prometheus_url is required when using metric_names"
 	if err.Error() != expectedError {
 		t.Errorf("Expected error '%s', got '%s'", expectedError, err.Error())
 	}
@@ -462,52 +386,3 @@ func TestGetStringOrDefault(t *testing.T) {
 	}
 }
 
-func TestMapVisualizationType(t *testing.T) {
-	tests := []struct {
-		vizType  string
-		expected string
-	}{
-		{"timeseries", "timeseries"},
-		{"stat", "stat"},
-		{"gauge", "gauge"},
-		{"table", "table"},
-		{"unknown", "timeseries"},
-		{"", "timeseries"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.vizType, func(t *testing.T) {
-			result := mapVisualizationType(tt.vizType)
-			if result != tt.expected {
-				t.Errorf("mapVisualizationType(%s) = %s, want %s", tt.vizType, result, tt.expected)
-			}
-		})
-	}
-}
-
-func TestInferUnit(t *testing.T) {
-	tests := []struct {
-		metricName string
-		yAxisLabel string
-		expected   string
-	}{
-		{"http_duration_seconds", "duration", "s"},
-		{"request_latency", "time", "s"},
-		{"cpu_usage", "percent", "percent"},
-		{"memory_bytes", "bytes", "bytes"},
-		{"disk_size_bytes", "size", "bytes"},
-		{"http_requests_rate", "per second", "reqps"},
-		{"api_calls", "requests/sec", "reqps"},
-		{"cpu_percent", "cpu", "percent"},
-		{"unknown_metric", "value", "short"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.metricName+"_"+tt.yAxisLabel, func(t *testing.T) {
-			result := inferUnit(tt.metricName, tt.yAxisLabel)
-			if result != tt.expected {
-				t.Errorf("inferUnit(%s, %s) = %s, want %s", tt.metricName, tt.yAxisLabel, result, tt.expected)
-			}
-		})
-	}
-}

@@ -58,8 +58,18 @@ func main() {
 	// Create toolbox with default tools (like input_required, create_artifact etc)
 	toolBox := server.NewDefaultToolBox(&cfg.A2A.AgentConfig.ToolBoxConfig)
 
+	// Register generate_promql_queries skill
+	generatePromqlQueriesSkill := skills.NewGeneratePromqlQueriesSkill(l, promqlSvc)
+	toolBox.AddTool(generatePromqlQueriesSkill)
+	l.Info("registered skill: generate_promql_queries (Generates PromQL query suggestions for given metric names by querying Prometheus metadata)")
+
+	// Register validate_promql_query skill
+	validatePromqlQuerySkill := skills.NewValidatePromqlQuerySkill(l, promqlSvc)
+	toolBox.AddTool(validatePromqlQuerySkill)
+	l.Info("registered skill: validate_promql_query (Validates a PromQL query against a Prometheus server)")
+
 	// Register create_dashboard skill
-	createDashboardSkill := skills.NewCreateDashboardSkill(l, grafanaSvc, promqlSvc, &cfg.Grafana)
+	createDashboardSkill := skills.NewCreateDashboardSkill(l, grafanaSvc, &cfg.Grafana)
 	toolBox.AddTool(createDashboardSkill)
 	l.Info("registered skill: create_dashboard (Creates a Grafana dashboard with specified panels, queries, and configurations)")
 

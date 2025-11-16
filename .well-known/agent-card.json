@@ -14,11 +14,25 @@
 	},
 	"skills": [
 		{
+			"id": "generate_promql_queries",
+			"name": "generate_promql_queries",
+			"description": "Generates PromQL query suggestions for given metric names by querying Prometheus metadata",
+			"tags": ["promql","prometheus","query","metrics"],
+			"schema": {"properties":{"metric_names":{"description":"Array of metric names to generate queries for","items":{"type":"string"},"type":"array"},"prometheus_url":{"description":"Prometheus server URL for querying metric metadata","type":"string"}},"required":["prometheus_url","metric_names"],"type":"object"}
+		},
+		{
+			"id": "validate_promql_query",
+			"name": "validate_promql_query",
+			"description": "Validates a PromQL query against a Prometheus server",
+			"tags": ["promql","prometheus","validation"],
+			"schema": {"properties":{"prometheus_url":{"description":"Prometheus server URL to validate against","type":"string"},"query":{"description":"PromQL query to validate","type":"string"}},"required":["prometheus_url","query"],"type":"object"}
+		},
+		{
 			"id": "create_dashboard",
 			"name": "create_dashboard",
 			"description": "Creates a Grafana dashboard with specified panels, queries, and configurations",
 			"tags": ["grafana","dashboard","visualization"],
-			"schema": {"properties":{"dashboard_title":{"description":"The title of the Grafana dashboard","type":"string"},"deploy":{"description":"Whether to deploy the dashboard to Grafana (requires grafana_url and GRAFANA_DEPLOY_ENABLED=true)","type":"boolean"},"description":{"description":"Description of what the dashboard monitors or displays","type":"string"},"grafana_url":{"description":"Grafana server URL (overrides default configuration if provided)","type":"string"},"metric_names":{"description":"Array of metric names to create panels for with auto-generated PromQL queries","items":{"type":"string"},"type":"array"},"panels":{"description":"Array of panel configurations (title, type, queries, etc.)","items":{"type":"object"},"type":"array"},"prometheus_url":{"description":"Prometheus server URL for querying metric metadata and generating intelligent queries","type":"string"},"refresh_interval":{"description":"Auto-refresh interval (e.g., \"5s\", \"1m\", \"5m\")","type":"string"},"tags":{"description":"Tags to categorize the dashboard","items":{"type":"string"},"type":"array"},"time_range":{"description":"Default time range for the dashboard (from, to)","properties":{"from":{"type":"string"},"to":{"type":"string"}},"type":"object"},"variables":{"description":"Dashboard template variables for dynamic queries","items":{"type":"object"},"type":"array"}},"required":["dashboard_title"],"type":"object"}
+			"schema": {"properties":{"dashboard_title":{"description":"The title of the Grafana dashboard","type":"string"},"deploy":{"description":"Whether to deploy the dashboard to Grafana (requires grafana_url and GRAFANA_DEPLOY_ENABLED=true)","type":"boolean"},"description":{"description":"Description of what the dashboard monitors or displays","type":"string"},"grafana_url":{"description":"Grafana server URL (overrides default configuration if provided)","type":"string"},"panels":{"description":"Array of panel configurations (title, type, queries, etc.)","items":{"type":"object"},"type":"array"},"refresh_interval":{"description":"Auto-refresh interval (e.g., \"5s\", \"1m\", \"5m\")","type":"string"},"tags":{"description":"Tags to categorize the dashboard","items":{"type":"string"},"type":"array"},"time_range":{"description":"Default time range for the dashboard (from, to)","properties":{"from":{"type":"string"},"to":{"type":"string"}},"type":"object"},"variables":{"description":"Dashboard template variables for dynamic queries","items":{"type":"object"},"type":"array"}},"required":["dashboard_title","panels"],"type":"object"}
 		}
 	]
 }

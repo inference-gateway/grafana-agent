@@ -36,12 +36,64 @@ spec:
   artifacts:
     enabled: true
   skills:
+    - id: generate_promql_queries
+      name: generate_promql_queries
+      inject:
+        - logger
+        - promql
+      description: Generates PromQL query suggestions for given metric names by querying Prometheus metadata
+      tags:
+        - promql
+        - prometheus
+        - query
+        - metrics
+      schema:
+        type: object
+        properties:
+          prometheus_url:
+            type: string
+            description: Prometheus server URL for querying metric metadata
+          metric_names:
+            type: array
+            items:
+              type: string
+            description: Array of metric names to generate queries for
+        required:
+          - prometheus_url
+          - metric_names
+      output:
+        type: data
+        description: Returns array of query suggestions with descriptions and visualization types
+    - id: validate_promql_query
+      name: validate_promql_query
+      inject:
+        - logger
+        - promql
+      description: Validates a PromQL query against a Prometheus server
+      tags:
+        - promql
+        - prometheus
+        - validation
+      schema:
+        type: object
+        properties:
+          prometheus_url:
+            type: string
+            description: Prometheus server URL to validate against
+          query:
+            type: string
+            description: PromQL query to validate
+        required:
+          - prometheus_url
+          - query
+      output:
+        type: data
+        description: Returns validation result with error details if invalid
     - id: create_dashboard
       name: create_dashboard
       inject:
         - logger
         - grafana
-        - promql
         - config.grafana
       description: Creates a Grafana dashboard with specified panels, queries, and configurations
       tags:
@@ -60,14 +112,6 @@ spec:
           grafana_url:
             type: string
             description: Grafana server URL (overrides default configuration if provided)
-          prometheus_url:
-            type: string
-            description: Prometheus server URL for querying metric metadata and generating intelligent queries
-          metric_names:
-            type: array
-            items:
-              type: string
-            description: Array of metric names to create panels for with auto-generated PromQL queries
           deploy:
             type: boolean
             description: Whether to deploy the dashboard to Grafana (requires grafana_url and GRAFANA_DEPLOY_ENABLED=true)
@@ -99,6 +143,7 @@ spec:
               type: object
         required:
           - dashboard_title
+          - panels
       output:
         type: artifact
         description: Returns the dashboard JSON configuration as an artifact

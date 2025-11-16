@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 
 	server "github.com/inference-gateway/adk/server"
 	config "github.com/inference-gateway/grafana-agent/config"
 	grafana "github.com/inference-gateway/grafana-agent/internal/grafana"
-	promql "github.com/inference-gateway/grafana-agent/internal/promql"
 	zap "go.uber.org/zap"
 )
 
@@ -18,16 +16,14 @@ import (
 type CreateDashboardSkill struct {
 	logger  *zap.Logger
 	grafana grafana.Grafana
-	promql  promql.PromQL
 	config  *config.GrafanaConfig
 }
 
 // NewCreateDashboardSkill creates a new create_dashboard skill
-func NewCreateDashboardSkill(logger *zap.Logger, grafana grafana.Grafana, promql promql.PromQL, grafanaConfig *config.GrafanaConfig) server.Tool {
+func NewCreateDashboardSkill(logger *zap.Logger, grafana grafana.Grafana, grafanaConfig *config.GrafanaConfig) server.Tool {
 	skill := &CreateDashboardSkill{
 		logger:  logger,
 		grafana: grafana,
-		promql:  promql,
 		config:  grafanaConfig,
 	}
 	return server.NewBasicTool(
@@ -47,15 +43,6 @@ func NewCreateDashboardSkill(logger *zap.Logger, grafana grafana.Grafana, promql
 				"grafana_url": map[string]any{
 					"description": "Grafana server URL (overrides default configuration if provided)",
 					"type":        "string",
-				},
-				"prometheus_url": map[string]any{
-					"description": "Prometheus server URL for querying metric metadata and generating intelligent queries",
-					"type":        "string",
-				},
-				"metric_names": map[string]any{
-					"description": "Array of metric names to create panels for with auto-generated PromQL queries",
-					"items":       map[string]any{"type": "string"},
-					"type":        "array",
 				},
 				"deploy": map[string]any{
 					"description": "Whether to deploy the dashboard to Grafana (requires grafana_url and GRAFANA_DEPLOY_ENABLED=true)",
@@ -86,7 +73,7 @@ func NewCreateDashboardSkill(logger *zap.Logger, grafana grafana.Grafana, promql
 					"type":        "array",
 				},
 			},
-			"required": []string{"dashboard_title"},
+			"required": []string{"dashboard_title", "panels"},
 		},
 		skill.CreateDashboardHandler,
 	)
@@ -97,6 +84,11 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 	dashboardTitle, ok := args["dashboard_title"].(string)
 	if !ok || dashboardTitle == "" {
 		return "", fmt.Errorf("dashboard_title is required and must be a string")
+	}
+
+	panels, ok := args["panels"].([]any)
+	if !ok || len(panels) == 0 {
+		return "", fmt.Errorf("panels are required")
 	}
 
 	deploy, deployRequested := args["deploy"].(bool)
@@ -116,24 +108,6 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 		if grafanaURL == "" {
 			return "", fmt.Errorf("deployment requested but no grafana_url provided")
 		}
-	}
-
-	if metricNames, ok := args["metric_names"].([]any); ok && len(metricNames) > 0 {
-		prometheusURL, hasPrometheusURL := args["prometheus_url"].(string)
-		if !hasPrometheusURL || prometheusURL == "" {
-			return "", fmt.Errorf("prometheus_url is required when using metric_names")
-		}
-
-		panels, err := s.generatePanelsFromMetrics(ctx, metricNames, prometheusURL)
-		if err != nil {
-			return "", fmt.Errorf("failed to generate panels from metrics: %w", err)
-		}
-		args["panels"] = panels
-	}
-
-	panels, ok := args["panels"].([]any)
-	if !ok || len(panels) == 0 {
-		return "", fmt.Errorf("panels are required - provide either 'panels' array or 'metric_names' with 'prometheus_url'")
 	}
 
 	var grafanaURL string
@@ -422,160 +396,3 @@ func getStringOrDefault(m map[string]any, key, defaultValue string) string {
 	return defaultValue
 }
 
-// generatePanelsFromMetrics creates panels from metric names using Prometheus metadata
-func (s *CreateDashboardSkill) generatePanelsFromMetrics(ctx context.Context, metricNames []any, prometheusURL string) ([]any, error) {
-	var panels []any
-
-	for _, metricNameRaw := range metricNames {
-		metricName, ok := metricNameRaw.(string)
-		if !ok {
-			s.logger.Warn("Skipping non-string metric name", zap.Any("metric", metricNameRaw))
-			continue
-		}
-
-		metricInfo, err := s.promql.GetMetricMetadata(ctx, prometheusURL, metricName)
-		if err != nil {
-			s.logger.Warn("Failed to get metadata for metric",
-				zap.String("metric", metricName),
-				zap.Error(err))
-
-			panel := map[string]any{
-				"title": metricName,
-				"type":  "timeseries",
-				"targets": []any{
-					map[string]any{
-						"refId": "A",
-						"expr":  metricName,
-					},
-				},
-			}
-			panels = append(panels, panel)
-			continue
-		}
-
-		suggestions := s.promql.GenerateQueries(metricInfo)
-		if len(suggestions) == 0 {
-			continue
-		}
-
-		enhancedSuggestions := s.promql.EnhanceQueries(ctx, metricInfo, suggestions)
-
-		bestQuery := s.promql.GetBestQuery(enhancedSuggestions)
-
-		if err := s.promql.ValidateQuery(ctx, prometheusURL, bestQuery.Query); err != nil {
-			s.logger.Warn("Generated query failed validation, using fallback",
-				zap.String("metric", metricName),
-				zap.String("query", bestQuery.Query),
-				zap.Error(err))
-			bestQuery.Query = metricName
-		}
-
-		panel := map[string]any{
-			"title": fmt.Sprintf("%s - %s", metricName, bestQuery.Description),
-			"type":  mapVisualizationType(bestQuery.VisualizationType),
-			"targets": []any{
-				map[string]any{
-					"refId": "A",
-					"expr":  bestQuery.Query,
-				},
-			},
-			"fieldConfig": map[string]any{
-				"defaults": map[string]any{
-					"unit": inferUnit(metricName, bestQuery.YAxisLabel),
-					"color": map[string]any{
-						"mode": "palette-classic",
-					},
-				},
-			},
-		}
-
-		if metricInfo.Help != "" && metricInfo.Help != "No metadata available" {
-			panel["description"] = metricInfo.Help
-		}
-
-		if len(enhancedSuggestions) > 1 {
-			targets := []any{
-				map[string]any{
-					"refId":        "A",
-					"expr":         bestQuery.Query,
-					"legendFormat": bestQuery.Description,
-				},
-			}
-
-			for j, suggestion := range enhancedSuggestions[1:] {
-				if j >= 3 {
-					break
-				}
-
-				if err := s.promql.ValidateQuery(ctx, prometheusURL, suggestion.Query); err != nil {
-					continue
-				}
-
-				refId := string(rune('B' + j))
-				targets = append(targets, map[string]any{
-					"refId":        refId,
-					"expr":         suggestion.Query,
-					"legendFormat": suggestion.Description,
-				})
-			}
-
-			panel["targets"] = targets
-		}
-
-		panels = append(panels, panel)
-	}
-
-	if len(panels) == 0 {
-		return nil, fmt.Errorf("no valid panels could be generated from the provided metric names")
-	}
-
-	s.logger.Info("Generated panels from metrics",
-		zap.Int("metric_count", len(metricNames)),
-		zap.Int("panel_count", len(panels)))
-
-	return panels, nil
-}
-
-// mapVisualizationType maps PromQL visualization types to Grafana panel types
-func mapVisualizationType(vizType string) string {
-	switch vizType {
-	case "timeseries":
-		return "timeseries"
-	case "stat":
-		return "stat"
-	case "gauge":
-		return "gauge"
-	case "table":
-		return "table"
-	default:
-		return "timeseries"
-	}
-}
-
-// inferUnit attempts to infer the appropriate unit from metric name and axis label
-func inferUnit(metricName, yAxisLabel string) string {
-	if strings.Contains(metricName, "duration") || strings.Contains(metricName, "latency") ||
-		strings.Contains(yAxisLabel, "duration") || strings.Contains(yAxisLabel, "time") {
-		return "s"
-	}
-
-	if strings.Contains(yAxisLabel, "per second") || strings.Contains(yAxisLabel, "requests/sec") {
-		return "reqps"
-	}
-
-	if strings.Contains(metricName, "ratio") || strings.Contains(metricName, "percent") ||
-		strings.Contains(yAxisLabel, "percent") {
-		return "percent"
-	}
-
-	if strings.Contains(metricName, "bytes") || strings.Contains(metricName, "size") ||
-		strings.Contains(metricName, "memory") {
-		return "bytes"
-	}
-
-	if strings.Contains(metricName, "cpu") {
-		return "percent"
-	}
-
-	return "short"
-}
