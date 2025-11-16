@@ -11,7 +11,7 @@ import (
 )
 
 func TestNewValidatePromqlQuerySkill(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 	fakePromQL := &promqlfakes.FakePromQL{}
 
 	skill := NewValidatePromqlQuerySkill(logger, fakePromQL)
@@ -22,7 +22,7 @@ func TestNewValidatePromqlQuerySkill(t *testing.T) {
 }
 
 func TestValidatePromqlQueryHandler(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 
 	tests := []struct {
 		name          string

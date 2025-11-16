@@ -12,7 +12,7 @@ import (
 )
 
 func TestNewGrafanaService(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 	cfg := &config.Config{}
 
 	service, err := NewGrafanaService(logger, cfg)
@@ -27,7 +27,7 @@ func TestNewGrafanaService(t *testing.T) {
 }
 
 func TestCreateDashboard(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 
 	tests := []struct {
 		name           string
@@ -152,7 +152,7 @@ func TestCreateDashboard(t *testing.T) {
 }
 
 func TestUpdateDashboard(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 
 	tests := []struct {
 		name             string
@@ -223,7 +223,7 @@ func TestUpdateDashboard(t *testing.T) {
 }
 
 func TestGetDashboard(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 
 	tests := []struct {
 		name           string
@@ -325,7 +325,7 @@ func TestGetDashboard(t *testing.T) {
 }
 
 func TestDeleteDashboard(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 
 	tests := []struct {
 		name           string

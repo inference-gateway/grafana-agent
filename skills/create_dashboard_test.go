@@ -39,7 +39,7 @@ func (m *mockGrafanaService) DeleteDashboard(ctx context.Context, uid, grafanaUR
 }
 
 func TestNewCreateDashboardSkill(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
 	config := &config.GrafanaConfig{
 		DeployEnabled: true,
@@ -55,7 +55,7 @@ func TestNewCreateDashboardSkill(t *testing.T) {
 }
 
 func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
 	config := &config.GrafanaConfig{
 		DeployEnabled: false,
@@ -105,7 +105,7 @@ func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 }
 
 func TestCreateDashboardHandler_MissingTitle(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
 	config := &config.GrafanaConfig{}
 
@@ -135,7 +135,7 @@ func TestCreateDashboardHandler_MissingTitle(t *testing.T) {
 }
 
 func TestCreateDashboardHandler_MissingPanels(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
 	config := &config.GrafanaConfig{}
 
@@ -161,7 +161,7 @@ func TestCreateDashboardHandler_MissingPanels(t *testing.T) {
 }
 
 func TestCreateDashboardHandler_DeploymentDisabled(t *testing.T) {
-	logger, _ := zap.NewDevelopment()
+	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
 	config := &config.GrafanaConfig{
 		DeployEnabled: false,
