@@ -2,12 +2,14 @@ version: '3'
 
 vars:
   CLUSTER_NAME: k3d-grafana-agent
-  REGISTRY_PORT: 5005
+  K3D_CLUSTER_NAME: grafana-agent
+  REGISTRY_PORT: 5000
   NAMESPACE: grafana-agent
 
 tasks:
   check-requirements:
     desc: Check if required tools are installed
+    run: once
     cmds:
       - command -v ctlptl >/dev/null 2>&1 || (echo "❌ ctlptl is not installed. Please install it first." && exit 1)
       - command -v k3d >/dev/null 2>&1 || (echo "❌ k3d is not installed. Please install it first." && exit 1)
@@ -17,6 +19,7 @@ tasks:
 
   create-cluster:
     desc: Create k3d cluster with ctlptl
+    run: once
     deps:
       - check-requirements
     cmds:
@@ -30,7 +33,7 @@ tasks:
     desc: Delete k3d cluster
     cmds:
       - echo "🗑️  Deleting k3d cluster..."
-      - ctlptl delete -f cluster.yaml
+      - ctlptl delete -f cluster.yaml --cascade=true
       - echo "✅ Cluster deleted successfully"
 
   install-operators:
@@ -57,19 +60,21 @@ tasks:
       - echo "✅ Inference Gateway Operator installed"
 
   build-images:
-    desc: Build and push images to local registry
+    desc: Build and import images to k3d cluster
     deps:
       - create-cluster
     cmds:
       - echo "🏗️  Building grafana-agent image..."
       - docker build -t localhost:{{.REGISTRY_PORT}}/grafana-agent:latest -f ../../Dockerfile ../..
-      - docker push localhost:{{.REGISTRY_PORT}}/grafana-agent:latest
-      - echo "✅ grafana-agent image built and pushed"
+      - echo "📦 Importing grafana-agent image to k3d cluster..."
+      - k3d image import localhost:{{.REGISTRY_PORT}}/grafana-agent:latest -c {{.K3D_CLUSTER_NAME}}
+      - echo "✅ grafana-agent image built and imported"
       - echo ""
       - echo "🏗️  Building demo-service image..."
       - docker build -t localhost:{{.REGISTRY_PORT}}/demo-otel-service:latest -f ../../examples/docker-compose/demo-service/Dockerfile ../../examples/docker-compose/demo-service
-      - docker push localhost:{{.REGISTRY_PORT}}/demo-otel-service:latest
-      - echo "✅ demo-service image built and pushed"
+      - echo "📦 Importing demo-service image to k3d cluster..."
+      - k3d image import localhost:{{.REGISTRY_PORT}}/demo-otel-service:latest -c {{.K3D_CLUSTER_NAME}}
+      - echo "✅ demo-service image built and imported"
 
   create-secrets:
     desc: Create secrets with API keys
@@ -207,7 +212,8 @@ tasks:
     cmds:
       - echo "🏗️  Rebuilding grafana-agent..."
       - docker build -t localhost:{{.REGISTRY_PORT}}/grafana-agent:latest -f ../../Dockerfile ../..
-      - docker push localhost:{{.REGISTRY_PORT}}/grafana-agent:latest
+      - echo "📦 Importing grafana-agent image to k3d cluster..."
+      - k3d image import localhost:{{.REGISTRY_PORT}}/grafana-agent:latest -c {{.K3D_CLUSTER_NAME}}
       - echo "♻️  Restarting grafana-agent deployment..."
       - kubectl rollout restart deployment/grafana-agent -n {{.NAMESPACE}}
       - kubectl rollout status deployment/grafana-agent -n {{.NAMESPACE}}

@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: grafana-agent
-          image: localhost:5005/grafana-agent:latest
-          imagePullPolicy: Always
+          image: localhost:5000/grafana-agent:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
               name: http

@@ -3,20 +3,12 @@ apiVersion: ctlptl.dev/v1alpha1
 kind: Cluster
 name: k3d-grafana-agent
 product: k3d
+registry: k3d-grafana-agent-registry
 k3d:
   v1alpha5Simple:
-    metadata:
-      name: k3d-grafana-agent
+    image: docker.io/rancher/k3s:v1.34.1-k3s1
     servers: 1
-    agents: 0
-    registries:
-      use:
-        - k3d-grafana-agent-registry:5005
-      config: |
-        mirrors:
-          "localhost:5005":
-            endpoint:
-              - http://k3d-grafana-agent-registry:5000
+    agents: 2
     ports:
       # Grafana UI
       - port: 3000:30000

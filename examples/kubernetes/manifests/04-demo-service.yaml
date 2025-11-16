@@ -18,8 +18,8 @@ spec:
     spec:
       containers:
         - name: demo-service
-          image: localhost:5005/demo-otel-service:latest
-          imagePullPolicy: Always
+          image: localhost:5000/demo-otel-service:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
               name: http
