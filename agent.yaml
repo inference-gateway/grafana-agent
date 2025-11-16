@@ -9,6 +9,18 @@ spec:
     streaming: true
     pushNotifications: false
     stateTransitionHistory: false
+  config:
+    grafana:
+      deployEnabled: false
+      url: ""
+      apiKey: ""
+      orgID: ""
+  services:
+    grafana:
+      type: service
+      interface: Grafana
+      factory: NewGrafanaService
+      description: Grafana service for accessing Grafana API
   agent:
     provider: ""
     model: ""
@@ -21,6 +33,10 @@ spec:
   skills:
     - id: create_dashboard
       name: create_dashboard
+      inject:
+        - logger
+        - grafana
+        - config.grafana
       description: Creates a Grafana dashboard with specified panels, queries, and configurations
       tags:
         - grafana

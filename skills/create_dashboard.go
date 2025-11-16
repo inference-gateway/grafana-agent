@@ -7,18 +7,24 @@ import (
 	"log"
 
 	server "github.com/inference-gateway/adk/server"
-	"github.com/inference-gateway/grafana-agent/config"
+	config "github.com/inference-gateway/grafana-agent/config"
+	grafana "github.com/inference-gateway/grafana-agent/internal/grafana"
+	zap "go.uber.org/zap"
 )
 
 // CreateDashboardSkill struct holds the skill with services
 type CreateDashboardSkill struct {
-	config *config.GrafanaConfig
+	logger  *zap.Logger
+	grafana grafana.Grafana
+	config  *config.GrafanaConfig
 }
 
 // NewCreateDashboardSkill creates a new create_dashboard skill
-func NewCreateDashboardSkill(grafanaConfig *config.GrafanaConfig) server.Tool {
+func NewCreateDashboardSkill(logger *zap.Logger, grafana grafana.Grafana, grafanaConfig *config.GrafanaConfig) server.Tool {
 	skill := &CreateDashboardSkill{
-		config: grafanaConfig,
+		logger:  logger,
+		grafana: grafana,
+		config:  grafanaConfig,
 	}
 	return server.NewBasicTool(
 		"create_dashboard",
