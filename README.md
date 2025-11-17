@@ -45,6 +45,78 @@ docker run -p 8080:8080 grafana-agent
 | `generate_promql_queries` | Generates PromQL query suggestions for given metric names by querying Prometheus metadata | metric_names, prometheus_url |
 | `validate_promql_query` | Validates a PromQL query against a Prometheus server | prometheus_url, query |
 | `create_dashboard` | Creates a Grafana dashboard with specified panels, queries, and configurations | dashboard_title, deploy, description, grafana_url, panels, refresh_interval, tags, time_range, variables |
+| `deploy_dashboard` | Deploys a dashboard JSON to Grafana (Cloud or self-hosted) | dashboard_json, folder_uid, grafana_url, message, overwrite |
+
+### Skill Usage Examples
+
+#### deploy_dashboard
+
+Deploy a dashboard JSON to Grafana. This skill requires `GRAFANA_DEPLOY_ENABLED=true` to prevent accidental deployments.
+
+**Example 1: Deploy with user-provided URL**
+```bash
+# Set required configuration
+export GRAFANA_DEPLOY_ENABLED=true
+export GRAFANA_API_KEY=your_api_key
+
+# Submit task via A2A Debugger
+docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest \
+  --server-url http://localhost:8080 tasks submit \
+  "Deploy this dashboard to https://my-org.grafana.net: {\"title\": \"My Dashboard\", \"panels\": [...]}"
+```
+
+**Example 2: Deploy with config default**
+```bash
+# Set configuration defaults
+export GRAFANA_DEPLOY_ENABLED=true
+export GRAFANA_URL=https://my-org.grafana.net
+export GRAFANA_API_KEY=your_api_key
+
+# Submit task (URL will use config default)
+docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest \
+  --server-url http://localhost:8080 tasks submit \
+  "Deploy this dashboard: {\"title\": \"My Dashboard\", \"panels\": [...]}"
+```
+
+**Example 3: Deploy to specific folder**
+```bash
+export GRAFANA_DEPLOY_ENABLED=true
+export GRAFANA_URL=https://my-org.grafana.net
+export GRAFANA_API_KEY=your_api_key
+
+# Deploy to specific folder with custom message
+docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest \
+  --server-url http://localhost:8080 tasks submit \
+  "Deploy this dashboard to folder 'monitoring-prod' with message 'Updated CPU metrics': {\"title\": \"CPU Dashboard\", \"panels\": [...]}"
+```
+
+**Safety Configuration:**
+- `GRAFANA_DEPLOY_ENABLED`: Must be set to `true` to enable deployments (default: `false`)
+- `GRAFANA_API_KEY`: Required for authentication with Grafana API
+- `GRAFANA_URL`: Optional default URL (can be overridden in user prompt)
+
+**Parameters:**
+- `dashboard_json` (required): Complete dashboard JSON object to deploy
+- `grafana_url` (optional): Grafana server URL (overrides config default)
+- `folder_uid` (optional): Folder UID for dashboard placement
+- `overwrite` (optional): Overwrite existing dashboard (default: `true`)
+- `message` (optional): Deployment commit message
+
+**Returns:**
+```json
+{
+  "status": "deployed",
+  "grafana_url": "https://my-org.grafana.net",
+  "dashboard": {
+    "id": 123,
+    "uid": "abc123xyz",
+    "url": "/d/abc123xyz/my-dashboard",
+    "version": 1,
+    "slug": "my-dashboard"
+  },
+  "message": "Dashboard deployed via grafana-agent"
+}
+```
 
 ## Configuration
 
