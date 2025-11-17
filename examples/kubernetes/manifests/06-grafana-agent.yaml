@@ -110,6 +110,13 @@ spec:
               value: "http://prometheus.grafana-agent.svc.cluster.local:9090"
             - name: GRAFANA_URL
               value: "http://grafana-service:3000"
+            - name: GRAFANA_DEPLOY_ENABLED
+              value: "true"
+            - name: GRAFANA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-access
+                  key: grafana-api-key
             - name: GRAFANA_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -170,3 +177,4 @@ type: Opaque
 stringData:
   grafana-username: "admin"
   grafana-password: "admin"
+  grafana-api-key: "YOUR_GRAFANA_API_KEY_HERE"
