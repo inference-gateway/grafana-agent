@@ -60,19 +60,16 @@ func NewDeployDashboardSkill(logger *zap.Logger, grafanaSvc grafana.Grafana, gra
 
 // DeployDashboardHandler handles the deploy_dashboard skill execution
 func (s *DeployDashboardSkill) DeployDashboardHandler(ctx context.Context, args map[string]any) (string, error) {
-	// Check if deployment is enabled
 	if s.grafanaConfig != nil && !s.grafanaConfig.DeployEnabled {
 		s.logger.Warn("Grafana deployment attempted but GRAFANA_DEPLOY_ENABLED=false")
 		return "", fmt.Errorf("grafana deployment is disabled - set GRAFANA_DEPLOY_ENABLED=true to enable dashboard deployments")
 	}
 
-	// Extract dashboard_json
 	dashboardJSON, ok := args["dashboard_json"].(map[string]any)
 	if !ok || len(dashboardJSON) == 0 {
 		return "", fmt.Errorf("dashboard_json is required and must be a valid object")
 	}
 
-	// Determine Grafana URL
 	var grafanaURL string
 	if urlParam, ok := args["grafana_url"].(string); ok && urlParam != "" {
 		grafanaURL = urlParam
@@ -84,7 +81,6 @@ func (s *DeployDashboardSkill) DeployDashboardHandler(ctx context.Context, args 
 		return "", fmt.Errorf("grafana_url must be provided either as a parameter or in configuration (GRAFANA_URL)")
 	}
 
-	// Get API key from config
 	var apiKey string
 	if s.grafanaConfig != nil && s.grafanaConfig.APIKey != "" {
 		apiKey = s.grafanaConfig.APIKey
@@ -94,13 +90,12 @@ func (s *DeployDashboardSkill) DeployDashboardHandler(ctx context.Context, args 
 		return "", fmt.Errorf("grafana API key is required - set GRAFANA_API_KEY")
 	}
 
-	// Extract optional parameters
 	folderUID := ""
 	if uid, ok := args["folder_uid"].(string); ok {
 		folderUID = uid
 	}
 
-	overwrite := true // default to true
+	overwrite := true
 	if ow, ok := args["overwrite"].(bool); ok {
 		overwrite = ow
 	}
@@ -110,7 +105,6 @@ func (s *DeployDashboardSkill) DeployDashboardHandler(ctx context.Context, args 
 		message = msg
 	}
 
-	// Create Dashboard object
 	dashboard := grafana.Dashboard{
 		Dashboard: dashboardJSON,
 		FolderUID: folderUID,
@@ -123,7 +117,6 @@ func (s *DeployDashboardSkill) DeployDashboardHandler(ctx context.Context, args 
 		zap.String("folder_uid", folderUID),
 		zap.Bool("overwrite", overwrite))
 
-	// Deploy dashboard
 	resp, err := s.grafanaSvc.CreateDashboard(ctx, dashboard, grafanaURL, apiKey)
 	if err != nil {
 		return "", fmt.Errorf("failed to deploy dashboard to Grafana: %w", err)
@@ -135,7 +128,6 @@ func (s *DeployDashboardSkill) DeployDashboardHandler(ctx context.Context, args 
 		zap.Int("dashboard_id", resp.ID),
 		zap.String("dashboard_url", resp.URL))
 
-	// Return deployment status
 	result := map[string]any{
 		"status":      "deployed",
 		"grafana_url": grafanaURL,
