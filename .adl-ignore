@@ -12,6 +12,7 @@
 skills/create_dashboard.go
 skills/generate_promql_queries.go
 skills/validate_promql_query.go
+skills/discover_metrics.go
 internal/grafana/grafana.go
 internal/promql/promql.go
 

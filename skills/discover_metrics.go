@@ -66,19 +66,16 @@ type FilterInfo struct {
 func (s *DiscoverMetricsSkill) DiscoverMetricsHandler(ctx context.Context, args map[string]any) (string, error) {
 	s.logger.Info("discovering metrics")
 
-	// Extract prometheus_url (required)
 	prometheusURL, ok := args["prometheus_url"].(string)
 	if !ok || prometheusURL == "" {
 		return "", fmt.Errorf("prometheus_url is required and must be a string")
 	}
 
-	// Extract optional name_pattern
 	namePattern := ""
 	if pattern, ok := args["name_pattern"].(string); ok {
 		namePattern = pattern
 	}
 
-	// Extract optional metric_type
 	metricTypeStr := ""
 	var metricType promql.MetricType
 	if mt, ok := args["metric_type"].(string); ok {
@@ -102,7 +99,6 @@ func (s *DiscoverMetricsSkill) DiscoverMetricsHandler(ctx context.Context, args 
 		zap.String("name_pattern", namePattern),
 		zap.String("metric_type", metricTypeStr))
 
-	// Discover metrics
 	metrics, err := s.promql.DiscoverMetrics(ctx, prometheusURL, namePattern, metricType)
 	if err != nil {
 		s.logger.Error("failed to discover metrics",
@@ -111,14 +107,12 @@ func (s *DiscoverMetricsSkill) DiscoverMetricsHandler(ctx context.Context, args 
 		return "", fmt.Errorf("failed to discover metrics: %w", err)
 	}
 
-	// Build response
 	response := DiscoverMetricsResponse{
 		PrometheusURL: prometheusURL,
 		TotalMetrics:  len(metrics),
 		Metrics:       metrics,
 	}
 
-	// Add filter information if filters were applied
 	if namePattern != "" || metricTypeStr != "" {
 		response.Filters = FilterInfo{
 			NamePattern: namePattern,
@@ -130,7 +124,6 @@ func (s *DiscoverMetricsSkill) DiscoverMetricsHandler(ctx context.Context, args 
 		zap.String("prometheus_url", prometheusURL),
 		zap.Int("total", len(metrics)))
 
-	// Marshal to JSON
 	jsonData, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal response: %w", err)
