@@ -100,6 +100,8 @@ spec:
               value: "24h"
             - name: A2A_ARTIFACTS_RETENTION_CLEANUP_INTERVAL
               value: "24h"
+            - name: PROMETHEUS_URL
+              value: "http://prometheus.grafana-agent.svc.cluster.local:9090"
             - name: GRAFANA_URL
               value: "http://grafana-service:3000"
             - name: GRAFANA_USERNAME

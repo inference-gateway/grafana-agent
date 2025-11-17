@@ -171,6 +171,7 @@ kubectl run -n grafana-agent --rm -it infer-cli \
   --env="INFER_GATEWAY_URL=http://inference-gateway.inference-gateway.svc.cluster.local:8080" \
   --env="INFER_A2A_ENABLED=true" \
   --env="INFER_A2A_AGENTS=http://grafana-agent.grafana-agent.svc.cluster.local:8080" \
+  --env="INFER_AGENT_MODEL=deepseek/deepseek-chat" \
   -- chat
 ```
 
