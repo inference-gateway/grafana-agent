@@ -7,27 +7,6 @@ metadata:
     inference-gateway.com/managed: "true"
 
 ---
-# API keys secret for the Inference Gateway
-# You should update this with your actual API keys before deploying.
-# Or use: kubectl create secret generic api-keys \
-#   --from-literal=deepseek-api-key=YOUR_KEY \
-#   --from-literal=google-api-key=YOUR_KEY \
-#   --from-literal=anthropic-api-key=YOUR_KEY \
-#   --from-literal=openai-api-key=YOUR_KEY \
-#   --namespace=inference-gateway
-apiVersion: v1
-kind: Secret
-metadata:
-  name: api-keys
-  namespace: inference-gateway
-type: Opaque
-stringData:
-  deepseek-api-key: ""
-  google-api-key: ""
-  anthropic-api-key: ""
-  openai-api-key: ""
-
----
 apiVersion: core.inference-gateway.com/v1alpha1
 kind: Gateway
 metadata:

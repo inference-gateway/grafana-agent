@@ -123,11 +123,11 @@ tasks:
       - kubectl apply -f manifests/02-dashboard.yaml
       - kubectl apply -f manifests/03-prometheus.yaml
       - kubectl apply -f manifests/04-demo-service.yaml
-      - kubectl apply -f manifests/06-inference-gateway.yaml
-      - kubectl apply -f manifests/07-grafana-agent.yaml
+      - kubectl apply -f manifests/05-inference-gateway.yaml
+      - kubectl apply -f manifests/06-grafana-agent.yaml
       - echo "⏳ Waiting a moment before deploying ServiceMonitors..."
       - sleep 5
-      - kubectl apply -f manifests/08-servicemonitors.yaml
+      - kubectl apply -f manifests/07-servicemonitors.yaml
       - echo "✅ All manifests deployed"
 
   wait-ready:
@@ -238,9 +238,9 @@ tasks:
     desc: Clean up resources without deleting the cluster
     cmds:
       - echo "🧹 Cleaning up resources..."
-      - kubectl delete -f manifests/08-servicemonitors.yaml --ignore-not-found=true
-      - kubectl delete -f manifests/07-grafana-agent.yaml --ignore-not-found=true
-      - kubectl delete -f manifests/06-inference-gateway.yaml --ignore-not-found=true
+      - kubectl delete -f manifests/07-servicemonitors.yaml --ignore-not-found=true
+      - kubectl delete -f manifests/06-grafana-agent.yaml --ignore-not-found=true
+      - kubectl delete -f manifests/05-inference-gateway.yaml --ignore-not-found=true
       - kubectl delete -f manifests/04-demo-service.yaml --ignore-not-found=true
       - kubectl delete -f manifests/03-prometheus.yaml --ignore-not-found=true
       - kubectl delete -f manifests/02-dashboard.yaml --ignore-not-found=true

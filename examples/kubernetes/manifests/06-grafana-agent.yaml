@@ -107,12 +107,12 @@ spec:
             - name: GRAFANA_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: api-keys
+                  name: grafana-access
                   key: grafana-username
             - name: GRAFANA_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: api-keys
+                  name: grafana-access
                   key: grafana-password
           volumeMounts:
             - name: artifacts
@@ -150,3 +150,13 @@ spec:
       port: 8081
       targetPort: 8081
       protocol: TCP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-access
+  namespace: grafana-agent
+type: Opaque
+stringData:
+  grafana-username: "admin"
+  grafana-password: "admin"
