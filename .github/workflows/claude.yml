@@ -60,7 +60,7 @@ jobs:
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@main
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           additional_permissions: |
@@ -68,12 +68,7 @@ jobs:
           use_commit_signing: true
           base_branch: main
           branch_prefix: "claude/"
-          allowed_tools: |
-            Bash(task:*)
-            Bash(go:*)
-            Bash(gh:*)
-            Bash(git:*)
-          custom_instructions: |
+          prompt: |
             IMPORTANT: You must NEVER push directly to the main branch. Always:
             1. Create a new feature branch (claude/feature-name)
             2. Make your changes on the feature branch
@@ -89,13 +84,6 @@ jobs:
             Examples: "feat(grafana): Add retry mechanism for agent connections", "fix(auth): Resolve token validation issue"
 
             Follow the development workflow specified in the coding instructions.
-          mcp_config: |
-            {
-              "mcpServers": {
-                "context7": {
-                  "command": "npx",
-                  "args": ["-y", "@upstash/context7-mcp@latest"],
-                  "env": {}
-                }
-              }
-            }
+          claude_args: |
+            --allowedTools "Bash(task:*),Bash(go:*),Bash(gh:*),Bash(git:*)"
+            --mcp-config '{"mcpServers":{"context7":{"command":"npx","args":["-y","@upstash/context7-mcp@latest"]}}}'
