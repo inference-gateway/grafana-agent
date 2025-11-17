@@ -40,6 +40,13 @@
 			"description": "Creates a Grafana dashboard with specified panels, queries, and configurations",
 			"tags": ["grafana","dashboard","visualization"],
 			"schema": {"properties":{"dashboard_title":{"description":"The title of the Grafana dashboard","type":"string"},"deploy":{"description":"Whether to deploy the dashboard to Grafana (requires grafana_url and GRAFANA_DEPLOY_ENABLED=true)","type":"boolean"},"description":{"description":"Description of what the dashboard monitors or displays","type":"string"},"grafana_url":{"description":"Grafana server URL (overrides default configuration if provided)","type":"string"},"panels":{"description":"Array of panel configurations (title, type, queries, etc.)","items":{"type":"object"},"type":"array"},"refresh_interval":{"description":"Auto-refresh interval (e.g., \"5s\", \"1m\", \"5m\")","type":"string"},"tags":{"description":"Tags to categorize the dashboard","items":{"type":"string"},"type":"array"},"time_range":{"description":"Default time range for the dashboard (from, to)","properties":{"from":{"type":"string"},"to":{"type":"string"}},"type":"object"},"variables":{"description":"Dashboard template variables for dynamic queries","items":{"type":"object"},"type":"array"}},"required":["dashboard_title","panels"],"type":"object"}
+		},
+		{
+			"id": "deploy_dashboard",
+			"name": "deploy_dashboard",
+			"description": "Deploys a dashboard JSON to Grafana (Cloud or self-hosted)",
+			"tags": ["grafana","dashboard","deployment"],
+			"schema": {"properties":{"dashboard_json":{"description":"The complete dashboard JSON object to deploy","type":"object"},"folder_uid":{"description":"Optional folder UID where the dashboard should be deployed","type":"string"},"grafana_url":{"description":"Grafana server URL (user provides in prompt or uses config default)","type":"string"},"message":{"description":"Optional commit message describing the dashboard changes","type":"string"},"overwrite":{"description":"Whether to overwrite an existing dashboard with the same UID (default true)","type":"boolean"}},"required":["dashboard_json"],"type":"object"}
 		}
 	]
 }

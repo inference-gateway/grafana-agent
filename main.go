@@ -78,6 +78,11 @@ func main() {
 	toolBox.AddTool(createDashboardSkill)
 	l.Info("registered skill: create_dashboard (Creates a Grafana dashboard with specified panels, queries, and configurations)")
 
+	// Register deploy_dashboard skill
+	deployDashboardSkill := skills.NewDeployDashboardSkill(l, grafanaSvc, &cfg.Grafana)
+	toolBox.AddTool(deployDashboardSkill)
+	l.Info("registered skill: deploy_dashboard (Deploys a dashboard JSON to Grafana (Cloud or self-hosted))")
+
 	llmClient, err := server.NewOpenAICompatibleLLMClient(&cfg.A2A.AgentConfig, l)
 	if err != nil {
 		l.Fatal("failed to create LLM client", zap.Error(err))
