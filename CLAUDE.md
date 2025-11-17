@@ -78,6 +78,7 @@ The following skills are currently defined:
 - **generate_promql_queries**: Generates PromQL query suggestions for given metric names by querying Prometheus metadata
 - **validate_promql_query**: Validates a PromQL query against a Prometheus server
 - **create_dashboard**: Creates a Grafana dashboard with specified panels, queries, and configurations
+- **deploy_dashboard**: Deploys a dashboard JSON to Grafana (Cloud or self-hosted)
 
 To modify skills:
 1. Update `agent.yaml` with skill definitions

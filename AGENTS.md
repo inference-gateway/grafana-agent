@@ -33,7 +33,7 @@ When using Grafana-related skills:
 
 ## Skills
 
-This agent provides 4 skills:
+This agent provides 5 skills:
 
 ### discover_metrics
 - **Description**: Discovers available metrics from a Prometheus endpoint with optional filtering
@@ -56,6 +56,12 @@ This agent provides 4 skills:
 ### create_dashboard
 - **Description**: Creates a Grafana dashboard with specified panels, queries, and configurations
 - **Tags**: grafana, dashboard, visualization
+- **Input Schema**: Defined in agent configuration
+- **Output Schema**: Defined in agent configuration
+
+### deploy_dashboard
+- **Description**: Deploys a dashboard JSON to Grafana (Cloud or self-hosted)
+- **Tags**: grafana, dashboard, deployment
 - **Input Schema**: Defined in agent configuration
 - **Output Schema**: Defined in agent configuration
 
@@ -137,6 +143,7 @@ docker run -p 8080:8080 grafana-agent
 │   └── generate_promql_queries.go # Generates PromQL query suggestions for given metric names by querying Prometheus metadata
 │   └── validate_promql_query.go  # Validates a PromQL query against a Prometheus server
 │   └── create_dashboard.go       # Creates a Grafana dashboard with specified panels, queries, and configurations
+│   └── deploy_dashboard.go       # Deploys a dashboard JSON to Grafana (Cloud or self-hosted)
 ├── .well-known/                  # Agent configuration
 │   └── agent-card.json           # Agent metadata
 ├── go.mod                        # Go module definition
