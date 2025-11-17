@@ -74,6 +74,7 @@ The agent uses OpenAI-compatible LLM client. Configure with:
 
 ### Skills Implementation
 The following skills are currently defined:
+- **discover_metrics**: Discovers available metrics from a Prometheus endpoint with optional filtering
 - **generate_promql_queries**: Generates PromQL query suggestions for given metric names by querying Prometheus metadata
 - **validate_promql_query**: Validates a PromQL query against a Prometheus server
 - **create_dashboard**: Creates a Grafana dashboard with specified panels, queries, and configurations

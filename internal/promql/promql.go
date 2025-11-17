@@ -14,6 +14,9 @@ import (
 //
 //counterfeiter:generate . PromQL
 type PromQL interface {
+	// DiscoverMetrics discovers all available metrics from Prometheus with optional filtering
+	DiscoverMetrics(ctx context.Context, prometheusURL, namePattern string, metricType MetricType) ([]MetricInfo, error)
+
 	// GetMetricMetadata fetches metadata for a specific metric from Prometheus
 	GetMetricMetadata(ctx context.Context, prometheusURL, metricName string) (*MetricInfo, error)
 
@@ -39,6 +42,17 @@ func NewPromQLService(logger *zap.Logger, cfg *config.Config) (PromQL, error) {
 	return &promqlImpl{
 		logger: logger,
 	}, nil
+}
+
+// DiscoverMetrics discovers all available metrics from Prometheus with optional filtering
+func (p *promqlImpl) DiscoverMetrics(ctx context.Context, prometheusURL, namePattern string, metricType MetricType) ([]MetricInfo, error) {
+	p.logger.Debug("discovering metrics",
+		zap.String("prometheus_url", prometheusURL),
+		zap.String("name_pattern", namePattern),
+		zap.String("metric_type", string(metricType)))
+
+	client := newPrometheusClient(prometheusURL)
+	return client.discoverMetrics(ctx, namePattern, metricType)
 }
 
 // GetMetricMetadata fetches metadata for a specific metric from Prometheus

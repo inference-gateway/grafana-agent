@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -51,6 +52,125 @@ func newPrometheusClient(baseURL string) *prometheusClient {
 			Timeout: 30 * time.Second,
 		},
 	}
+}
+
+// discoverMetrics discovers all available metrics from Prometheus with optional filtering
+func (c *prometheusClient) discoverMetrics(ctx context.Context, namePattern string, metricType MetricType) ([]MetricInfo, error) {
+	// Get all metric names
+	metricsURL := fmt.Sprintf("%s/api/v1/label/__name__/values", c.baseURL)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", metricsURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query Prometheus metrics: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("prometheus returned status %d", resp.StatusCode)
+	}
+
+	var metricsResp struct {
+		Status string   `json:"status"`
+		Data   []string `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&metricsResp); err != nil {
+		return nil, fmt.Errorf("failed to decode metrics response: %w", err)
+	}
+
+	if metricsResp.Status != "success" {
+		return nil, fmt.Errorf("prometheus API returned non-success status: %s", metricsResp.Status)
+	}
+
+	// Compile regex pattern if provided
+	var pattern *regexp.Regexp
+	if namePattern != "" {
+		pattern, err = regexp.Compile(namePattern)
+		if err != nil {
+			return nil, fmt.Errorf("invalid name pattern: %w", err)
+		}
+	}
+
+	// Fetch metadata for all metrics
+	metadataURL := fmt.Sprintf("%s/api/v1/metadata", c.baseURL)
+	req, err = http.NewRequestWithContext(ctx, "GET", metadataURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create metadata request: %w", err)
+	}
+
+	resp, err = c.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query Prometheus metadata: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("prometheus metadata returned status %d", resp.StatusCode)
+	}
+
+	var metadataResp struct {
+		Status string `json:"status"`
+		Data   map[string][]struct {
+			Type MetricType `json:"type"`
+			Help string     `json:"help"`
+		} `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&metadataResp); err != nil {
+		return nil, fmt.Errorf("failed to decode metadata response: %w", err)
+	}
+
+	if metadataResp.Status != "success" {
+		return nil, fmt.Errorf("prometheus metadata API returned non-success status: %s", metadataResp.Status)
+	}
+
+	// Filter and build result
+	var results []MetricInfo
+	for _, metricName := range metricsResp.Data {
+		// Apply name pattern filter
+		if pattern != nil && !pattern.MatchString(metricName) {
+			continue
+		}
+
+		// Get metadata for this metric
+		metadata, exists := metadataResp.Data[metricName]
+		var mType MetricType
+		var help string
+
+		if exists && len(metadata) > 0 {
+			mType = metadata[0].Type
+			help = metadata[0].Help
+		} else {
+			// Infer type if metadata not available
+			mType = inferMetricType(metricName)
+			help = "No metadata available"
+		}
+
+		// Apply metric type filter
+		if metricType != "" && metricType != MetricTypeUnknown && mType != metricType {
+			continue
+		}
+
+		// Get labels for this metric
+		labels, err := c.getMetricLabels(ctx, metricName)
+		if err != nil {
+			labels = []string{}
+		}
+
+		results = append(results, MetricInfo{
+			Name:   metricName,
+			Type:   mType,
+			Help:   help,
+			Labels: labels,
+		})
+	}
+
+	return results, nil
 }
 
 // getMetricMetadata fetches metadata for a specific metric from Prometheus

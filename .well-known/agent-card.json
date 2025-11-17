@@ -14,6 +14,13 @@
 	},
 	"skills": [
 		{
+			"id": "discover_metrics",
+			"name": "discover_metrics",
+			"description": "Discovers available metrics from a Prometheus endpoint with optional filtering",
+			"tags": ["promql","prometheus","metrics","discovery"],
+			"schema": {"properties":{"metric_type":{"description":"Optional metric type filter (counter, gauge, histogram, summary)","enum":["counter","gauge","histogram","summary"],"type":"string"},"name_pattern":{"description":"Optional regex pattern to filter metrics by name","type":"string"},"prometheus_url":{"description":"Prometheus server URL to discover metrics from","type":"string"}},"required":["prometheus_url"],"type":"object"}
+		},
+		{
 			"id": "generate_promql_queries",
 			"name": "generate_promql_queries",
 			"description": "Generates PromQL query suggestions for given metric names by querying Prometheus metadata",
