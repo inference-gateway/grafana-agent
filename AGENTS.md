@@ -21,6 +21,13 @@ This agent is built using the Agent Definition Language (ADL) and provides A2A c
 You provide best practices for data visualization, panel configuration, query optimization, alerting, and overall dashboard usability.
 Always offer practical examples and explain the reasoning behind your recommendations.
 
+When using Prometheus-related skills:
+- Use the PROMETHEUS_URL environment variable for prometheus_url parameters (default: http://prometheus.grafana-agent.svc.cluster.local:9090)
+- The Prometheus server is available at this internal Kubernetes service URL
+
+When using Grafana-related skills:
+- Use the GRAFANA_URL environment variable for grafana_url parameters if not explicitly provided by the user
+
 
 **Configuration:**
 

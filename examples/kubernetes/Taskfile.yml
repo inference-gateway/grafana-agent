@@ -77,30 +77,35 @@ tasks:
       - echo "✅ demo-service image built and imported"
 
   create-secrets:
-    desc: Create secrets with API keys
+    desc: Create secrets with API keys in inference-gateway namespace
     deps:
       - create-cluster
     cmds:
-      - echo "🔐 Creating API keys secret..."
+      - echo "🔐 Creating API keys secret in inference-gateway namespace..."
       - |
         if [ -f .env ]; then
           source .env
-          kubectl create namespace {{.NAMESPACE}} --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace inference-gateway --dry-run=client -o yaml | kubectl apply -f -
           kubectl create secret generic api-keys \
             --from-literal=deepseek-api-key="${DEEPSEEK_API_KEY:-}" \
             --from-literal=google-api-key="${GOOGLE_API_KEY:-}" \
             --from-literal=anthropic-api-key="${ANTHROPIC_API_KEY:-}" \
             --from-literal=openai-api-key="${OPENAI_API_KEY:-}" \
-            --from-literal=grafana-username="${GRAFANA_USERNAME:-admin}" \
-            --from-literal=grafana-password="${GRAFANA_PASSWORD:-admin}" \
-            --namespace={{.NAMESPACE}} \
+            --namespace=inference-gateway \
             --dry-run=client -o yaml | kubectl apply -f -
-          echo "✅ Secrets created successfully"
+          echo "✅ Secrets created in inference-gateway namespace"
         else
-          echo "⚠️  .env file not found. Applying manifests/07-secrets.yaml with empty values..."
-          kubectl apply -f manifests/07-secrets.yaml
+          echo "⚠️  .env file not found. Creating secret with empty values..."
+          kubectl create namespace inference-gateway --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create secret generic api-keys \
+            --from-literal=deepseek-api-key="" \
+            --from-literal=google-api-key="" \
+            --from-literal=anthropic-api-key="" \
+            --from-literal=openai-api-key="" \
+            --namespace=inference-gateway \
+            --dry-run=client -o yaml | kubectl apply -f -
           echo "⚠️  Please update the secret with your actual API keys:"
-          echo "   kubectl edit secret api-keys -n {{.NAMESPACE}}"
+          echo "   kubectl edit secret api-keys -n inference-gateway"
         fi
 
   deploy:
