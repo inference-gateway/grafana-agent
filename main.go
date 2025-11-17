@@ -58,6 +58,11 @@ func main() {
 	// Create toolbox with default tools (like input_required, create_artifact etc)
 	toolBox := server.NewDefaultToolBox(&cfg.A2A.AgentConfig.ToolBoxConfig)
 
+	// Register discover_metrics skill
+	discoverMetricsSkill := skills.NewDiscoverMetricsSkill(l, promqlSvc)
+	toolBox.AddTool(discoverMetricsSkill)
+	l.Info("registered skill: discover_metrics (Discovers available metrics from a Prometheus endpoint with optional filtering)")
+
 	// Register generate_promql_queries skill
 	generatePromqlQueriesSkill := skills.NewGeneratePromqlQueriesSkill(l, promqlSvc)
 	toolBox.AddTool(generatePromqlQueriesSkill)

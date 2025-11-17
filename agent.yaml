@@ -36,6 +36,39 @@ spec:
   artifacts:
     enabled: true
   skills:
+    - id: discover_metrics
+      name: discover_metrics
+      inject:
+        - logger
+        - promql
+      description: Discovers available metrics from a Prometheus endpoint with optional filtering
+      tags:
+        - promql
+        - prometheus
+        - metrics
+        - discovery
+      schema:
+        type: object
+        properties:
+          prometheus_url:
+            type: string
+            description: Prometheus server URL to discover metrics from
+          name_pattern:
+            type: string
+            description: Optional regex pattern to filter metrics by name
+          metric_type:
+            type: string
+            description: Optional metric type filter (counter, gauge, histogram, summary)
+            enum:
+              - counter
+              - gauge
+              - histogram
+              - summary
+        required:
+          - prometheus_url
+      output:
+        type: data
+        description: Returns structured JSON artifact with metric names, types, labels, and help text
     - id: generate_promql_queries
       name: generate_promql_queries
       inject:

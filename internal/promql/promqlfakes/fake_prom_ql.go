@@ -9,6 +9,22 @@ import (
 )
 
 type FakePromQL struct {
+	DiscoverMetricsStub        func(context.Context, string, string, promql.MetricType) ([]promql.MetricInfo, error)
+	discoverMetricsMutex       sync.RWMutex
+	discoverMetricsArgsForCall []struct {
+		arg1 context.Context
+		arg2 string
+		arg3 string
+		arg4 promql.MetricType
+	}
+	discoverMetricsReturns struct {
+		result1 []promql.MetricInfo
+		result2 error
+	}
+	discoverMetricsReturnsOnCall map[int]struct {
+		result1 []promql.MetricInfo
+		result2 error
+	}
 	GenerateQueriesStub        func(*promql.MetricInfo) []promql.QuerySuggestion
 	generateQueriesMutex       sync.RWMutex
 	generateQueriesArgsForCall []struct {
@@ -61,6 +77,73 @@ type FakePromQL struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakePromQL) DiscoverMetrics(arg1 context.Context, arg2 string, arg3 string, arg4 promql.MetricType) ([]promql.MetricInfo, error) {
+	fake.discoverMetricsMutex.Lock()
+	ret, specificReturn := fake.discoverMetricsReturnsOnCall[len(fake.discoverMetricsArgsForCall)]
+	fake.discoverMetricsArgsForCall = append(fake.discoverMetricsArgsForCall, struct {
+		arg1 context.Context
+		arg2 string
+		arg3 string
+		arg4 promql.MetricType
+	}{arg1, arg2, arg3, arg4})
+	stub := fake.DiscoverMetricsStub
+	fakeReturns := fake.discoverMetricsReturns
+	fake.recordInvocation("DiscoverMetrics", []interface{}{arg1, arg2, arg3, arg4})
+	fake.discoverMetricsMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2, arg3, arg4)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakePromQL) DiscoverMetricsCallCount() int {
+	fake.discoverMetricsMutex.RLock()
+	defer fake.discoverMetricsMutex.RUnlock()
+	return len(fake.discoverMetricsArgsForCall)
+}
+
+func (fake *FakePromQL) DiscoverMetricsCalls(stub func(context.Context, string, string, promql.MetricType) ([]promql.MetricInfo, error)) {
+	fake.discoverMetricsMutex.Lock()
+	defer fake.discoverMetricsMutex.Unlock()
+	fake.DiscoverMetricsStub = stub
+}
+
+func (fake *FakePromQL) DiscoverMetricsArgsForCall(i int) (context.Context, string, string, promql.MetricType) {
+	fake.discoverMetricsMutex.RLock()
+	defer fake.discoverMetricsMutex.RUnlock()
+	argsForCall := fake.discoverMetricsArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2, argsForCall.arg3, argsForCall.arg4
+}
+
+func (fake *FakePromQL) DiscoverMetricsReturns(result1 []promql.MetricInfo, result2 error) {
+	fake.discoverMetricsMutex.Lock()
+	defer fake.discoverMetricsMutex.Unlock()
+	fake.DiscoverMetricsStub = nil
+	fake.discoverMetricsReturns = struct {
+		result1 []promql.MetricInfo
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakePromQL) DiscoverMetricsReturnsOnCall(i int, result1 []promql.MetricInfo, result2 error) {
+	fake.discoverMetricsMutex.Lock()
+	defer fake.discoverMetricsMutex.Unlock()
+	fake.DiscoverMetricsStub = nil
+	if fake.discoverMetricsReturnsOnCall == nil {
+		fake.discoverMetricsReturnsOnCall = make(map[int]struct {
+			result1 []promql.MetricInfo
+			result2 error
+		})
+	}
+	fake.discoverMetricsReturnsOnCall[i] = struct {
+		result1 []promql.MetricInfo
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakePromQL) GenerateQueries(arg1 *promql.MetricInfo) []promql.QuerySuggestion {

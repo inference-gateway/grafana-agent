@@ -41,9 +41,44 @@ docker run -p 8080:8080 grafana-agent
 
 | Skill | Description | Parameters |
 |-------|-------------|------------|
+| `discover_metrics` | Discovers available metrics from a Prometheus endpoint with optional filtering | metric_type, name_pattern, prometheus_url |
 | `generate_promql_queries` | Generates PromQL query suggestions for given metric names by querying Prometheus metadata | metric_names, prometheus_url |
 | `validate_promql_query` | Validates a PromQL query against a Prometheus server | prometheus_url, query |
 | `create_dashboard` | Creates a Grafana dashboard with specified panels, queries, and configurations | dashboard_title, deploy, description, grafana_url, panels, refresh_interval, tags, time_range, variables |
+
+### Skill Examples
+
+#### discover_metrics
+
+Discover all available metrics from a Prometheus server:
+
+```
+What metrics are available at http://prometheus.demo.svc:9090?
+```
+
+Discover metrics matching a specific pattern:
+
+```
+Show me all HTTP-related metrics at http://prometheus.demo.svc:9090
+```
+
+Discover metrics of a specific type:
+
+```
+What counter metrics are available at http://prometheus.demo.svc:9090?
+```
+
+Filter by both name pattern and type:
+
+```
+Find all gauge metrics starting with "process_" at http://prometheus.demo.svc:9090
+```
+
+The skill returns structured JSON with:
+- Metric names
+- Metric types (counter, gauge, histogram, summary)
+- Available labels for each metric
+- Help text describing each metric
 
 ## Configuration
 
