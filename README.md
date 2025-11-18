@@ -23,6 +23,16 @@ docker build -t grafana-agent .
 docker run -p 8080:8080 grafana-agent
 ```
 
+## Quick Install
+
+Add this agent to your Inference Gateway CLI:
+
+```bash
+infer agents add grafana-agent http://localhost:8080 \
+  --oci ghcr.io/inference-gateway/grafana-agent:latest \
+  --run
+```
+
 ## Features
 
 - ✅ A2A protocol compliant
