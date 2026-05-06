@@ -143,7 +143,7 @@ Configure which LLM provider to use in `.env`:
 ```bash
 # Use DeepSeek (recommended for cost-effectiveness)
 A2A_AGENT_CLIENT_PROVIDER=deepseek
-A2A_AGENT_CLIENT_MODEL=deepseek-chat
+A2A_AGENT_CLIENT_MODEL=deepseek-v4-flash
 
 # Use Google Gemini
 A2A_AGENT_CLIENT_PROVIDER=google
