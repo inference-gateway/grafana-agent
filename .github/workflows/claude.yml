@@ -51,7 +51,7 @@ jobs:
 
       - name: Install task
         run: |
-          curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.45.4
+          curl -s https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin v3.48.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -60,15 +60,16 @@ jobs:
 
       - name: Run Claude Code
         id: claude
-        uses: anthropics/claude-code-action@main
+        uses: anthropics/claude-code-action@v1.0.114
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           additional_permissions: |
             actions: read
           use_commit_signing: true
           base_branch: main
-          branch_prefix: "claude/"
+          branch_prefix: 'claude/'
           claude_args: |
-            --system-prompt "IMPORTANT: You must NEVER push directly to the main branch. Always: 1. Create a new feature branch (claude/feature-name), 2. Make your changes on the feature branch, 3. Open a pull request to main. IMPORTANT: Use specification-driven development. Always: 1. Adjust or add to the agent.yaml, 2. Run 'task generate', 3. Start developing. COMMIT MESSAGE FORMAT: Always use conventional commits with capital letters. Follow the format: 'type(scope): Description' where the description starts with a capital letter. Examples: 'feat(grafana): Add retry mechanism for agent connections', 'fix(auth): Resolve token validation issue'. Follow the development workflow specified in the coding instructions."
+            --model claude-opus-4-7
+            --system-prompt "You must NEVER push directly to the main branch. Always create a new feature branch (claude/feature-name), make changes there, and open a pull request to main. Use conventional commits with a capital description, e.g. 'feat(client): Add retry mechanism for streaming requests' or 'fix(auth): Resolve token validation issue'. Follow the development workflow specified in the coding instructions."
             --allowedTools "Bash(task:*),Bash(go:*),Bash(gh:*),Bash(git:*)"
             --mcp-config '{"mcpServers":{"context7":{"command":"npx","args":["-y","@upstash/context7-mcp@latest"]}}}'
