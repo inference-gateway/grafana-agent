@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2](https://github.com/inference-gateway/grafana-agent/compare/v0.1.1...v0.1.2) (2026-05-20)
+
+### 👷 CI
+
+* **deps:** Update installation steps in CI/CD workflows to use actions ([2c94335](https://github.com/inference-gateway/grafana-agent/commit/2c94335390651ef7f8cdfd9c0fba39b720ad7893))
+
+### 🔧 Miscellaneous
+
+* **deps:** Bump ADL CLI to 0.30.8 ([3f8a136](https://github.com/inference-gateway/grafana-agent/commit/3f8a1363c580e74ef38dd9901907f4f75ffbc082))
+* **deps:** Bump ADL CLI to version 0.30.10 ([22f0bd4](https://github.com/inference-gateway/grafana-agent/commit/22f0bd4950dd7a971b25d64950aa21f5d8120039))
+* **deps:** Bump ADL to version 0.30.9 ([da5eac7](https://github.com/inference-gateway/grafana-agent/commit/da5eac7b9aec6905d65a9aa5894c8c6425759668))
+* Run task generate ([1ca2c9c](https://github.com/inference-gateway/grafana-agent/commit/1ca2c9cd272341de1f965b5a19346d16e474e2e4))
+
 ## [0.1.1](https://github.com/inference-gateway/grafana-agent/compare/v0.1.0...v0.1.1) (2026-05-20)
 
 ### ♻️ Improvements

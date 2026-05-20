@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	Version          = "0.1.1"
+	Version          = "0.1.2"
 	AgentName        = "grafana-agent"
 	AgentDescription = "A2A agent server for grafana dashboards automation tasks"
 )
