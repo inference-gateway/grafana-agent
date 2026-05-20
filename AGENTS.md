@@ -21,19 +21,23 @@ This agent is built using the Agent Definition Language (ADL) and provides A2A c
 You provide best practices for data visualization, panel configuration, query optimization, alerting, and overall dashboard usability.
 Always offer practical examples and explain the reasoning behind your recommendations.
 
-When using Prometheus-related skills:
+When using Prometheus-related tools:
 - Use the PROMETHEUS_URL environment variable for prometheus_url parameters (default: http://prometheus.grafana-agent.svc.cluster.local:9090)
 - The Prometheus server is available at this internal Kubernetes service URL
 
-When using Grafana-related skills:
+When using Grafana-related tools:
 - Use the GRAFANA_URL environment variable for grafana_url parameters if not explicitly provided by the user
 
 
 **Configuration:**
 
-## Skills
+## Tools
 
-This agent provides 5 skills:
+This agent exposes 6 function-call tools:
+
+### Read (built-in)
+- **Description**: Read a file from disk. Returns its contents, optionally sliced by line offset/limit. Use this to load SKILL.md bodies on demand.
+- **Parameters**: file_path, offset, limit
 
 ### discover_metrics
 - **Description**: Discovers available metrics from a Prometheus endpoint with optional filtering
@@ -64,6 +68,20 @@ This agent provides 5 skills:
 - **Tags**: grafana, dashboard, deployment
 - **Input Schema**: Defined in agent configuration
 - **Output Schema**: Defined in agent configuration
+
+## Skills
+
+This agent ships 2 markdown skills that are loaded into the system prompt at startup:
+
+### dashboard-authoring
+- **Description**: Use this when the user asks to build, modify, or deploy a Grafana dashboard. Walks the full lifecycle - discover_metrics to enumerate signals, generate_promql_queries to draft expressions, validate_promql_query to confirm they parse, create_dashboard to assemble the JSON, and deploy_dashboard to ship it.
+- **Tags**: grafana, dashboard, workflow
+- **Source**: scaffolded locally (`skills/dashboard-authoring/SKILL.md`)
+
+### metric-exploration
+- **Description**: Use this when the user is exploring what metrics a Prometheus server exposes or wants candidate PromQL expressions before committing to a dashboard. Combines discover_metrics, generate_promql_queries, and validate_promql_query into a discovery loop.
+- **Tags**: prometheus, promql, exploration
+- **Source**: scaffolded locally (`skills/metric-exploration/SKILL.md`)
 
 ## Server Configuration
 
@@ -138,12 +156,18 @@ docker run -p 8080:8080 grafana-agent
 ```
 .
 ├── main.go                       # Server entry point
-├── skills/                       # Business logic skills
+├── tools/                        # Function-call tools
+│   └── read.go                   # Read a file from disk. Returns its contents, optionally sliced by line offset/limit. Use this to load SKILL.md bodies on demand.
 │   └── discover_metrics.go       # Discovers available metrics from a Prometheus endpoint with optional filtering
-│   └── generate_promql_queries.go # Generates PromQL query suggestions for given metric names by querying Prometheus metadata
+│   └── generate_promql_queries.go# Generates PromQL query suggestions for given metric names by querying Prometheus metadata
 │   └── validate_promql_query.go  # Validates a PromQL query against a Prometheus server
 │   └── create_dashboard.go       # Creates a Grafana dashboard with specified panels, queries, and configurations
 │   └── deploy_dashboard.go       # Deploys a dashboard JSON to Grafana (Cloud or self-hosted)
+├── skills/                       # Skill directories (SKILL.md + optional assets)
+│   └── dashboard-authoring/      # Use this when the user asks to build, modify, or deploy a Grafana dashboard. Walks the full lifecycle - discover_metrics to enumerate signals, generate_promql_queries to draft expressions, validate_promql_query to confirm they parse, create_dashboard to assemble the JSON, and deploy_dashboard to ship it.
+│       └── SKILL.md              # Playbook prepended to the system prompt
+│   └── metric-exploration/       # Use this when the user is exploring what metrics a Prometheus server exposes or wants candidate PromQL expressions before committing to a dashboard. Combines discover_metrics, generate_promql_queries, and validate_promql_query into a discovery loop.
+│       └── SKILL.md              # Playbook prepended to the system prompt
 ├── .well-known/                  # Agent configuration
 │   └── agent-card.json           # Agent metadata
 ├── go.mod                        # Go module definition
@@ -175,7 +199,7 @@ This agent was generated using ADL CLI v0.1.0 with the following configuration:
 
 - **Language**: Go
 - **Template**: Minimal A2A Agent
-- **ADL Version**: adl.dev/v1
+- **ADL Version**: adl.inference-gateway.com/v1
 
 ---
 

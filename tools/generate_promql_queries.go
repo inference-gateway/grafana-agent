@@ -1,4 +1,4 @@
-package skills
+package tools
 
 import (
 	"context"
@@ -10,15 +10,15 @@ import (
 	zap "go.uber.org/zap"
 )
 
-// GeneratePromqlQueriesSkill struct holds the skill with services
-type GeneratePromqlQueriesSkill struct {
+// GeneratePromqlQueriesTool struct holds the tool with services
+type GeneratePromqlQueriesTool struct {
 	logger *zap.Logger
 	promql promql.PromQL
 }
 
-// NewGeneratePromqlQueriesSkill creates a new generate_promql_queries skill
-func NewGeneratePromqlQueriesSkill(logger *zap.Logger, promql promql.PromQL) server.Tool {
-	skill := &GeneratePromqlQueriesSkill{
+// NewGeneratePromqlQueriesTool creates a new generate_promql_queries tool
+func NewGeneratePromqlQueriesTool(logger *zap.Logger, promql promql.PromQL) server.Tool {
+	tool := &GeneratePromqlQueriesTool{
 		logger: logger,
 		promql: promql,
 	}
@@ -40,7 +40,7 @@ func NewGeneratePromqlQueriesSkill(logger *zap.Logger, promql promql.PromQL) ser
 			},
 			"required": []string{"prometheus_url", "metric_names"},
 		},
-		skill.GeneratePromqlQueriesHandler,
+		tool.GeneratePromqlQueriesHandler,
 	)
 }
 
@@ -60,9 +60,9 @@ type GeneratePromqlQueriesResponse struct {
 	Results       []QueryGenerationResult `json:"results"`
 }
 
-// GeneratePromqlQueriesHandler handles the generate_promql_queries skill execution
-func (s *GeneratePromqlQueriesSkill) GeneratePromqlQueriesHandler(ctx context.Context, args map[string]any) (string, error) {
-	s.logger.Info("generating promql queries")
+// GeneratePromqlQueriesHandler handles the generate_promql_queries tool execution
+func (t *GeneratePromqlQueriesTool) GeneratePromqlQueriesHandler(ctx context.Context, args map[string]any) (string, error) {
+	t.logger.Info("generating promql queries")
 
 	prometheusURL, ok := args["prometheus_url"].(string)
 	if !ok || prometheusURL == "" {
@@ -96,15 +96,15 @@ func (s *GeneratePromqlQueriesSkill) GeneratePromqlQueriesHandler(ctx context.Co
 	}
 
 	for _, metricName := range metricNames {
-		s.logger.Debug("processing metric", zap.String("metric", metricName))
+		t.logger.Debug("processing metric", zap.String("metric", metricName))
 
 		result := QueryGenerationResult{
 			MetricName: metricName,
 		}
 
-		metricInfo, err := s.promql.GetMetricMetadata(ctx, prometheusURL, metricName)
+		metricInfo, err := t.promql.GetMetricMetadata(ctx, prometheusURL, metricName)
 		if err != nil {
-			s.logger.Warn("failed to get metric metadata",
+			t.logger.Warn("failed to get metric metadata",
 				zap.String("metric", metricName),
 				zap.Error(err))
 			result.Error = fmt.Sprintf("failed to get metadata: %v", err)
@@ -116,9 +116,9 @@ func (s *GeneratePromqlQueriesSkill) GeneratePromqlQueriesHandler(ctx context.Co
 		result.MetricHelp = metricInfo.Help
 		result.Labels = metricInfo.Labels
 
-		suggestions := s.promql.GenerateQueries(metricInfo)
+		suggestions := t.promql.GenerateQueries(metricInfo)
 		if len(suggestions) == 0 {
-			s.logger.Warn("no suggestions generated",
+			t.logger.Warn("no suggestions generated",
 				zap.String("metric", metricName))
 			result.Error = "no query suggestions could be generated"
 			response.Results = append(response.Results, result)
@@ -128,7 +128,7 @@ func (s *GeneratePromqlQueriesSkill) GeneratePromqlQueriesHandler(ctx context.Co
 		result.Suggestions = suggestions
 		response.Results = append(response.Results, result)
 
-		s.logger.Info("generated queries for metric",
+		t.logger.Info("generated queries for metric",
 			zap.String("metric", metricName),
 			zap.Int("suggestion_count", len(suggestions)))
 	}

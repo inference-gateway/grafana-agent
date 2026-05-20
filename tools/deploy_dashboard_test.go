@@ -1,4 +1,4 @@
-package skills
+package tools
 
 import (
 	"context"
@@ -11,33 +11,33 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestNewDeployDashboardSkill(t *testing.T) {
+func TestNewDeployDashboardTool(t *testing.T) {
 	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "http://grafana.test",
 		APIKey:        "test-key",
 	}
 
-	skill := NewDeployDashboardSkill(logger, mockGrafana, config)
+	tool := NewDeployDashboardTool(logger, mockGrafana, cfg)
 
-	if skill == nil {
-		t.Error("Expected non-nil skill")
+	if tool == nil {
+		t.Error("Expected non-nil tool")
 	}
 }
 
 func TestDeployDashboardHandler_DeploymentDisabled(t *testing.T) {
 	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: false,
 	}
 
-	skill := &DeployDashboardSkill{
+	tool := &DeployDashboardTool{
 		logger:        logger,
 		grafanaSvc:    mockGrafana,
-		grafanaConfig: config,
+		grafanaConfig: cfg,
 	}
 
 	args := map[string]any{
@@ -47,7 +47,7 @@ func TestDeployDashboardHandler_DeploymentDisabled(t *testing.T) {
 		"grafana_url": "http://test.grafana",
 	}
 
-	_, err := skill.DeployDashboardHandler(context.Background(), args)
+	_, err := tool.DeployDashboardHandler(context.Background(), args)
 	if err == nil {
 		t.Error("Expected error when deployment is disabled")
 	}
@@ -61,19 +61,19 @@ func TestDeployDashboardHandler_DeploymentDisabled(t *testing.T) {
 func TestDeployDashboardHandler_MissingDashboardJSON(t *testing.T) {
 	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: true,
 	}
 
-	skill := &DeployDashboardSkill{
+	tool := &DeployDashboardTool{
 		logger:        logger,
 		grafanaSvc:    mockGrafana,
-		grafanaConfig: config,
+		grafanaConfig: cfg,
 	}
 
 	args := map[string]any{}
 
-	_, err := skill.DeployDashboardHandler(context.Background(), args)
+	_, err := tool.DeployDashboardHandler(context.Background(), args)
 	if err == nil {
 		t.Error("Expected error for missing dashboard_json")
 	}
@@ -87,15 +87,15 @@ func TestDeployDashboardHandler_MissingDashboardJSON(t *testing.T) {
 func TestDeployDashboardHandler_MissingGrafanaURL(t *testing.T) {
 	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "",
 	}
 
-	skill := &DeployDashboardSkill{
+	tool := &DeployDashboardTool{
 		logger:        logger,
 		grafanaSvc:    mockGrafana,
-		grafanaConfig: config,
+		grafanaConfig: cfg,
 	}
 
 	args := map[string]any{
@@ -104,7 +104,7 @@ func TestDeployDashboardHandler_MissingGrafanaURL(t *testing.T) {
 		},
 	}
 
-	_, err := skill.DeployDashboardHandler(context.Background(), args)
+	_, err := tool.DeployDashboardHandler(context.Background(), args)
 	if err == nil {
 		t.Error("Expected error for missing grafana_url")
 	}
@@ -118,16 +118,16 @@ func TestDeployDashboardHandler_MissingGrafanaURL(t *testing.T) {
 func TestDeployDashboardHandler_MissingAPIKey(t *testing.T) {
 	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "http://grafana.test",
 		APIKey:        "",
 	}
 
-	skill := &DeployDashboardSkill{
+	tool := &DeployDashboardTool{
 		logger:        logger,
 		grafanaSvc:    mockGrafana,
-		grafanaConfig: config,
+		grafanaConfig: cfg,
 	}
 
 	args := map[string]any{
@@ -136,7 +136,7 @@ func TestDeployDashboardHandler_MissingAPIKey(t *testing.T) {
 		},
 	}
 
-	_, err := skill.DeployDashboardHandler(context.Background(), args)
+	_, err := tool.DeployDashboardHandler(context.Background(), args)
 	if err == nil {
 		t.Error("Expected error for missing API key")
 	}
@@ -161,16 +161,16 @@ func TestDeployDashboardHandler_SuccessfulDeployment(t *testing.T) {
 			}, nil
 		},
 	}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "http://grafana.test",
 		APIKey:        "test-api-key",
 	}
 
-	skill := &DeployDashboardSkill{
+	tool := &DeployDashboardTool{
 		logger:        logger,
 		grafanaSvc:    mockGrafana,
-		grafanaConfig: config,
+		grafanaConfig: cfg,
 	}
 
 	args := map[string]any{
@@ -180,7 +180,7 @@ func TestDeployDashboardHandler_SuccessfulDeployment(t *testing.T) {
 		},
 	}
 
-	result, err := skill.DeployDashboardHandler(context.Background(), args)
+	result, err := tool.DeployDashboardHandler(context.Background(), args)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -226,16 +226,16 @@ func TestDeployDashboardHandler_WithUserProvidedURL(t *testing.T) {
 			}, nil
 		},
 	}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "http://default.grafana",
 		APIKey:        "test-api-key",
 	}
 
-	skill := &DeployDashboardSkill{
+	tool := &DeployDashboardTool{
 		logger:        logger,
 		grafanaSvc:    mockGrafana,
-		grafanaConfig: config,
+		grafanaConfig: cfg,
 	}
 
 	args := map[string]any{
@@ -245,7 +245,7 @@ func TestDeployDashboardHandler_WithUserProvidedURL(t *testing.T) {
 		"grafana_url": "http://user-provided.grafana",
 	}
 
-	_, err := skill.DeployDashboardHandler(context.Background(), args)
+	_, err := tool.DeployDashboardHandler(context.Background(), args)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -265,16 +265,16 @@ func TestDeployDashboardHandler_WithFolderUID(t *testing.T) {
 			}, nil
 		},
 	}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "http://grafana.test",
 		APIKey:        "test-api-key",
 	}
 
-	skill := &DeployDashboardSkill{
+	tool := &DeployDashboardTool{
 		logger:        logger,
 		grafanaSvc:    mockGrafana,
-		grafanaConfig: config,
+		grafanaConfig: cfg,
 	}
 
 	args := map[string]any{
@@ -284,7 +284,7 @@ func TestDeployDashboardHandler_WithFolderUID(t *testing.T) {
 		"folder_uid": "test-folder-uid",
 	}
 
-	_, err := skill.DeployDashboardHandler(context.Background(), args)
+	_, err := tool.DeployDashboardHandler(context.Background(), args)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -304,16 +304,16 @@ func TestDeployDashboardHandler_WithCustomMessage(t *testing.T) {
 			}, nil
 		},
 	}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "http://grafana.test",
 		APIKey:        "test-api-key",
 	}
 
-	skill := &DeployDashboardSkill{
+	tool := &DeployDashboardTool{
 		logger:        logger,
 		grafanaSvc:    mockGrafana,
-		grafanaConfig: config,
+		grafanaConfig: cfg,
 	}
 
 	args := map[string]any{
@@ -323,7 +323,7 @@ func TestDeployDashboardHandler_WithCustomMessage(t *testing.T) {
 		"message": "Custom deployment message",
 	}
 
-	_, err := skill.DeployDashboardHandler(context.Background(), args)
+	_, err := tool.DeployDashboardHandler(context.Background(), args)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -343,16 +343,16 @@ func TestDeployDashboardHandler_WithOverwriteFalse(t *testing.T) {
 			}, nil
 		},
 	}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "http://grafana.test",
 		APIKey:        "test-api-key",
 	}
 
-	skill := &DeployDashboardSkill{
+	tool := &DeployDashboardTool{
 		logger:        logger,
 		grafanaSvc:    mockGrafana,
-		grafanaConfig: config,
+		grafanaConfig: cfg,
 	}
 
 	args := map[string]any{
@@ -362,7 +362,7 @@ func TestDeployDashboardHandler_WithOverwriteFalse(t *testing.T) {
 		"overwrite": false,
 	}
 
-	_, err := skill.DeployDashboardHandler(context.Background(), args)
+	_, err := tool.DeployDashboardHandler(context.Background(), args)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -375,16 +375,16 @@ func TestDeployDashboardHandler_DeploymentError(t *testing.T) {
 			return nil, errors.New("grafana API error")
 		},
 	}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "http://grafana.test",
 		APIKey:        "test-api-key",
 	}
 
-	skill := &DeployDashboardSkill{
+	tool := &DeployDashboardTool{
 		logger:        logger,
 		grafanaSvc:    mockGrafana,
-		grafanaConfig: config,
+		grafanaConfig: cfg,
 	}
 
 	args := map[string]any{
@@ -393,7 +393,7 @@ func TestDeployDashboardHandler_DeploymentError(t *testing.T) {
 		},
 	}
 
-	_, err := skill.DeployDashboardHandler(context.Background(), args)
+	_, err := tool.DeployDashboardHandler(context.Background(), args)
 	if err == nil {
 		t.Error("Expected error from Grafana API")
 	}

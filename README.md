@@ -1,8 +1,9 @@
 <div align="center">
 
 # Grafana-Agent
+
 [![CI](https://github.com/inference-gateway/grafana-agent/workflows/CI/badge.svg)](https://github.com/inference-gateway/grafana-agent/actions/workflows/ci.yml)
-[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go)](https://golang.org)
+[![Go Version](https://img.shields.io/badge/Go-1.26.2+-00ADD8?style=flat&logo=go)](https://golang.org)
 [![A2A Protocol](https://img.shields.io/badge/A2A-Protocol-blue?style=flat)](https://github.com/inference-gateway/adk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -47,15 +48,23 @@ infer agents add grafana-agent http://localhost:8080 \
 - `GET /health` - Health check endpoint
 - `POST /a2a` - A2A protocol endpoint
 
-## Available Skills
+## Available Tools
 
-| Skill | Description | Parameters |
-|-------|-------------|------------|
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `Read` | Read a file from disk. Returns its contents, optionally sliced by line offset/limit. Use this to load SKILL.md bodies on demand. | file_path, offset, limit |
 | `discover_metrics` | Discovers available metrics from a Prometheus endpoint with optional filtering | metric_type, name_pattern, prometheus_url |
 | `generate_promql_queries` | Generates PromQL query suggestions for given metric names by querying Prometheus metadata | metric_names, prometheus_url |
 | `validate_promql_query` | Validates a PromQL query against a Prometheus server | prometheus_url, query |
 | `create_dashboard` | Creates a Grafana dashboard with specified panels, queries, and configurations | dashboard_title, deploy, description, grafana_url, panels, refresh_interval, tags, time_range, variables |
 | `deploy_dashboard` | Deploys a dashboard JSON to Grafana (Cloud or self-hosted) | dashboard_json, folder_uid, grafana_url, message, overwrite |
+
+## Skills (loaded into the system prompt)
+
+| Skill | Description | Source |
+|-------|-------------|--------|
+| `dashboard-authoring` | Use this when the user asks to build, modify, or deploy a Grafana dashboard. Walks the full lifecycle - discover_metrics to enumerate signals, generate_promql_queries to draft expressions, validate_promql_query to confirm they parse, create_dashboard to assemble the JSON, and deploy_dashboard to ship it. | bare scaffold (`skills/dashboard-authoring.md`) |
+| `metric-exploration` | Use this when the user is exploring what metrics a Prometheus server exposes or wants candidate PromQL expressions before committing to a dashboard. Combines discover_metrics, generate_promql_queries, and validate_promql_query into a discovery loop. | bare scaffold (`skills/metric-exploration.md`) |
 
 ## Configuration
 
@@ -63,14 +72,19 @@ Configure the agent via environment variables:
 
 ### Custom Configuration
 
-The following custom configuration variables are available:
+The following custom configuration variables are available. Defaults are
+derived from `spec.config.*` in `agent.yaml`; the env vars below override
+them at runtime.
 
-| Category | Variable | Description | Default |
-|----------|----------|-------------|---------|
-| **Grafana** | `GRAFANA_API_KEY` | ApiKey configuration | `` |
-| **Grafana** | `GRAFANA_DEPLOY_ENABLED` | DeployEnabled configuration | `false` |
-| **Grafana** | `GRAFANA_ORG_ID` | OrgID configuration | `` |
-| **Grafana** | `GRAFANA_URL` | Url configuration | `` |
+| Category | Variable | Default |
+|----------|----------|---------|
+| **Grafana** | `GRAFANA_API_KEY` | `` |
+| **Grafana** | `GRAFANA_DEPLOY_ENABLED` | `false` |
+| **Grafana** | `GRAFANA_ORG_ID` | `` |
+| **Grafana** | `GRAFANA_URL` | `` |
+| **Tools** | `TOOLS_READ_ENABLED` | `true` |
+
+### Environment Variables
 
 | Category | Variable | Description | Default |
 |----------|----------|-------------|---------|
@@ -102,20 +116,6 @@ The following custom configuration variables are available:
 | **Storage** | `A2A_QUEUE_URL` | Redis connection URL (when using Redis) | - |
 | **Storage** | `A2A_QUEUE_MAX_SIZE` | Maximum queue size | `100` |
 | **Storage** | `A2A_QUEUE_CLEANUP_INTERVAL` | Task cleanup interval | `30s` |
-| **Artifacts** | `ARTIFACTS_ENABLE` | Enable artifacts support | `false` |
-| **Artifacts** | `ARTIFACTS_SERVER_HOST` | Artifacts server host | `localhost` |
-| **Artifacts** | `ARTIFACTS_SERVER_PORT` | Artifacts server port | `8081` |
-| **Artifacts** | `ARTIFACTS_STORAGE_PROVIDER` | Storage backend (`filesystem` or `minio`) | `filesystem` |
-| **Artifacts** | `ARTIFACTS_STORAGE_BASE_PATH` | Base path for filesystem storage | `./artifacts` |
-| **Artifacts** | `ARTIFACTS_STORAGE_BASE_URL` | Override base URL for direct downloads | (auto-generated) |
-| **Artifacts** | `ARTIFACTS_STORAGE_ENDPOINT` | MinIO/S3 endpoint URL | - |
-| **Artifacts** | `ARTIFACTS_STORAGE_ACCESS_KEY` | MinIO/S3 access key | - |
-| **Artifacts** | `ARTIFACTS_STORAGE_SECRET_KEY` | MinIO/S3 secret key | - |
-| **Artifacts** | `ARTIFACTS_STORAGE_BUCKET_NAME` | MinIO/S3 bucket name | `artifacts` |
-| **Artifacts** | `ARTIFACTS_STORAGE_USE_SSL` | Use SSL for MinIO/S3 connections | `true` |
-| **Artifacts** | `ARTIFACTS_RETENTION_MAX_ARTIFACTS` | Max artifacts per task (0 = unlimited) | `5` |
-| **Artifacts** | `ARTIFACTS_RETENTION_MAX_AGE` | Max artifact age (0 = no age limit) | `168h` |
-| **Artifacts** | `ARTIFACTS_RETENTION_CLEANUP_INTERVAL` | Cleanup frequency (0 = manual only) | `24h` |
 | **Authentication** | `A2A_AUTH_ENABLE` | Enable OIDC authentication | `false` |
 
 ## Development
@@ -172,6 +172,7 @@ docker build \
 ```
 
 **Available Build Arguments:**
+
 - `VERSION` - Agent version (default: `0.1.0`)
 - `AGENT_NAME` - Agent name (default: `grafana-agent`)
 - `AGENT_DESCRIPTION` - Agent description (default: `A2A agent server for grafana dashboards automation tasks`)

@@ -1,4 +1,4 @@
-package skills
+package tools
 
 import (
 	"context"
@@ -10,15 +10,15 @@ import (
 	zap "go.uber.org/zap"
 )
 
-// ValidatePromqlQuerySkill struct holds the skill with services
-type ValidatePromqlQuerySkill struct {
+// ValidatePromqlQueryTool struct holds the tool with services
+type ValidatePromqlQueryTool struct {
 	logger *zap.Logger
 	promql promql.PromQL
 }
 
-// NewValidatePromqlQuerySkill creates a new validate_promql_query skill
-func NewValidatePromqlQuerySkill(logger *zap.Logger, promql promql.PromQL) server.Tool {
-	skill := &ValidatePromqlQuerySkill{
+// NewValidatePromqlQueryTool creates a new validate_promql_query tool
+func NewValidatePromqlQueryTool(logger *zap.Logger, promql promql.PromQL) server.Tool {
+	tool := &ValidatePromqlQueryTool{
 		logger: logger,
 		promql: promql,
 	}
@@ -39,7 +39,7 @@ func NewValidatePromqlQuerySkill(logger *zap.Logger, promql promql.PromQL) serve
 			},
 			"required": []string{"prometheus_url", "query"},
 		},
-		skill.ValidatePromqlQueryHandler,
+		tool.ValidatePromqlQueryHandler,
 	)
 }
 
@@ -51,9 +51,9 @@ type ValidateQueryResponse struct {
 	Error         string `json:"error,omitempty"`
 }
 
-// ValidatePromqlQueryHandler handles the validate_promql_query skill execution
-func (s *ValidatePromqlQuerySkill) ValidatePromqlQueryHandler(ctx context.Context, args map[string]any) (string, error) {
-	s.logger.Info("validating promql query")
+// ValidatePromqlQueryHandler handles the validate_promql_query tool execution
+func (t *ValidatePromqlQueryTool) ValidatePromqlQueryHandler(ctx context.Context, args map[string]any) (string, error) {
+	t.logger.Info("validating promql query")
 
 	prometheusURL, ok := args["prometheus_url"].(string)
 	if !ok || prometheusURL == "" {
@@ -65,7 +65,7 @@ func (s *ValidatePromqlQuerySkill) ValidatePromqlQueryHandler(ctx context.Contex
 		return "", fmt.Errorf("query is required and must be a string")
 	}
 
-	s.logger.Debug("validating query",
+	t.logger.Debug("validating query",
 		zap.String("query", query),
 		zap.String("prometheus_url", prometheusURL))
 
@@ -75,15 +75,15 @@ func (s *ValidatePromqlQuerySkill) ValidatePromqlQueryHandler(ctx context.Contex
 		Valid:         false,
 	}
 
-	err := s.promql.ValidateQuery(ctx, prometheusURL, query)
+	err := t.promql.ValidateQuery(ctx, prometheusURL, query)
 	if err != nil {
-		s.logger.Warn("query validation failed",
+		t.logger.Warn("query validation failed",
 			zap.String("query", query),
 			zap.Error(err))
 		response.Error = err.Error()
 		response.Valid = false
 	} else {
-		s.logger.Info("query validation succeeded",
+		t.logger.Info("query validation succeeded",
 			zap.String("query", query))
 		response.Valid = true
 	}

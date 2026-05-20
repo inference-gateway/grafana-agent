@@ -9,11 +9,18 @@
 # - Directories: build/
 # - Comments: lines starting with #
 
-skills/create_dashboard.go
-skills/generate_promql_queries.go
-skills/validate_promql_query.go
-skills/discover_metrics.go
-skills/deploy_dashboard.go
+tools/create_dashboard.go
+tools/generate_promql_queries.go
+tools/validate_promql_query.go
+tools/discover_metrics.go
+tools/deploy_dashboard.go
+tools/create_dashboard_test.go
+tools/generate_promql_queries_test.go
+tools/validate_promql_query_test.go
+tools/discover_metrics_test.go
+tools/deploy_dashboard_test.go
+skills/dashboard-authoring/SKILL.md
+skills/metric-exploration/SKILL.md
 internal/grafana/grafana.go
 internal/promql/promql.go
 

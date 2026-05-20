@@ -1,4 +1,4 @@
-apiVersion: adl.dev/v1
+apiVersion: adl.inference-gateway.com/v1
 kind: Agent
 metadata:
   name: grafana-agent
@@ -15,6 +15,9 @@ spec:
       url: ""
       apiKey: ""
       orgID: ""
+    tools:
+      read:
+        enabled: true
   services:
     grafana:
       type: service
@@ -34,15 +37,14 @@ spec:
       You provide best practices for data visualization, panel configuration, query optimization, alerting, and overall dashboard usability.
       Always offer practical examples and explain the reasoning behind your recommendations.
 
-      When using Prometheus-related skills:
+      When using Prometheus-related tools:
       - Use the PROMETHEUS_URL environment variable for prometheus_url parameters (default: http://prometheus.grafana-agent.svc.cluster.local:9090)
       - The Prometheus server is available at this internal Kubernetes service URL
 
-      When using Grafana-related skills:
+      When using Grafana-related tools:
       - Use the GRAFANA_URL environment variable for grafana_url parameters if not explicitly provided by the user
-  artifacts:
-    enabled: true
-  skills:
+  tools:
+    - id: read
     - id: discover_metrics
       name: discover_metrics
       inject:
@@ -73,9 +75,6 @@ spec:
               - summary
         required:
           - prometheus_url
-      output:
-        type: data
-        description: Returns structured JSON artifact with metric names, types, labels, and help text
     - id: generate_promql_queries
       name: generate_promql_queries
       inject:
@@ -101,9 +100,6 @@ spec:
         required:
           - prometheus_url
           - metric_names
-      output:
-        type: data
-        description: Returns array of query suggestions with descriptions and visualization types
     - id: validate_promql_query
       name: validate_promql_query
       inject:
@@ -126,9 +122,6 @@ spec:
         required:
           - prometheus_url
           - query
-      output:
-        type: data
-        description: Returns validation result with error details if invalid
     - id: create_dashboard
       name: create_dashboard
       inject:
@@ -184,9 +177,6 @@ spec:
         required:
           - dashboard_title
           - panels
-      output:
-        type: artifact
-        description: Returns the dashboard JSON configuration as an artifact
     - id: deploy_dashboard
       name: deploy_dashboard
       inject:
@@ -218,21 +208,35 @@ spec:
             description: Optional commit message describing the dashboard changes
         required:
           - dashboard_json
-      output:
-        type: data
-        description: Returns deployment status and dashboard URL
+  skills:
+    - id: dashboard-authoring
+      bare: true
+      name: dashboard-authoring
+      description: "Use this when the user asks to build, modify, or deploy a Grafana dashboard. Walks the full lifecycle - discover_metrics to enumerate signals, generate_promql_queries to draft expressions, validate_promql_query to confirm they parse, create_dashboard to assemble the JSON, and deploy_dashboard to ship it."
+      tags:
+        - grafana
+        - dashboard
+        - workflow
+    - id: metric-exploration
+      bare: true
+      name: metric-exploration
+      description: "Use this when the user is exploring what metrics a Prometheus server exposes or wants candidate PromQL expressions before committing to a dashboard. Combines discover_metrics, generate_promql_queries, and validate_promql_query into a discovery loop."
+      tags:
+        - prometheus
+        - promql
+        - exploration
   server:
     port: 8080
     debug: false
   language:
     go:
       module: github.com/inference-gateway/grafana-agent
-      version: "1.25"
+      version: "1.26.2"
   scm:
     provider: github
     url: https://github.com/inference-gateway/grafana-agent
     github_app: true
-    issue_templates: true
+    issue_templates: false
   sandbox:
     flox:
       enabled: true

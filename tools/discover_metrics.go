@@ -1,4 +1,4 @@
-package skills
+package tools
 
 import (
 	"context"
@@ -10,15 +10,15 @@ import (
 	zap "go.uber.org/zap"
 )
 
-// DiscoverMetricsSkill struct holds the skill with services
-type DiscoverMetricsSkill struct {
+// DiscoverMetricsTool struct holds the tool with services
+type DiscoverMetricsTool struct {
 	logger *zap.Logger
 	promql promql.PromQL
 }
 
-// NewDiscoverMetricsSkill creates a new discover_metrics skill
-func NewDiscoverMetricsSkill(logger *zap.Logger, promql promql.PromQL) server.Tool {
-	skill := &DiscoverMetricsSkill{
+// NewDiscoverMetricsTool creates a new discover_metrics tool
+func NewDiscoverMetricsTool(logger *zap.Logger, promql promql.PromQL) server.Tool {
+	tool := &DiscoverMetricsTool{
 		logger: logger,
 		promql: promql,
 	}
@@ -44,7 +44,7 @@ func NewDiscoverMetricsSkill(logger *zap.Logger, promql promql.PromQL) server.To
 			},
 			"required": []string{"prometheus_url"},
 		},
-		skill.DiscoverMetricsHandler,
+		tool.DiscoverMetricsHandler,
 	)
 }
 
@@ -62,9 +62,9 @@ type FilterInfo struct {
 	MetricType  string `json:"metric_type,omitempty"`
 }
 
-// DiscoverMetricsHandler handles the discover_metrics skill execution
-func (s *DiscoverMetricsSkill) DiscoverMetricsHandler(ctx context.Context, args map[string]any) (string, error) {
-	s.logger.Info("discovering metrics")
+// DiscoverMetricsHandler handles the discover_metrics tool execution
+func (t *DiscoverMetricsTool) DiscoverMetricsHandler(ctx context.Context, args map[string]any) (string, error) {
+	t.logger.Info("discovering metrics")
 
 	prometheusURL, ok := args["prometheus_url"].(string)
 	if !ok || prometheusURL == "" {
@@ -94,14 +94,14 @@ func (s *DiscoverMetricsSkill) DiscoverMetricsHandler(ctx context.Context, args 
 		}
 	}
 
-	s.logger.Debug("discovering metrics with filters",
+	t.logger.Debug("discovering metrics with filters",
 		zap.String("prometheus_url", prometheusURL),
 		zap.String("name_pattern", namePattern),
 		zap.String("metric_type", metricTypeStr))
 
-	metrics, err := s.promql.DiscoverMetrics(ctx, prometheusURL, namePattern, metricType)
+	metrics, err := t.promql.DiscoverMetrics(ctx, prometheusURL, namePattern, metricType)
 	if err != nil {
-		s.logger.Error("failed to discover metrics",
+		t.logger.Error("failed to discover metrics",
 			zap.String("prometheus_url", prometheusURL),
 			zap.Error(err))
 		return "", fmt.Errorf("failed to discover metrics: %w", err)
@@ -120,7 +120,7 @@ func (s *DiscoverMetricsSkill) DiscoverMetricsHandler(ctx context.Context, args 
 		}
 	}
 
-	s.logger.Info("discovered metrics",
+	t.logger.Info("discovered metrics",
 		zap.String("prometheus_url", prometheusURL),
 		zap.Int("total", len(metrics)))
 
