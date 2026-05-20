@@ -1,4 +1,4 @@
-package skills
+package tools
 
 import (
 	"context"
@@ -11,14 +11,14 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestNewDiscoverMetricsSkill(t *testing.T) {
+func TestNewDiscoverMetricsTool(t *testing.T) {
 	logger := zap.NewNop()
 	fakePromQL := &promqlfakes.FakePromQL{}
 
-	skill := NewDiscoverMetricsSkill(logger, fakePromQL)
+	tool := NewDiscoverMetricsTool(logger, fakePromQL)
 
-	if skill == nil {
-		t.Error("Expected non-nil skill")
+	if tool == nil {
+		t.Error("Expected non-nil tool")
 	}
 }
 
@@ -281,12 +281,12 @@ func TestDiscoverMetricsHandler(t *testing.T) {
 			fakePromQL := &promqlfakes.FakePromQL{}
 			tt.setupMock(fakePromQL)
 
-			skill := &DiscoverMetricsSkill{
+			tool := &DiscoverMetricsTool{
 				logger: logger,
 				promql: fakePromQL,
 			}
 
-			result, err := skill.DiscoverMetricsHandler(context.Background(), tt.args)
+			result, err := tool.DiscoverMetricsHandler(context.Background(), tt.args)
 
 			if tt.wantErr {
 				if err == nil {

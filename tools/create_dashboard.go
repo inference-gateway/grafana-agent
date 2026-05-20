@@ -1,4 +1,4 @@
-package skills
+package tools
 
 import (
 	"context"
@@ -12,19 +12,19 @@ import (
 	zap "go.uber.org/zap"
 )
 
-// CreateDashboardSkill struct holds the skill with services
-type CreateDashboardSkill struct {
-	logger  *zap.Logger
-	grafana grafana.Grafana
-	config  *config.GrafanaConfig
+// CreateDashboardTool struct holds the tool with services
+type CreateDashboardTool struct {
+	logger     *zap.Logger
+	grafanaSvc grafana.Grafana
+	config     *config.GrafanaConfig
 }
 
-// NewCreateDashboardSkill creates a new create_dashboard skill
-func NewCreateDashboardSkill(logger *zap.Logger, grafana grafana.Grafana, grafanaConfig *config.GrafanaConfig) server.Tool {
-	skill := &CreateDashboardSkill{
-		logger:  logger,
-		grafana: grafana,
-		config:  grafanaConfig,
+// NewCreateDashboardTool creates a new create_dashboard tool
+func NewCreateDashboardTool(logger *zap.Logger, grafanaSvc grafana.Grafana, grafanaConfig *config.GrafanaConfig) server.Tool {
+	tool := &CreateDashboardTool{
+		logger:     logger,
+		grafanaSvc: grafanaSvc,
+		config:     grafanaConfig,
 	}
 	return server.NewBasicTool(
 		"create_dashboard",
@@ -75,12 +75,12 @@ func NewCreateDashboardSkill(logger *zap.Logger, grafana grafana.Grafana, grafan
 			},
 			"required": []string{"dashboard_title", "panels"},
 		},
-		skill.CreateDashboardHandler,
+		tool.CreateDashboardHandler,
 	)
 }
 
-// CreateDashboardHandler handles the create_dashboard skill execution
-func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args map[string]any) (string, error) {
+// CreateDashboardHandler handles the create_dashboard tool execution
+func (t *CreateDashboardTool) CreateDashboardHandler(ctx context.Context, args map[string]any) (string, error) {
 	dashboardTitle, ok := args["dashboard_title"].(string)
 	if !ok || dashboardTitle == "" {
 		return "", fmt.Errorf("dashboard_title is required and must be a string")
@@ -93,7 +93,7 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 
 	deploy, deployRequested := args["deploy"].(bool)
 	if deployRequested && deploy {
-		if s.config != nil && !s.config.DeployEnabled {
+		if t.config != nil && !t.config.DeployEnabled {
 			log.Printf("WARNING: Grafana deployment attempted but GRAFANA_DEPLOY_ENABLED=false")
 			return "", fmt.Errorf("grafana deployment is disabled - set GRAFANA_DEPLOY_ENABLED=true to enable dashboard deployments")
 		}
@@ -101,8 +101,8 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 		var grafanaURL string
 		if urlParam, ok := args["grafana_url"].(string); ok && urlParam != "" {
 			grafanaURL = urlParam
-		} else if s.config != nil && s.config.URL != "" {
-			grafanaURL = s.config.URL
+		} else if t.config != nil && t.config.URL != "" {
+			grafanaURL = t.config.URL
 		}
 
 		if grafanaURL == "" {
@@ -113,14 +113,14 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 	var grafanaURL string
 	if urlParam, ok := args["grafana_url"].(string); ok && urlParam != "" {
 		grafanaURL = urlParam
-	} else if s.config != nil && s.config.URL != "" {
-		grafanaURL = s.config.URL
+	} else if t.config != nil && t.config.URL != "" {
+		grafanaURL = t.config.URL
 	}
 
 	if grafanaURL != "" {
 		log.Printf("INFO: Using Grafana URL: %s", grafanaURL)
 	}
-	if s.config != nil && s.config.APIKey != "" {
+	if t.config != nil && t.config.APIKey != "" {
 		log.Printf("INFO: Grafana API key configured")
 	}
 
@@ -161,12 +161,12 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 
 		if urlParam, ok := args["grafana_url"].(string); ok && urlParam != "" {
 			grafanaURL = urlParam
-		} else if s.config != nil && s.config.URL != "" {
-			grafanaURL = s.config.URL
+		} else if t.config != nil && t.config.URL != "" {
+			grafanaURL = t.config.URL
 		}
 
-		if s.config != nil && s.config.APIKey != "" {
-			apiKey = s.config.APIKey
+		if t.config != nil && t.config.APIKey != "" {
+			apiKey = t.config.APIKey
 		}
 
 		if apiKey == "" {
@@ -180,12 +180,12 @@ func (s *CreateDashboardSkill) CreateDashboardHandler(ctx context.Context, args 
 			Overwrite: true,
 		}
 
-		resp, err := s.grafana.CreateDashboard(ctx, grafanaDashboard, grafanaURL, apiKey)
+		resp, err := t.grafanaSvc.CreateDashboard(ctx, grafanaDashboard, grafanaURL, apiKey)
 		if err != nil {
 			return "", fmt.Errorf("failed to deploy dashboard to Grafana: %w", err)
 		}
 
-		s.logger.Info("Dashboard deployed successfully",
+		t.logger.Info("Dashboard deployed successfully",
 			zap.String("grafana_url", grafanaURL),
 			zap.String("dashboard_uid", resp.UID),
 			zap.Int("dashboard_id", resp.ID))

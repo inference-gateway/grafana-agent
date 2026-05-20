@@ -405,6 +405,16 @@ func (fake *FakePromQL) ValidateQueryReturnsOnCall(i int, result1 error) {
 func (fake *FakePromQL) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.discoverMetricsMutex.RLock()
+	defer fake.discoverMetricsMutex.RUnlock()
+	fake.generateQueriesMutex.RLock()
+	defer fake.generateQueriesMutex.RUnlock()
+	fake.getBestQueryMutex.RLock()
+	defer fake.getBestQueryMutex.RUnlock()
+	fake.getMetricMetadataMutex.RLock()
+	defer fake.getMetricMetadataMutex.RUnlock()
+	fake.validateQueryMutex.RLock()
+	defer fake.validateQueryMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value

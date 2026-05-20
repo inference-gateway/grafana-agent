@@ -1,4 +1,4 @@
-package skills
+package tools
 
 import (
 	"context"
@@ -38,33 +38,33 @@ func (m *mockGrafanaService) DeleteDashboard(ctx context.Context, uid, grafanaUR
 	return nil
 }
 
-func TestNewCreateDashboardSkill(t *testing.T) {
+func TestNewCreateDashboardTool(t *testing.T) {
 	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: true,
 		URL:           "http://grafana.test",
 		APIKey:        "test-key",
 	}
 
-	skill := NewCreateDashboardSkill(logger, mockGrafana, config)
+	tool := NewCreateDashboardTool(logger, mockGrafana, cfg)
 
-	if skill == nil {
-		t.Error("Expected non-nil skill")
+	if tool == nil {
+		t.Error("Expected non-nil tool")
 	}
 }
 
 func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: false,
 	}
 
-	skill := &CreateDashboardSkill{
-		logger:  logger,
-		grafana: mockGrafana,
-		config:  config,
+	tool := &CreateDashboardTool{
+		logger:     logger,
+		grafanaSvc: mockGrafana,
+		config:     cfg,
 	}
 
 	args := map[string]any{
@@ -83,7 +83,7 @@ func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 		},
 	}
 
-	result, err := skill.CreateDashboardHandler(context.Background(), args)
+	result, err := tool.CreateDashboardHandler(context.Background(), args)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
@@ -107,12 +107,12 @@ func TestCreateDashboardHandler_BasicPanels(t *testing.T) {
 func TestCreateDashboardHandler_MissingTitle(t *testing.T) {
 	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
-	config := &config.GrafanaConfig{}
+	cfg := &config.GrafanaConfig{}
 
-	skill := &CreateDashboardSkill{
-		logger:  logger,
-		grafana: mockGrafana,
-		config:  config,
+	tool := &CreateDashboardTool{
+		logger:     logger,
+		grafanaSvc: mockGrafana,
+		config:     cfg,
 	}
 
 	args := map[string]any{
@@ -123,7 +123,7 @@ func TestCreateDashboardHandler_MissingTitle(t *testing.T) {
 		},
 	}
 
-	_, err := skill.CreateDashboardHandler(context.Background(), args)
+	_, err := tool.CreateDashboardHandler(context.Background(), args)
 	if err == nil {
 		t.Error("Expected error for missing dashboard_title")
 	}
@@ -137,19 +137,19 @@ func TestCreateDashboardHandler_MissingTitle(t *testing.T) {
 func TestCreateDashboardHandler_MissingPanels(t *testing.T) {
 	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
-	config := &config.GrafanaConfig{}
+	cfg := &config.GrafanaConfig{}
 
-	skill := &CreateDashboardSkill{
-		logger:  logger,
-		grafana: mockGrafana,
-		config:  config,
+	tool := &CreateDashboardTool{
+		logger:     logger,
+		grafanaSvc: mockGrafana,
+		config:     cfg,
 	}
 
 	args := map[string]any{
 		"dashboard_title": "Test Dashboard",
 	}
 
-	_, err := skill.CreateDashboardHandler(context.Background(), args)
+	_, err := tool.CreateDashboardHandler(context.Background(), args)
 	if err == nil {
 		t.Error("Expected error for missing panels")
 	}
@@ -163,14 +163,14 @@ func TestCreateDashboardHandler_MissingPanels(t *testing.T) {
 func TestCreateDashboardHandler_DeploymentDisabled(t *testing.T) {
 	logger := zap.NewNop()
 	mockGrafana := &mockGrafanaService{}
-	config := &config.GrafanaConfig{
+	cfg := &config.GrafanaConfig{
 		DeployEnabled: false,
 	}
 
-	skill := &CreateDashboardSkill{
-		logger:  logger,
-		grafana: mockGrafana,
-		config:  config,
+	tool := &CreateDashboardTool{
+		logger:     logger,
+		grafanaSvc: mockGrafana,
+		config:     cfg,
 	}
 
 	args := map[string]any{
@@ -184,7 +184,7 @@ func TestCreateDashboardHandler_DeploymentDisabled(t *testing.T) {
 		},
 	}
 
-	_, err := skill.CreateDashboardHandler(context.Background(), args)
+	_, err := tool.CreateDashboardHandler(context.Background(), args)
 	if err == nil {
 		t.Error("Expected error when deployment is disabled but deploy=true")
 	}

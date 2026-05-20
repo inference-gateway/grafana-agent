@@ -1,4 +1,4 @@
-package skills
+package tools
 
 import (
 	"context"
@@ -11,14 +11,14 @@ import (
 	"go.uber.org/zap"
 )
 
-func TestNewGeneratePromqlQueriesSkill(t *testing.T) {
+func TestNewGeneratePromqlQueriesTool(t *testing.T) {
 	logger := zap.NewNop()
 	fakePromQL := &promqlfakes.FakePromQL{}
 
-	skill := NewGeneratePromqlQueriesSkill(logger, fakePromQL)
+	tool := NewGeneratePromqlQueriesTool(logger, fakePromQL)
 
-	if skill == nil {
-		t.Error("Expected non-nil skill")
+	if tool == nil {
+		t.Error("Expected non-nil tool")
 	}
 }
 
@@ -232,12 +232,12 @@ func TestGeneratePromqlQueriesHandler(t *testing.T) {
 			fakePromQL := &promqlfakes.FakePromQL{}
 			tt.setupMock(fakePromQL)
 
-			skill := &GeneratePromqlQueriesSkill{
+			tool := &GeneratePromqlQueriesTool{
 				logger: logger,
 				promql: fakePromQL,
 			}
 
-			result, err := skill.GeneratePromqlQueriesHandler(context.Background(), tt.args)
+			result, err := tool.GeneratePromqlQueriesHandler(context.Background(), tt.args)
 
 			if tt.wantErr {
 				if err == nil {
