@@ -228,6 +228,7 @@ spec:
   server:
     port: 8080
     debug: false
+    scheme: http
   language:
     go:
       module: github.com/inference-gateway/grafana-agent
@@ -237,6 +238,16 @@ spec:
     url: https://github.com/inference-gateway/grafana-agent
     github_app: true
     issue_templates: false
-  sandbox:
-    flox:
+    dependabot: true
+    ci: true
+    cd: true
+  development:
+    sandbox:
+      flox:
+        enabled: true
+      devcontainer:
+        enabled: false
+      dockerCompose:
+        enabled: false
+    ai:
       enabled: true
