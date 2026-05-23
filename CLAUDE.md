@@ -123,6 +123,7 @@ When implementing tests:
 
 ### Development Environment
 - **Flox Environment**: ✅ Configured via `.flox/env/manifest.toml` providing Go 1.26.2, linter, `go-task`, Docker, and the Claude Code CLI. Activate with `flox activate`.
+- **Docker Compose**: ✅ Local service stack defined in `docker-compose.yaml`. Bring up the Inference Gateway and the agent (built from the local `Dockerfile`) with `docker compose up --build`. Opt-in profiles add the `infer` CLI (`docker compose --profile cli run --rm cli`) and the `a2a-debugger` (`docker compose --profile debugger run --rm debugger --server-url http://grafana-agent:8080 tasks list`).
 
 ## Important Constraints
 

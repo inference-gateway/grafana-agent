@@ -11,6 +11,10 @@ Dockerfile linguist-generated=true
 Taskfile.yml linguist-generated=true
 .gitignore linguist-generated=true
 
+# Docker Compose dev stack (generated)
+docker-compose.yaml linguist-generated=true
+.env.example linguist-generated=true
+
 # CI/CD workflows
 .github/workflows/ci.yml linguist-generated=true
 .github/workflows/cd.yml linguist-generated=true
