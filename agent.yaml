@@ -209,22 +209,10 @@ spec:
         required:
           - dashboard_json
   skills:
-    - id: dashboard-authoring
-      bare: true
-      name: dashboard-authoring
-      description: "Use this when the user asks to build, modify, or deploy a Grafana dashboard. Walks the full lifecycle - discover_metrics to enumerate signals, generate_promql_queries to draft expressions, validate_promql_query to confirm they parse, create_dashboard to assemble the JSON, and deploy_dashboard to ship it."
-      tags:
-        - grafana
-        - dashboard
-        - workflow
-    - id: metric-exploration
-      bare: true
-      name: metric-exploration
-      description: "Use this when the user is exploring what metrics a Prometheus server exposes or wants candidate PromQL expressions before committing to a dashboard. Combines discover_metrics, generate_promql_queries, and validate_promql_query into a discovery loop."
-      tags:
-        - prometheus
-        - promql
-        - exploration
+    - id: promql
+      source: https://github.com/grafana/skills/tree/6311c4f4d36db3c5a85686ef2b3ce5fed4e53c0c/skills/grafana-core/promql
+    - id: dashboarding
+      source: https://github.com/grafana/skills/tree/6311c4f4d36db3c5a85686ef2b3ce5fed4e53c0c/skills/grafana-core/dashboarding
   server:
     port: 8080
     debug: false

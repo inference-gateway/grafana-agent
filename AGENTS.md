@@ -73,15 +73,15 @@ This agent exposes 6 function-call tools:
 
 This agent ships 2 markdown skills that are loaded into the system prompt at startup:
 
-### dashboard-authoring
-- **Description**: Use this when the user asks to build, modify, or deploy a Grafana dashboard. Walks the full lifecycle - discover_metrics to enumerate signals, generate_promql_queries to draft expressions, validate_promql_query to confirm they parse, create_dashboard to assemble the JSON, and deploy_dashboard to ship it.
-- **Tags**: grafana, dashboard, workflow
-- **Source**: scaffolded locally (`skills/dashboard-authoring/SKILL.md`)
+### promql
+- **Description**: Write, validate, and optimise PromQL queries for Prometheus and Grafana Cloud Metrics. Use when the user asks to query metrics, write a PromQL expression, calculate rates, aggregate across labels, build histogram quantiles, create recording rules, debug query performance, or understand metric cardinality. Triggers on phrases like "PromQL", "Prometheus query", "write a metric query", "calculate rate", "histogram_quantile", "recording rule", "metric cardinality", "sum by", "rate vs irate", "absent()", or "query is slow".
+- **Version**: 6311c4f4d36db3c5a85686ef2b3ce5fed4e53c0c
+- **Source**: fetched from the skills registry (`skills/promql/SKILL.md`)
 
-### metric-exploration
-- **Description**: Use this when the user is exploring what metrics a Prometheus server exposes or wants candidate PromQL expressions before committing to a dashboard. Combines discover_metrics, generate_promql_queries, and validate_promql_query into a discovery loop.
-- **Tags**: prometheus, promql, exploration
-- **Source**: scaffolded locally (`skills/metric-exploration/SKILL.md`)
+### dashboarding
+- **Description**: Create, modify, and organise Grafana dashboards including panels, variables, transformations, and alerting. Use when the user asks to create a Grafana dashboard, add a panel, configure a time series or stat panel, add template variables, set up dashboard linking, use transformations, configure thresholds, build a dashboard for a service, or export dashboard JSON. Triggers on phrases like "create dashboard", "add panel", "time series panel", "Grafana dashboard JSON", "template variables", "dashboard variable", "panel transformation", "threshold", "stat panel", "table panel", "Grafana annotations", or "dashboard folder".
+- **Version**: 6311c4f4d36db3c5a85686ef2b3ce5fed4e53c0c
+- **Source**: fetched from the skills registry (`skills/dashboarding/SKILL.md`)
 
 ## Server Configuration
 
@@ -165,9 +165,9 @@ docker run -p 8080:8080 grafana-agent
 │   └── create_dashboard.go       # Creates a Grafana dashboard with specified panels, queries, and configurations
 │   └── deploy_dashboard.go       # Deploys a dashboard JSON to Grafana (Cloud or self-hosted)
 ├── skills/                       # Skill directories (SKILL.md + optional assets)
-│   └── dashboard-authoring/      # Use this when the user asks to build, modify, or deploy a Grafana dashboard. Walks the full lifecycle - discover_metrics to enumerate signals, generate_promql_queries to draft expressions, validate_promql_query to confirm they parse, create_dashboard to assemble the JSON, and deploy_dashboard to ship it.
+│   └── promql/                   # Write, validate, and optimise PromQL queries for Prometheus and Grafana Cloud Metrics. Use when the user asks to query metrics, write a PromQL expression, calculate rates, aggregate across labels, build histogram quantiles, create recording rules, debug query performance, or understand metric cardinality. Triggers on phrases like "PromQL", "Prometheus query", "write a metric query", "calculate rate", "histogram_quantile", "recording rule", "metric cardinality", "sum by", "rate vs irate", "absent()", or "query is slow".
 │       └── SKILL.md              # Playbook prepended to the system prompt
-│   └── metric-exploration/       # Use this when the user is exploring what metrics a Prometheus server exposes or wants candidate PromQL expressions before committing to a dashboard. Combines discover_metrics, generate_promql_queries, and validate_promql_query into a discovery loop.
+│   └── dashboarding/             # Create, modify, and organise Grafana dashboards including panels, variables, transformations, and alerting. Use when the user asks to create a Grafana dashboard, add a panel, configure a time series or stat panel, add template variables, set up dashboard linking, use transformations, configure thresholds, build a dashboard for a service, or export dashboard JSON. Triggers on phrases like "create dashboard", "add panel", "time series panel", "Grafana dashboard JSON", "template variables", "dashboard variable", "panel transformation", "threshold", "stat panel", "table panel", "Grafana annotations", or "dashboard folder".
 │       └── SKILL.md              # Playbook prepended to the system prompt
 ├── .well-known/                  # Agent configuration
 │   └── agent-card.json           # Agent metadata
