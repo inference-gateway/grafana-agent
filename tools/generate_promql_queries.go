@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	server "github.com/inference-gateway/adk/server"
-	promql "github.com/inference-gateway/grafana-agent/internal/promql"
 	zap "go.uber.org/zap"
+
+	server "github.com/inference-gateway/adk/server"
+
+	promql "github.com/inference-gateway/grafana-agent/internal/promql"
 )
 
 // GeneratePromqlQueriesTool struct holds the tool with services

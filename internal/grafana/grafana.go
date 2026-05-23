@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
-	config "github.com/inference-gateway/grafana-agent/config"
 	zap "go.uber.org/zap"
+
+	config "github.com/inference-gateway/grafana-agent/config"
 )
 
 // Dashboard represents a Grafana dashboard

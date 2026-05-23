@@ -6,9 +6,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/inference-gateway/grafana-agent/config"
-	"github.com/inference-gateway/grafana-agent/internal/grafana"
-	"go.uber.org/zap"
+	zap "go.uber.org/zap"
+
+	config "github.com/inference-gateway/grafana-agent/config"
+	grafana "github.com/inference-gateway/grafana-agent/internal/grafana"
 )
 
 func TestNewDeployDashboardTool(t *testing.T) {

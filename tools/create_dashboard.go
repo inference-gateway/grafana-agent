@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"log"
 
+	zap "go.uber.org/zap"
+
 	server "github.com/inference-gateway/adk/server"
+
 	config "github.com/inference-gateway/grafana-agent/config"
 	grafana "github.com/inference-gateway/grafana-agent/internal/grafana"
-	zap "go.uber.org/zap"
 )
 
 // CreateDashboardTool struct holds the tool with services

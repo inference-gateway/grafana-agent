@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/inference-gateway/grafana-agent/config"
-	"github.com/inference-gateway/grafana-agent/internal/grafana"
-	"go.uber.org/zap"
+	zap "go.uber.org/zap"
+
+	config "github.com/inference-gateway/grafana-agent/config"
+	grafana "github.com/inference-gateway/grafana-agent/internal/grafana"
 )
 
 // mockGrafanaService is a mock implementation of the Grafana interface for testing

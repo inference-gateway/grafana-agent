@@ -6,8 +6,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/inference-gateway/grafana-agent/internal/promql/promqlfakes"
-	"go.uber.org/zap"
+	zap "go.uber.org/zap"
+
+	promqlfakes "github.com/inference-gateway/grafana-agent/internal/promql/promqlfakes"
 )
 
 func TestNewValidatePromqlQueryTool(t *testing.T) {

@@ -3,8 +3,9 @@ package promql
 import (
 	"context"
 
-	config "github.com/inference-gateway/grafana-agent/config"
 	zap "go.uber.org/zap"
+
+	config "github.com/inference-gateway/grafana-agent/config"
 )
 
 //go:generate go tool counterfeiter -generate

@@ -7,9 +7,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/inference-gateway/grafana-agent/config"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
+	require "github.com/stretchr/testify/require"
+
+	zap "go.uber.org/zap"
+
+	config "github.com/inference-gateway/grafana-agent/config"
 )
 
 func TestNewGrafanaService(t *testing.T) {

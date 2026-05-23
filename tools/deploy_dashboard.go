@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	zap "go.uber.org/zap"
+
 	server "github.com/inference-gateway/adk/server"
+
 	config "github.com/inference-gateway/grafana-agent/config"
 	grafana "github.com/inference-gateway/grafana-agent/internal/grafana"
-	zap "go.uber.org/zap"
 )
 
 // DeployDashboardTool struct holds the tool with services
