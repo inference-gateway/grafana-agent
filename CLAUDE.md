@@ -90,8 +90,8 @@ To modify tools:
 
 ### Skills (markdown system-prompt playbooks)
 The following skills are currently shipped with the agent:
-- **dashboard-authoring** (bare scaffold): Use this when the user asks to build, modify, or deploy a Grafana dashboard. Walks the full lifecycle - discover_metrics to enumerate signals, generate_promql_queries to draft expressions, validate_promql_query to confirm they parse, create_dashboard to assemble the JSON, and deploy_dashboard to ship it.
-- **metric-exploration** (bare scaffold): Use this when the user is exploring what metrics a Prometheus server exposes or wants candidate PromQL expressions before committing to a dashboard. Combines discover_metrics, generate_promql_queries, and validate_promql_query into a discovery loop.
+- **promql** (registry): Write, validate, and optimise PromQL queries for Prometheus and Grafana Cloud Metrics. Use when the user asks to query metrics, write a PromQL expression, calculate rates, aggregate across labels, build histogram quantiles, create recording rules, debug query performance, or understand metric cardinality. Triggers on phrases like "PromQL", "Prometheus query", "write a metric query", "calculate rate", "histogram_quantile", "recording rule", "metric cardinality", "sum by", "rate vs irate", "absent()", or "query is slow".
+- **dashboarding** (registry): Create, modify, and organise Grafana dashboards including panels, variables, transformations, and alerting. Use when the user asks to create a Grafana dashboard, add a panel, configure a time series or stat panel, add template variables, set up dashboard linking, use transformations, configure thresholds, build a dashboard for a service, or export dashboard JSON. Triggers on phrases like "create dashboard", "add panel", "time series panel", "Grafana dashboard JSON", "template variables", "dashboard variable", "panel transformation", "threshold", "stat panel", "table panel", "Grafana annotations", or "dashboard folder".
 
 Each skill lives in its own directory at `skills/<id>/SKILL.md` and is
 loaded into the system prompt at startup. Bare skills can ship arbitrary

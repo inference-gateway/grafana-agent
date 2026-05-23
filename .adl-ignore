@@ -19,8 +19,6 @@ tools/generate_promql_queries_test.go
 tools/validate_promql_query_test.go
 tools/discover_metrics_test.go
 tools/deploy_dashboard_test.go
-skills/dashboard-authoring/SKILL.md
-skills/metric-exploration/SKILL.md
 internal/grafana/grafana.go
 internal/promql/promql.go
 
