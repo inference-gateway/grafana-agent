@@ -221,6 +221,9 @@ spec:
     go:
       module: github.com/inference-gateway/grafana-agent
       version: "1.26.2"
+      vendor:
+        deps: []
+        devdeps: []
   scm:
     provider: github
     url: https://github.com/inference-gateway/grafana-agent
@@ -248,3 +251,4 @@ spec:
         enabled: false
       opencode:
         enabled: false
+    deps: []
