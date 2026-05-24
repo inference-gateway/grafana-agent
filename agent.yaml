@@ -3,7 +3,7 @@ kind: Agent
 metadata:
   name: grafana-agent
   description: A2A agent server for grafana dashboards automation tasks
-  version: 0.1.2
+  version: 0.2.0
 spec:
   capabilities:
     streaming: true
