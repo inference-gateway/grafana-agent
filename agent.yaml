@@ -226,6 +226,11 @@ spec:
           - github.com/stretchr/testify@v1.11.1
         devdeps:
           - github.com/maxbrunsfeld/counterfeiter/v6@v6.11.2
+  hooks:
+    post:
+      - go mod tidy
+      - go fmt ./...
+      - go generate ./...
   scm:
     provider: github
     url: https://github.com/inference-gateway/grafana-agent
