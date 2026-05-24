@@ -222,8 +222,10 @@ spec:
       module: github.com/inference-gateway/grafana-agent
       version: "1.26.2"
       vendor:
-        deps: []
-        devdeps: []
+        deps:
+          - github.com/stretchr/testify@v1.11.1
+        devdeps:
+          - github.com/maxbrunsfeld/counterfeiter/v6@v6.11.2
   scm:
     provider: github
     url: https://github.com/inference-gateway/grafana-agent

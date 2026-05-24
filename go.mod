@@ -2,8 +2,6 @@ module github.com/inference-gateway/grafana-agent
 
 go 1.26.2
 
-tool github.com/maxbrunsfeld/counterfeiter/v6
-
 require (
 	github.com/inference-gateway/adk v0.19.0
 	github.com/sethvargo/go-envconfig v1.3.0
@@ -95,3 +93,5 @@ require (
 	golang.org/x/tools v0.41.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
+
+tool github.com/maxbrunsfeld/counterfeiter/v6
