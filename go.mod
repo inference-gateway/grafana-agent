@@ -5,7 +5,7 @@ go 1.26.2
 tool github.com/maxbrunsfeld/counterfeiter/v6
 
 require (
-	github.com/inference-gateway/adk v0.18.4
+	github.com/inference-gateway/adk v0.19.0
 	github.com/sethvargo/go-envconfig v1.3.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
