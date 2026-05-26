@@ -1,6 +1,6 @@
 <div align="center">
 
-# Grafana-Agent
+# Grafana Agent
 
 [![CI](https://github.com/inference-gateway/grafana-agent/workflows/CI/badge.svg)](https://github.com/inference-gateway/grafana-agent/actions/workflows/ci.yml)
 [![Go Report Card](https://img.shields.io/badge/Go%20Report%20Card-A+-brightgreen?style=flat&logo=go&logoColor=white)](https://goreportcard.com/report/github.com/inference-gateway/grafana-agent)
