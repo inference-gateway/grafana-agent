@@ -220,7 +220,7 @@ spec:
   language:
     go:
       module: github.com/inference-gateway/grafana-agent
-      version: "1.26.2"
+      version: "1.26.4"
       vendor:
         deps:
           - github.com/stretchr/testify@v1.11.1
