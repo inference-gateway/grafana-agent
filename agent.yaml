@@ -213,6 +213,47 @@ spec:
       source: https://github.com/grafana/skills/tree/6311c4f4d36db3c5a85686ef2b3ce5fed4e53c0c/skills/grafana-core/promql
     - id: dashboarding
       source: https://github.com/grafana/skills/tree/6311c4f4d36db3c5a85686ef2b3ce5fed4e53c0c/skills/grafana-core/dashboarding
+  examples:
+    - title: Discover metrics for a service
+      description: >-
+        Ask "What HTTP metrics are exposed in Prometheus matching http_.*?" and
+        the agent uses discover_metrics to list the matching series, optionally
+        filtered by metric type (counter, gauge, histogram, summary).
+    - title: Build and validate a PromQL query
+      description: >-
+        Ask "Give me the p99 request latency per endpoint" and the agent drafts
+        PromQL with generate_promql_queries, applies the promql skill's best
+        practices, and confirms it parses against Prometheus with
+        validate_promql_query before returning it.
+    - title: Create a dashboard for a service
+      description: >-
+        Ask "Create a RED-method dashboard for my checkout service" and the
+        agent uses the dashboarding skill and create_dashboard to assemble time
+        series and stat panels wired to validated PromQL queries, with
+        thresholds and template variables.
+    - title: Deploy a dashboard to Grafana
+      description: >-
+        Provide a Grafana URL and API key, then ask "Deploy this dashboard to my
+        Grafana Cloud instance" and the agent pushes the dashboard JSON with
+        deploy_dashboard (guarded by GRAFANA_DEPLOY_ENABLED) to Grafana Cloud or
+        a self-hosted instance.
+  documentation:
+    pages:
+      - title: Getting Started
+        path: docs/getting-started.md
+        description: >-
+          Run the agent, connect it to an LLM, Prometheus, and Grafana, and send
+          your first request.
+      - title: Configuration
+        path: docs/configuration.md
+        description: >-
+          Environment variables for the LLM client, Prometheus, and Grafana
+          deployment.
+      - title: Usage
+        path: docs/usage.md
+        description: >-
+          The discover, query, build, and deploy workflow and the tools behind
+          it.
   server:
     port: 8080
     debug: false

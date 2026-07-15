@@ -77,12 +77,26 @@ infer agents add grafana-agent http://localhost:8080 \
 | `create_dashboard` | Creates a Grafana dashboard with specified panels, queries, and configurations | dashboard_title, deploy, description, grafana_url, panels, refresh_interval, tags, time_range, variables |
 | `deploy_dashboard` | Deploys a dashboard JSON to Grafana (Cloud or self-hosted) | dashboard_json, folder_uid, grafana_url, message, overwrite |
 
+## Examples
+
+| Example | Description |
+|---------|-------------|
+| Discover metrics for a service | Ask "What HTTP metrics are exposed in Prometheus matching http_.*?" and the agent uses discover_metrics to list the matching series, optionally filtered by metric type (counter, gauge, histogram, summary). |
+| Build and validate a PromQL query | Ask "Give me the p99 request latency per endpoint" and the agent drafts PromQL with generate_promql_queries, applies the promql skill's best practices, and confirms it parses against Prometheus with validate_promql_query before returning it. |
+| Create a dashboard for a service | Ask "Create a RED-method dashboard for my checkout service" and the agent uses the dashboarding skill and create_dashboard to assemble time series and stat panels wired to validated PromQL queries, with thresholds and template variables. |
+| Deploy a dashboard to Grafana | Provide a Grafana URL and API key, then ask "Deploy this dashboard to my Grafana Cloud instance" and the agent pushes the dashboard JSON with deploy_dashboard (guarded by GRAFANA_DEPLOY_ENABLED) to Grafana Cloud or a self-hosted instance. |
+
 ## Skills (loaded into the system prompt)
 
 | Skill | Description | Source |
 |-------|-------------|--------|
 | `promql` | Write, validate, and optimise PromQL queries for Prometheus and Grafana Cloud Metrics. Use when the user asks to query metrics, write a PromQL expression, calculate rates, aggregate across labels, build histogram quantiles, create recording rules, debug query performance, or understand metric cardinality. Triggers on phrases like "PromQL", "Prometheus query", "write a metric query", "calculate rate", "histogram_quantile", "recording rule", "metric cardinality", "sum by", "rate vs irate", "absent()", or "query is slow". | registry @ 6311c4f4d36db3c5a85686ef2b3ce5fed4e53c0c |
 | `dashboarding` | Create, modify, and organise Grafana dashboards including panels, variables, transformations, and alerting. Use when the user asks to create a Grafana dashboard, add a panel, configure a time series or stat panel, add template variables, set up dashboard linking, use transformations, configure thresholds, build a dashboard for a service, or export dashboard JSON. Triggers on phrases like "create dashboard", "add panel", "time series panel", "Grafana dashboard JSON", "template variables", "dashboard variable", "panel transformation", "threshold", "stat panel", "table panel", "Grafana annotations", or "dashboard folder". | registry @ 6311c4f4d36db3c5a85686ef2b3ce5fed4e53c0c |
+
+## Documentation
+- [Getting Started](docs/getting-started.md)
+- [Configuration](docs/configuration.md)
+- [Usage](docs/usage.md)
 
 ## Configuration
 
