@@ -50,7 +50,9 @@ spec:
       inject:
         - logger
         - promql
-      description: Discovers available metrics from a Prometheus endpoint with optional filtering
+      description:
+        Discovers available metrics from a Prometheus endpoint with optional
+        filtering
       tags:
         - promql
         - prometheus
@@ -67,7 +69,8 @@ spec:
             description: Optional regex pattern to filter metrics by name
           metric_type:
             type: string
-            description: Optional metric type filter (counter, gauge, histogram, summary)
+            description:
+              Optional metric type filter (counter, gauge, histogram, summary)
             enum:
               - counter
               - gauge
@@ -80,7 +83,9 @@ spec:
       inject:
         - logger
         - promql
-      description: Generates PromQL query suggestions for given metric names by querying Prometheus metadata
+      description:
+        Generates PromQL query suggestions for given metric names by querying
+        Prometheus metadata
       tags:
         - promql
         - prometheus
@@ -128,7 +133,9 @@ spec:
         - logger
         - grafana
         - config.grafana
-      description: Creates a Grafana dashboard with specified panels, queries, and configurations
+      description:
+        Creates a Grafana dashboard with specified panels, queries, and
+        configurations
       tags:
         - grafana
         - dashboard
@@ -144,10 +151,13 @@ spec:
             description: Description of what the dashboard monitors or displays
           grafana_url:
             type: string
-            description: Grafana server URL (overrides default configuration if provided)
+            description:
+              Grafana server URL (overrides default configuration if provided)
           deploy:
             type: boolean
-            description: Whether to deploy the dashboard to Grafana (requires grafana_url and GRAFANA_DEPLOY_ENABLED=true)
+            description:
+              Whether to deploy the dashboard to Grafana (requires grafana_url
+              and GRAFANA_DEPLOY_ENABLED=true)
           tags:
             type: array
             items:
@@ -155,7 +165,8 @@ spec:
             description: Tags to categorize the dashboard
           panels:
             type: array
-            description: Array of panel configurations (title, type, queries, etc.)
+            description:
+              Array of panel configurations (title, type, queries, etc.)
             items:
               type: object
           time_range:
@@ -196,16 +207,22 @@ spec:
             description: The complete dashboard JSON object to deploy
           grafana_url:
             type: string
-            description: Grafana server URL (user provides in prompt or uses config default)
+            description:
+              Grafana server URL (user provides in prompt or uses config
+              default)
           folder_uid:
             type: string
-            description: Optional folder UID where the dashboard should be deployed
+            description:
+              Optional folder UID where the dashboard should be deployed
           overwrite:
             type: boolean
-            description: Whether to overwrite an existing dashboard with the same UID (default true)
+            description:
+              Whether to overwrite an existing dashboard with the same UID
+              (default true)
           message:
             type: string
-            description: Optional commit message describing the dashboard changes
+            description:
+              Optional commit message describing the dashboard changes
         required:
           - dashboard_json
   skills:
@@ -280,6 +297,8 @@ spec:
     dependabot: true
     ci: true
     cd: true
+    app_id_secret: RELEASER_APP_ID
+    app_private_key_secret: RELEASER_APP_PRIVATE_KEY
   development:
     sandbox:
       flox:
@@ -292,8 +311,12 @@ spec:
       orchestrators:
         claudecode:
           enabled: true
+          appIdSecret: CLAUDE_APP_ID
+          appPrivateKeySecret: CLAUDE_APP_PRIVATE_KEY
         infer:
           enabled: true
+          appIdSecret: INFER_APP_ID
+          appPrivateKeySecret: INFER_APP_PRIVATE_KEY
         codex:
           enabled: false
         gemini:
