@@ -25,8 +25,6 @@ go run . start
 
 # Or build and invoke the CLI directly
 task build
-./bin/grafana-agent --help
-./bin/grafana-agent --version
 ./bin/grafana-agent start
 
 # Or with Docker
@@ -81,10 +79,10 @@ infer agents add grafana-agent http://localhost:8080 \
 
 | Example | Description |
 |---------|-------------|
-| Discover metrics for a service | Ask "What HTTP metrics are exposed in Prometheus matching http_.*?" and the agent uses discover_metrics to list the matching series, optionally filtered by metric type (counter, gauge, histogram, summary). |
-| Build and validate a PromQL query | Ask "Give me the p99 request latency per endpoint" and the agent drafts PromQL with generate_promql_queries, applies the promql skill's best practices, and confirms it parses against Prometheus with validate_promql_query before returning it. |
-| Create a dashboard for a service | Ask "Create a RED-method dashboard for my checkout service" and the agent uses the dashboarding skill and create_dashboard to assemble time series and stat panels wired to validated PromQL queries, with thresholds and template variables. |
-| Deploy a dashboard to Grafana | Provide a Grafana URL and API key, then ask "Deploy this dashboard to my Grafana Cloud instance" and the agent pushes the dashboard JSON with deploy_dashboard (guarded by GRAFANA_DEPLOY_ENABLED) to Grafana Cloud or a self-hosted instance. |
+| [Discover metrics for a service](examples/discover-metrics-for-a-service/) | Ask "What HTTP metrics are exposed in Prometheus matching http_.*?" and the agent uses discover_metrics to list the matching series, optionally filtered by metric type (counter, gauge, histogram, summary). |
+| [Build and validate a PromQL query](examples/build-and-validate-a-promql-query/) | Ask "Give me the p99 request latency per endpoint" and the agent drafts PromQL with generate_promql_queries, applies the promql skill's best practices, and confirms it parses against Prometheus with validate_promql_query before returning it. |
+| [Create a dashboard for a service](examples/create-a-dashboard-for-a-service/) | Ask "Create a RED-method dashboard for my checkout service" and the agent uses the dashboarding skill and create_dashboard to assemble time series and stat panels wired to validated PromQL queries, with thresholds and template variables. |
+| [Deploy a dashboard to Grafana](examples/deploy-a-dashboard-to-grafana/) | Provide a Grafana URL and API key, then ask "Deploy this dashboard to my Grafana Cloud instance" and the agent pushes the dashboard JSON with deploy_dashboard (guarded by GRAFANA_DEPLOY_ENABLED) to Grafana Cloud or a self-hosted instance. |
 
 ## Skills (loaded into the system prompt)
 
@@ -100,55 +98,9 @@ infer agents add grafana-agent http://localhost:8080 \
 
 ## Configuration
 
-Configure the agent via environment variables:
-
-### Custom Configuration
-
-The following custom configuration variables are available. Defaults are
-derived from `spec.config.*` in `agent.yaml`; the env vars below override
-them at runtime.
-
-| Category | Variable | Default |
-|----------|----------|---------|
-| **Grafana** | `GRAFANA_API_KEY` | `` |
-| **Grafana** | `GRAFANA_DEPLOY_ENABLED` | `false` |
-| **Grafana** | `GRAFANA_ORG_ID` | `` |
-| **Grafana** | `GRAFANA_URL` | `` |
-| **Tools** | `TOOLS_READ_ENABLED` | `true` |
-
-### Environment Variables
-
-| Category | Variable | Description | Default |
-|----------|----------|-------------|---------|
-| **Server** | `A2A_PORT` | Server port | `8080` |
-| **Server** | `A2A_DEBUG` | Enable debug mode | `false` |
-| **Server** | `A2A_AGENT_URL` | Agent URL for internal references | `http://localhost:8080` |
-| **Server** | `A2A_STREAMING_STATUS_UPDATE_INTERVAL` | Streaming status update frequency | `1s` |
-| **Server** | `A2A_SERVER_READ_TIMEOUT` | HTTP server read timeout | `120s` |
-| **Server** | `A2A_SERVER_WRITE_TIMEOUT` | HTTP server write timeout | `120s` |
-| **Server** | `A2A_SERVER_IDLE_TIMEOUT` | HTTP server idle timeout | `120s` |
-| **Server** | `A2A_SERVER_DISABLE_HEALTHCHECK_LOG` | Disable logging for health check requests | `true` |
-| **Agent Metadata** | `A2A_AGENT_CARD_FILE_PATH` | Path to agent card JSON file | `.well-known/agent-card.json` |
-| **LLM Client** | `A2A_AGENT_CLIENT_PROVIDER` | LLM provider (`openai`, `anthropic`, `azure`, `ollama`, `deepseek`) |`` |
-| **LLM Client** | `A2A_AGENT_CLIENT_MODEL` | Model to use |`` |
-| **LLM Client** | `A2A_AGENT_CLIENT_API_KEY` | API key for LLM provider | - |
-| **LLM Client** | `A2A_AGENT_CLIENT_BASE_URL` | Custom LLM API endpoint | - |
-| **LLM Client** | `A2A_AGENT_CLIENT_TIMEOUT` | Timeout for LLM requests | `30s` |
-| **LLM Client** | `A2A_AGENT_CLIENT_MAX_RETRIES` | Maximum retries for LLM requests | `3` |
-| **LLM Client** | `A2A_AGENT_CLIENT_MAX_CHAT_COMPLETION_ITERATIONS` | Max chat completion rounds | `10` |
-| **LLM Client** | `A2A_AGENT_CLIENT_MAX_TOKENS` | Maximum tokens for LLM responses |`4096` |
-| **LLM Client** | `A2A_AGENT_CLIENT_TEMPERATURE` | Controls randomness of LLM output |`0.7` |
-| **Capabilities** | `A2A_CAPABILITIES_STREAMING` | Enable streaming responses | `true` |
-| **Capabilities** | `A2A_CAPABILITIES_PUSH_NOTIFICATIONS` | Enable push notifications | `false` |
-| **Capabilities** | `A2A_CAPABILITIES_STATE_TRANSITION_HISTORY` | Track state transitions | `false` |
-| **Task Management** | `A2A_TASK_RETENTION_MAX_COMPLETED_TASKS` | Max completed tasks to keep (0 = unlimited) | `100` |
-| **Task Management** | `A2A_TASK_RETENTION_MAX_FAILED_TASKS` | Max failed tasks to keep (0 = unlimited) | `50` |
-| **Task Management** | `A2A_TASK_RETENTION_CLEANUP_INTERVAL` | Cleanup frequency (0 = manual only) | `5m` |
-| **Storage** | `A2A_QUEUE_PROVIDER` | Storage backend (`memory` or `redis`) | `memory` |
-| **Storage** | `A2A_QUEUE_URL` | Redis connection URL (when using Redis) | - |
-| **Storage** | `A2A_QUEUE_MAX_SIZE` | Maximum queue size | `100` |
-| **Storage** | `A2A_QUEUE_CLEANUP_INTERVAL` | Task cleanup interval | `30s` |
-| **Authentication** | `A2A_AUTH_ENABLE` | Enable OIDC authentication | `false` |
+The agent is configured via environment variables. Defaults are derived
+from `agent.yaml`; see [CONFIGURATIONS.md](CONFIGURATIONS.md) for the
+full reference of custom and `A2A_*` variables.
 
 ## Development
 
@@ -210,10 +162,6 @@ docker run --rm -it --network host ghcr.io/inference-gateway/a2a-debugger:latest
 The Docker image can be built with custom version information using build arguments:
 
 ```bash
-# Build with default values from ADL
-docker build -t grafana-agent .
-
-# Build with custom version information
 docker build \
   --build-arg VERSION=1.2.3 \
   --build-arg AGENT_NAME="My Custom Agent" \
