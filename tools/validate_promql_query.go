@@ -55,6 +55,9 @@ type ValidateQueryResponse struct {
 
 // ValidatePromqlQueryHandler handles the validate_promql_query tool execution
 func (t *ValidatePromqlQueryTool) ValidatePromqlQueryHandler(ctx context.Context, args map[string]any) (string, error) {
+	span := startToolSpan(ctx, "validate_promql_query")
+	defer span.End()
+
 	t.logger.Info("validating promql query")
 
 	prometheusURL, ok := args["prometheus_url"].(string)

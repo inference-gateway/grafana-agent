@@ -83,6 +83,9 @@ func NewCreateDashboardTool(logger *zap.Logger, grafanaSvc grafana.Grafana, graf
 
 // CreateDashboardHandler handles the create_dashboard tool execution
 func (t *CreateDashboardTool) CreateDashboardHandler(ctx context.Context, args map[string]any) (string, error) {
+	span := startToolSpan(ctx, "create_dashboard")
+	defer span.End()
+
 	dashboardTitle, ok := args["dashboard_title"].(string)
 	if !ok || dashboardTitle == "" {
 		return "", fmt.Errorf("dashboard_title is required and must be a string")

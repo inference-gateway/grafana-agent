@@ -62,6 +62,9 @@ func NewDeployDashboardTool(logger *zap.Logger, grafanaSvc grafana.Grafana, graf
 
 // DeployDashboardHandler handles the deploy_dashboard tool execution
 func (t *DeployDashboardTool) DeployDashboardHandler(ctx context.Context, args map[string]any) (string, error) {
+	span := startToolSpan(ctx, "deploy_dashboard")
+	defer span.End()
+
 	if t.grafanaConfig != nil && !t.grafanaConfig.DeployEnabled {
 		t.logger.Warn("Grafana deployment attempted but GRAFANA_DEPLOY_ENABLED=false")
 		return "", fmt.Errorf("grafana deployment is disabled - set GRAFANA_DEPLOY_ENABLED=true to enable dashboard deployments")

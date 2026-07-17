@@ -64,6 +64,9 @@ type GeneratePromqlQueriesResponse struct {
 
 // GeneratePromqlQueriesHandler handles the generate_promql_queries tool execution
 func (t *GeneratePromqlQueriesTool) GeneratePromqlQueriesHandler(ctx context.Context, args map[string]any) (string, error) {
+	span := startToolSpan(ctx, "generate_promql_queries")
+	defer span.End()
+
 	t.logger.Info("generating promql queries")
 
 	prometheusURL, ok := args["prometheus_url"].(string)
