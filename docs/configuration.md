@@ -45,6 +45,23 @@ configured `GRAFANA_API_KEY`; the tools return an error otherwise. A
 `grafana_url` argument on the tool call overrides `GRAFANA_URL` for that
 request.
 
+## Telemetry
+
+OpenTelemetry instrumentation is enabled by default via `spec.telemetry` in
+`agent.yaml`. Metrics are exposed on a Prometheus endpoint; traces can be
+exported via OTLP when configured.
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `A2A_TELEMETRY_ENABLE` | Enable OpenTelemetry instrumentation | `true` |
+| `A2A_OTEL_METRICS_EXPORTER` | Metrics exporter (`prometheus`, `otlp`, or `none`) | `prometheus` |
+| `A2A_OTEL_EXPORTER_PROMETHEUS_PORT` | Prometheus metrics endpoint port | `9464` |
+| `A2A_OTEL_TRACES_EXPORTER` | Trace exporter (`otlp` or `none`) | `none` |
+
+Set `A2A_TELEMETRY_ENABLE=false` to disable telemetry entirely. The Prometheus
+metrics endpoint is served at `0.0.0.0:<port>/metrics` when the Prometheus
+exporter is active.
+
 ## Built-in tools
 
 | Variable | Description | Default |

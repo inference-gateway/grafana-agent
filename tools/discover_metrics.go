@@ -66,6 +66,9 @@ type FilterInfo struct {
 
 // DiscoverMetricsHandler handles the discover_metrics tool execution
 func (t *DiscoverMetricsTool) DiscoverMetricsHandler(ctx context.Context, args map[string]any) (string, error) {
+	span := startToolSpan(ctx, "discover_metrics")
+	defer span.End()
+
 	t.logger.Info("discovering metrics")
 
 	prometheusURL, ok := args["prometheus_url"].(string)
