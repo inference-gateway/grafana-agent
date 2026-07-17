@@ -35,7 +35,7 @@ import (
 // via `-ldflags "-X 'main.Version=...'"` (see Dockerfile). They default
 // to the values declared in the ADL.
 var (
-	Version          = "0.2.2"
+	Version          = "0.3.0"
 	AgentName        = "grafana-agent"
 	AgentDescription = "A2A agent server for grafana dashboards automation tasks"
 )

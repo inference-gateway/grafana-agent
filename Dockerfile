@@ -5,7 +5,7 @@
 FROM golang:1.26.4-alpine AS builder
 
 # Build arguments for version injection
-ARG VERSION="0.2.2"
+ARG VERSION="0.3.0"
 ARG AGENT_NAME="grafana-agent"
 ARG AGENT_DESCRIPTION="A2A agent server for grafana dashboards automation tasks"
 

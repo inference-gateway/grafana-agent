@@ -2,6 +2,73 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0](https://github.com/inference-gateway/grafana-agent/compare/v0.2.2...v0.3.0) (2026-07-17)
+
+### ✨ Features
+
+* **telemetry:** add OpenTelemetry support via agent.yaml manifest ([#95](https://github.com/inference-gateway/grafana-agent/issues/95)) ([074f185](https://github.com/inference-gateway/grafana-agent/commit/074f185225163171bde3a0cefc817c341651394f))
+
+### 👷 CI
+
+* **claude:** change effort to max ([623a246](https://github.com/inference-gateway/grafana-agent/commit/623a246718fc18a56a6f07ce383d45e61e859676))
+* **claude:** remove system prompt - use default community maintained prompt ([fca1de7](https://github.com/inference-gateway/grafana-agent/commit/fca1de786708fe635758f9d99893c57a4a83b161))
+* **claude:** standardize workflow + task-based branch prefix ([dab06f9](https://github.com/inference-gateway/grafana-agent/commit/dab06f9e57c659bf7b8351920f4c44b4b33f5634))
+* **deps:** bump actions/checkout in the github-actions group ([#61](https://github.com/inference-gateway/grafana-agent/issues/61)) ([06c8aba](https://github.com/inference-gateway/grafana-agent/commit/06c8ababefa3c446b31c73fea4ed20ac32854491))
+* **deps:** bump actions/setup-go in the github-actions group ([#91](https://github.com/inference-gateway/grafana-agent/issues/91)) ([2853482](https://github.com/inference-gateway/grafana-agent/commit/2853482d01e03371d603e80e362023043711535d))
+* **deps:** bump anthropics/claude-code-action in the github-actions group ([#56](https://github.com/inference-gateway/grafana-agent/issues/56)) ([9495d31](https://github.com/inference-gateway/grafana-agent/commit/9495d31737c69a52df8465e8237c1360906c3e26))
+* **deps:** bump anthropics/claude-code-action in the github-actions group ([#59](https://github.com/inference-gateway/grafana-agent/issues/59)) ([fbde196](https://github.com/inference-gateway/grafana-agent/commit/fbde196e0c0ab0f321aac19f08f1e161fe44c335))
+* **deps:** bump anthropics/claude-code-action in the github-actions group ([#76](https://github.com/inference-gateway/grafana-agent/issues/76)) ([3f3d70b](https://github.com/inference-gateway/grafana-agent/commit/3f3d70b68abe9e1150365c4fd9b38ad8b15084e7))
+* **deps:** bump anthropics/claude-code-action in the github-actions group ([#78](https://github.com/inference-gateway/grafana-agent/issues/78)) ([c8fdc68](https://github.com/inference-gateway/grafana-agent/commit/c8fdc68fad2fda14fca9259ea1d35ef2b958ff13))
+* **deps:** bump anthropics/claude-code-action in the github-actions group ([#89](https://github.com/inference-gateway/grafana-agent/issues/89)) ([7fe4d6a](https://github.com/inference-gateway/grafana-agent/commit/7fe4d6ad6958c7c0d098679e1a028dee1217d70b))
+* **deps:** bump github.com/inference-gateway/adk in the gomod group ([#65](https://github.com/inference-gateway/grafana-agent/issues/65)) ([15e9f35](https://github.com/inference-gateway/grafana-agent/commit/15e9f35981c773fdb2fad6ccc21b007fe600dc0b))
+* **deps:** bump github.com/inference-gateway/adk in the gomod group ([#80](https://github.com/inference-gateway/grafana-agent/issues/80)) ([66c760d](https://github.com/inference-gateway/grafana-agent/commit/66c760d0b4899b0aaaae627ca63b6d18fa348658))
+* **deps:** bump github.com/inference-gateway/adk in the gomod group ([#90](https://github.com/inference-gateway/grafana-agent/issues/90)) ([84db9ff](https://github.com/inference-gateway/grafana-agent/commit/84db9ff193e6bfef68a85819c938c4be0ac14bdd))
+* **deps:** bump github.com/quic-go/quic-go from 0.59.0 to 0.59.1 ([#57](https://github.com/inference-gateway/grafana-agent/issues/57)) ([284190a](https://github.com/inference-gateway/grafana-agent/commit/284190a06751737d62c948ee2658b32a5364ee0a))
+* **deps:** bump github.com/sethvargo/go-envconfig in the gomod group ([#96](https://github.com/inference-gateway/grafana-agent/issues/96)) ([c16fcf5](https://github.com/inference-gateway/grafana-agent/commit/c16fcf58edeff7f743744d7b1c7338ce0acd9064))
+* **deps:** bump go.opentelemetry.io/otel/sdk ([#58](https://github.com/inference-gateway/grafana-agent/issues/58)) ([62eb8c9](https://github.com/inference-gateway/grafana-agent/commit/62eb8c9a058bf82ebf3f928b96c6a323becab24b))
+* **deps:** bump golang.org/x/crypto from 0.51.0 to 0.52.0 ([#67](https://github.com/inference-gateway/grafana-agent/issues/67)) ([3895c6e](https://github.com/inference-gateway/grafana-agent/commit/3895c6e2ef281d8c35bb515ad577d416e523c2f6))
+* **deps:** bump golang.org/x/net from 0.51.0 to 0.55.0 ([#64](https://github.com/inference-gateway/grafana-agent/issues/64)) ([da0731b](https://github.com/inference-gateway/grafana-agent/commit/da0731b8d0832ef65237f6d8b3d176bc68950da4))
+* **deps:** bump inference-gateway/infer-action ([#83](https://github.com/inference-gateway/grafana-agent/issues/83)) ([e5fe7d2](https://github.com/inference-gateway/grafana-agent/commit/e5fe7d2e733641ed6395c2dd663ecfa27175d62d))
+* **deps:** bump inference-gateway/infer-action ([#93](https://github.com/inference-gateway/grafana-agent/issues/93)) ([36260cd](https://github.com/inference-gateway/grafana-agent/commit/36260cd45d3ad990beea1b6e0178feae62c38694))
+* **deps:** Bump the github-actions group with 2 updates ([#54](https://github.com/inference-gateway/grafana-agent/issues/54)) ([e2d6525](https://github.com/inference-gateway/grafana-agent/commit/e2d65252684376efbe53b192e50fa44e3d294c6e))
+* **deps:** bump the github-actions group with 2 updates ([#62](https://github.com/inference-gateway/grafana-agent/issues/62)) ([3b5b06f](https://github.com/inference-gateway/grafana-agent/commit/3b5b06f9725746965cbcdc93fcd6d132751ef05c))
+* **deps:** bump the github-actions group with 3 updates ([#66](https://github.com/inference-gateway/grafana-agent/issues/66)) ([3bb7bc1](https://github.com/inference-gateway/grafana-agent/commit/3bb7bc1009716cefaff22e2a6320d961425b0d07))
+* **deps:** bump the github-actions group with 4 updates ([#63](https://github.com/inference-gateway/grafana-agent/issues/63)) ([370ac77](https://github.com/inference-gateway/grafana-agent/commit/370ac777fc9ccb0339548d29e7478cb4a45c1f74))
+* **deps:** downgrade task version from 3.51.1 to 3.48.0 in workflows and manifest ([762deae](https://github.com/inference-gateway/grafana-agent/commit/762deae923b5549d10984d7708d12d9d29781dae))
+* **release:** update semantic release and plugins to latest versions with local installation ([a77045b](https://github.com/inference-gateway/grafana-agent/commit/a77045b7773b3ece56a94e3f62589528310f0ddd))
+
+### 📚 Documentation
+
+* author spec.documentation and spec.examples in agent.yaml ([#85](https://github.com/inference-gateway/grafana-agent/issues/85)) ([c70fc7c](https://github.com/inference-gateway/grafana-agent/commit/c70fc7cb7547ba78d13a57f70006d60aa4a41ebc)), closes [#84](https://github.com/inference-gateway/grafana-agent/issues/84)
+
+### 🔧 Miscellaneous
+
+* **adl:** refresh agent.yaml defaults from ADL CLI v0.50.2 ([#86](https://github.com/inference-gateway/grafana-agent/issues/86)) ([91d0622](https://github.com/inference-gateway/grafana-agent/commit/91d0622932925fb81a471fe2a191f6ad8c0af222))
+* **deps:** bump ADL CLI to v0.47.1 ([#74](https://github.com/inference-gateway/grafana-agent/issues/74)) ([62c8bc3](https://github.com/inference-gateway/grafana-agent/commit/62c8bc32aaddb181c3ecd9d9dea0bf50cd0abb40))
+* **deps:** bump ADL CLI v0.39.3 -> v0.40.0 ([#53](https://github.com/inference-gateway/grafana-agent/issues/53)) ([163b64d](https://github.com/inference-gateway/grafana-agent/commit/163b64d7b841f8d6475f45da28939dbf4c4b131f))
+* **deps:** bump ADL CLI v0.40.0 -> v0.43.2 ([#55](https://github.com/inference-gateway/grafana-agent/issues/55)) ([cc862e4](https://github.com/inference-gateway/grafana-agent/commit/cc862e409abfa2b6e66c013100f9a4296ab993c3))
+* **deps:** bump ADL CLI v0.43.2 -> v0.44.0 ([#60](https://github.com/inference-gateway/grafana-agent/issues/60)) ([ecc1fbb](https://github.com/inference-gateway/grafana-agent/commit/ecc1fbb56174520cce28957ad6c2168ed7ba181d))
+* **deps:** bump ADL CLI v0.44.0 -> v0.46.0 ([#68](https://github.com/inference-gateway/grafana-agent/issues/68)) ([02132bf](https://github.com/inference-gateway/grafana-agent/commit/02132bfcafe0472050c61fc790a5acab9501a829))
+* **deps:** bump ADL CLI v0.46.0 -> v0.46.5 ([#71](https://github.com/inference-gateway/grafana-agent/issues/71)) ([59c24c2](https://github.com/inference-gateway/grafana-agent/commit/59c24c2d7a21a1eaee4ef8ed9cc75c111811f42c))
+* **deps:** bump ADL CLI v0.46.5 -> v0.47.0 ([#73](https://github.com/inference-gateway/grafana-agent/issues/73)) ([419e00e](https://github.com/inference-gateway/grafana-agent/commit/419e00e0c93bd2b165d76d24e226d18ca55ad8be))
+* **deps:** bump ADL CLI v0.47.1 -> v0.48.0 ([#75](https://github.com/inference-gateway/grafana-agent/issues/75)) ([0e4a1d7](https://github.com/inference-gateway/grafana-agent/commit/0e4a1d7df36deb4e73ea614562edd7c20c423614))
+* **deps:** bump ADL CLI v0.48.0 -> v0.48.1 ([#77](https://github.com/inference-gateway/grafana-agent/issues/77)) ([28c89f7](https://github.com/inference-gateway/grafana-agent/commit/28c89f73678f0ec2a58204ecb85f6f8fffa3ef1e))
+* **deps:** bump ADL CLI v0.48.1 -> v0.48.4 ([#79](https://github.com/inference-gateway/grafana-agent/issues/79)) ([f828068](https://github.com/inference-gateway/grafana-agent/commit/f8280684ed346330d74431fbc1931091f1ea66cd))
+* **deps:** bump ADL CLI v0.48.4 -> v0.48.5 ([#81](https://github.com/inference-gateway/grafana-agent/issues/81)) ([54a9ecc](https://github.com/inference-gateway/grafana-agent/commit/54a9eccdca9fe7733867050c3b28c0c39b1d917f))
+* **deps:** bump ADL CLI v0.48.5 -> v0.49.0 ([#82](https://github.com/inference-gateway/grafana-agent/issues/82)) ([99e7547](https://github.com/inference-gateway/grafana-agent/commit/99e7547e2a19530889f6681c2955ea9ca21a643e))
+* **deps:** bump ADL CLI v0.49.0 -> v0.50.2 ([#87](https://github.com/inference-gateway/grafana-agent/issues/87)) ([ba8b14d](https://github.com/inference-gateway/grafana-agent/commit/ba8b14d64620feee3ab4050a08a37c18f1aad6b8))
+* **deps:** bump ADL CLI v0.50.2 -> v0.51.0 ([#88](https://github.com/inference-gateway/grafana-agent/issues/88)) ([aa87b20](https://github.com/inference-gateway/grafana-agent/commit/aa87b20bc313f4fe4cf70bf3ebfb8878c5a3e9d0))
+* **deps:** bump ADL CLI v0.51.0 -> v0.51.4 ([#92](https://github.com/inference-gateway/grafana-agent/issues/92)) ([f7eae3a](https://github.com/inference-gateway/grafana-agent/commit/f7eae3abc6fe5baec41e0a8662cb94efece58b6c))
+* **deps:** bump ADL CLI v0.51.4 -> v0.52.0 ([#94](https://github.com/inference-gateway/grafana-agent/issues/94)) ([a8dce30](https://github.com/inference-gateway/grafana-agent/commit/a8dce3002aebc1cf67284c9518ffb8cf6991e149))
+* **deps:** bump docker/setup-qemu-action version v4.0.0 -> v4.1.0 ([d40d27f](https://github.com/inference-gateway/grafana-agent/commit/d40d27fe65f4b8d028d31af3715d151d8a51e54c))
+* **flox:** add missing lock file changes ([98e8416](https://github.com/inference-gateway/grafana-agent/commit/98e84168051e2d74b388caa19a4db2471fde5455))
+* **flox:** downgrade deps ([3e81f09](https://github.com/inference-gateway/grafana-agent/commit/3e81f093b1b081112d3515f8d59dfe75de82ce24))
+* **schema:** update adl schema to latest ([a268b0e](https://github.com/inference-gateway/grafana-agent/commit/a268b0ee444634932b480adf2f280ed6af050867))
+
+### 🔨 Miscellaneous
+
+* **deps:** bump Go version from 1.26.2 to 1.26.4 in agent configuration ([00da606](https://github.com/inference-gateway/grafana-agent/commit/00da606e82680830c0a1b9ecea5b0c7577444edd))
+
 ## [0.2.2](https://github.com/inference-gateway/grafana-agent/compare/v0.2.1...v0.2.2) (2026-05-26)
 
 ### 🔧 Miscellaneous
