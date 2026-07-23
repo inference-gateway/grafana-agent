@@ -23,7 +23,7 @@ internal/grafana/grafana.go
 internal/promql/promql.go
 
 # Skill playbooks — hand-written content preserved across regeneration
-# (moved from skills/ to .agents/skills/ in ADL CLI v0.54.0)
+# (moved from skills/ to .agents/skills/ in ADL CLI v0.55.0)
 .agents/skills/
 
 # Add your own files to ignore here:
