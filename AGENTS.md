@@ -76,12 +76,12 @@ This agent ships 2 markdown skills that are loaded into the system prompt at sta
 ### promql
 - **Description**: Write, validate, and optimise PromQL queries for Prometheus and Grafana Cloud Metrics. Use when the user asks to query metrics, write a PromQL expression, calculate rates, aggregate across labels, build histogram quantiles, create recording rules, debug query performance, or understand metric cardinality. Triggers on phrases like "PromQL", "Prometheus query", "write a metric query", "calculate rate", "histogram_quantile", "recording rule", "metric cardinality", "sum by", "rate vs irate", "absent()", or "query is slow".
 - **Version**: 6311c4f4d36db3c5a85686ef2b3ce5fed4e53c0c
-- **Source**: fetched from the skills registry (`skills/promql/SKILL.md`)
+- **Source**: fetched from the skills registry (`.agents/skills/promql/SKILL.md`)
 
 ### dashboarding
 - **Description**: Create, modify, and organise Grafana dashboards including panels, variables, transformations, and alerting. Use when the user asks to create a Grafana dashboard, add a panel, configure a time series or stat panel, add template variables, set up dashboard linking, use transformations, configure thresholds, build a dashboard for a service, or export dashboard JSON. Triggers on phrases like "create dashboard", "add panel", "time series panel", "Grafana dashboard JSON", "template variables", "dashboard variable", "panel transformation", "threshold", "stat panel", "table panel", "Grafana annotations", or "dashboard folder".
 - **Version**: 6311c4f4d36db3c5a85686ef2b3ce5fed4e53c0c
-- **Source**: fetched from the skills registry (`skills/dashboarding/SKILL.md`)
+- **Source**: fetched from the skills registry (`.agents/skills/dashboarding/SKILL.md`)
 
 ## Server Configuration
 
@@ -164,7 +164,7 @@ docker run -p 8080:8080 grafana-agent
 │   └── validate_promql_query.go  # Validates a PromQL query against a Prometheus server
 │   └── create_dashboard.go       # Creates a Grafana dashboard with specified panels, queries, and configurations
 │   └── deploy_dashboard.go       # Deploys a dashboard JSON to Grafana (Cloud or self-hosted)
-├── skills/                       # Skill directories (SKILL.md + optional assets)
+├── .agents/skills/               # Skill directories (SKILL.md + optional assets)
 │   └── promql/                   # Write, validate, and optimise PromQL queries for Prometheus and Grafana Cloud Metrics. Use when the user asks to query metrics, write a PromQL expression, calculate rates, aggregate across labels, build histogram quantiles, create recording rules, debug query performance, or understand metric cardinality. Triggers on phrases like "PromQL", "Prometheus query", "write a metric query", "calculate rate", "histogram_quantile", "recording rule", "metric cardinality", "sum by", "rate vs irate", "absent()", or "query is slow".
 │       └── SKILL.md              # Playbook prepended to the system prompt
 │   └── dashboarding/             # Create, modify, and organise Grafana dashboards including panels, variables, transformations, and alerting. Use when the user asks to create a Grafana dashboard, add a panel, configure a time series or stat panel, add template variables, set up dashboard linking, use transformations, configure thresholds, build a dashboard for a service, or export dashboard JSON. Triggers on phrases like "create dashboard", "add panel", "time series panel", "Grafana dashboard JSON", "template variables", "dashboard variable", "panel transformation", "threshold", "stat panel", "table panel", "Grafana annotations", or "dashboard folder".

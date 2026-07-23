@@ -3,9 +3,9 @@
 # Files listed here typically contain implementations that users have completed.
 #
 # Patterns supported:
-# - Exact file names: skills/agent_skill.go
+# - Exact file names: .agents/skills/agent_skill.go
 # - Wildcards: *.go
-# - Directory patterns: skills/*
+# - Directory patterns: .agents/skills/*
 # - Directories: build/
 # - Comments: lines starting with #
 
@@ -21,6 +21,10 @@ tools/discover_metrics_test.go
 tools/deploy_dashboard_test.go
 internal/grafana/grafana.go
 internal/promql/promql.go
+
+# Skill playbooks — hand-written content preserved across regeneration
+# (moved from skills/ to .agents/skills/ in ADL CLI v0.54.0)
+.agents/skills/
 
 # Add your own files to ignore here:
 # my-custom-file.go
