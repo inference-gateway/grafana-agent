@@ -10,7 +10,7 @@ grafana-agent is an A2A (Agent-to-Agent) server implementing the [A2A Protocol](
 
 ### ADL-Generated Structure
 
-The codebase is generated using ADL CLI 0.52.0 and follows a strict generation pattern:
+The codebase is generated using ADL CLI 0.54.0 and follows a strict generation pattern:
 - **Generated Files**: Marked with `DO NOT EDIT` headers - manual changes will be overwritten
 - **Configuration Source**: `agent.yaml` - defines agent capabilities, skills, and metadata
 - **Server Implementation**: Built on the ADK (Agent Development Kit) framework from `github.com/inference-gateway/adk`
@@ -93,17 +93,19 @@ The following skills are currently shipped with the agent:
 - **promql** (registry): Write, validate, and optimise PromQL queries for Prometheus and Grafana Cloud Metrics. Use when the user asks to query metrics, write a PromQL expression, calculate rates, aggregate across labels, build histogram quantiles, create recording rules, debug query performance, or understand metric cardinality. Triggers on phrases like "PromQL", "Prometheus query", "write a metric query", "calculate rate", "histogram_quantile", "recording rule", "metric cardinality", "sum by", "rate vs irate", "absent()", or "query is slow".
 - **dashboarding** (registry): Create, modify, and organise Grafana dashboards including panels, variables, transformations, and alerting. Use when the user asks to create a Grafana dashboard, add a panel, configure a time series or stat panel, add template variables, set up dashboard linking, use transformations, configure thresholds, build a dashboard for a service, or export dashboard JSON. Triggers on phrases like "create dashboard", "add panel", "time series panel", "Grafana dashboard JSON", "template variables", "dashboard variable", "panel transformation", "threshold", "stat panel", "table panel", "Grafana annotations", or "dashboard folder".
 
-Each skill lives in its own directory at `skills/<id>/SKILL.md` and is
-loaded into the system prompt at startup. Bare skills can ship arbitrary
+Each skill lives in its own directory at `.agents/skills/<id>/SKILL.md`
+and is loaded into the system prompt at startup. A generated `.claude/skills`
+-> `../.agents/skills` symlink makes the same tree readable as `.claude/skills/<id>/SKILL.md`,
+so Claude Code picks these skills up directly. Bare skills can ship arbitrary
 bundled assets (scripts, templates, resources) alongside `SKILL.md` -
-the whole `skills/<id>/` directory is protected by `.adl-ignore` against
+the whole `.agents/skills/<id>/` directory is protected by `.adl-ignore` against
 regeneration overwrites. To modify skills:
 1. Update `agent.yaml` `spec.skills` with skill definitions
 2. Run `task generate` (registry skills are re-fetched; bare skill
    directories are preserved when listed in `.adl-ignore`)
-3. For bare skills, edit `skills/<id>/SKILL.md` directly - frontmatter
+3. For bare skills, edit `.agents/skills/<id>/SKILL.md` directly - frontmatter
    (`name`/`description`/`tags`) shows up on the agent card. Drop helper
-   scripts or templates next to it (e.g. `skills/<id>/scripts/foo.py`).
+   scripts or templates next to it (e.g. `.agents/skills/<id>/scripts/foo.py`).
 
 ### Modifying Agent Behavior
 
@@ -129,7 +131,7 @@ When implementing tests:
 
 - **Generated Files**: Never manually edit files with "DO NOT EDIT" headers
 - **Configuration Changes**: Always modify `agent.yaml` and regenerate
-- **ADL Version**: Ensure ADL CLI 0.52.0 or compatible version for regeneration
+- **ADL Version**: Ensure ADL CLI 0.54.0 or compatible version for regeneration
 - **Port Configuration**: Default 8080, configurable via `A2A_PORT` or `A2A_SERVER_PORT`
 
 ## Debugging Tips
