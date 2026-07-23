@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1](https://github.com/inference-gateway/grafana-agent/compare/v0.3.0...v0.3.1) (2026-07-23)
+
+### 👷 CI
+
+* **deps:** bump the github-actions group with 3 updates ([#98](https://github.com/inference-gateway/grafana-agent/issues/98)) ([35162ee](https://github.com/inference-gateway/grafana-agent/commit/35162ee59139c3025c7adc2128f40a8059e5f2ca))
+* **deps:** bump the gomod group with 2 updates ([#97](https://github.com/inference-gateway/grafana-agent/issues/97)) ([57fb5a7](https://github.com/inference-gateway/grafana-agent/commit/57fb5a7eae1236c5bc43ead43449f6136e449395))
+
+### 🔧 Miscellaneous
+
+* **adl:** refresh agent.yaml defaults from ADL CLI v0.54.0 ([#99](https://github.com/inference-gateway/grafana-agent/issues/99)) ([2b204f2](https://github.com/inference-gateway/grafana-agent/commit/2b204f2e84f7a2c450231007f7e1e93989586790))
+* **deps:** bump ADL CLI to v0.54.0 ([#100](https://github.com/inference-gateway/grafana-agent/issues/100)) ([807efb5](https://github.com/inference-gateway/grafana-agent/commit/807efb5abff38e6c291869ef7d3fee2194717af3))
+
 ## [0.3.0](https://github.com/inference-gateway/grafana-agent/compare/v0.2.2...v0.3.0) (2026-07-17)
 
 ### ✨ Features
