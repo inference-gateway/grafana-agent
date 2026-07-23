@@ -50,6 +50,9 @@ spec:
 
       When using Grafana-related tools:
       - Use the GRAFANA_URL environment variable for grafana_url parameters if not explicitly provided by the user
+    mcp:
+      enabled: false
+      servers: []
   tools:
     - id: read
     - id: discover_metrics
