@@ -172,7 +172,7 @@ docker build \
 
 **Available Build Arguments:**
 
-- `VERSION` - Agent version (default: `0.3.2`)
+- `VERSION` - Agent version (default: `0.3.3`)
 - `AGENT_NAME` - Agent name (default: `grafana-agent`)
 - `AGENT_DESCRIPTION` - Agent description (default: `A2A agent server for grafana dashboards automation tasks`)
 

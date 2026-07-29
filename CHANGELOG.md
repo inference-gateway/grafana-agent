@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.3](https://github.com/inference-gateway/grafana-agent/compare/v0.3.2...v0.3.3) (2026-07-29)
+
+### 👷 CI
+
+* **deps:** bump anthropics/claude-code-action in the github-actions group ([#104](https://github.com/inference-gateway/grafana-agent/issues/104)) ([cc101c1](https://github.com/inference-gateway/grafana-agent/commit/cc101c194f988803ba0d619977ea57b86ba965fd))
+* **deps:** bump docker/login-action in the github-actions group ([#102](https://github.com/inference-gateway/grafana-agent/issues/102)) ([1c76d46](https://github.com/inference-gateway/grafana-agent/commit/1c76d464a284301d9c57b6c29630f236c452e0d7))
+* **deps:** bump docker/login-action in the github-actions group ([#106](https://github.com/inference-gateway/grafana-agent/issues/106)) ([8cf67fd](https://github.com/inference-gateway/grafana-agent/commit/8cf67fdbd5474caf448ca585418b035c763263ed))
+
+### 🔧 Miscellaneous
+
+* **adl:** refresh agent.yaml defaults from ADL CLI v0.57.0 ([#107](https://github.com/inference-gateway/grafana-agent/issues/107)) ([e2d4e04](https://github.com/inference-gateway/grafana-agent/commit/e2d4e04eb0c0e50d3f89d7832251be3d8a470544))
+* **deps:** bump ADL CLI v0.55.0 -> v0.56.0 ([#103](https://github.com/inference-gateway/grafana-agent/issues/103)) ([6f81594](https://github.com/inference-gateway/grafana-agent/commit/6f81594dcd72b7a31e7f13bc1f9bf819e592dad5))
+* **deps:** bump ADL CLI v0.56.0 -> v0.57.0 ([#105](https://github.com/inference-gateway/grafana-agent/issues/105)) ([8b73b18](https://github.com/inference-gateway/grafana-agent/commit/8b73b18d237b3237ca69d28dcd8223cc71bc2076))
+* **deps:** bump ADL CLI v0.57.0 -> v0.57.1 ([#108](https://github.com/inference-gateway/grafana-agent/issues/108)) ([ac3edf1](https://github.com/inference-gateway/grafana-agent/commit/ac3edf1e140bd531fdd2d4986513145994147527))
+
 ## [0.3.2](https://github.com/inference-gateway/grafana-agent/compare/v0.3.1...v0.3.2) (2026-07-23)
 
 ### 🔧 Miscellaneous
