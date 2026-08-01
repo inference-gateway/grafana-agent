@@ -84,13 +84,13 @@ spec:
               value: "100"
             - name: A2A_QUEUE_CLEANUP_INTERVAL
               value: "500s"
-            - name: A2A_AUTH_ENABLE
+            - name: A2A_AUTH_ENABLED
               value: "false"
-            - name: A2A_TELEMETRY_ENABLE
+            - name: A2A_TELEMETRY_ENABLED
               value: "true"
             - name: A2A_TELEMETRY_METRICS_PORT
               value: "9090"
-            - name: A2A_ARTIFACTS_ENABLE
+            - name: A2A_ARTIFACTS_ENABLED
               value: "true"
             - name: A2A_ARTIFACTS_SERVER_HOST
               value: "grafana-agent"
