@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.4](https://github.com/inference-gateway/grafana-agent/compare/v0.3.3...v0.3.4) (2026-08-05)
+
+### 👷 CI
+
+* **deps:** bump github.com/inference-gateway/adk in the gomod group ([#109](https://github.com/inference-gateway/grafana-agent/issues/109)) ([1c38628](https://github.com/inference-gateway/grafana-agent/commit/1c38628fd19e8dc64870e88ad62931fe1cd2fd7c))
+* remove deprecated ollama-api-key input ([#114](https://github.com/inference-gateway/grafana-agent/issues/114)) ([4f2157a](https://github.com/inference-gateway/grafana-agent/commit/4f2157a9b0501c19f9648d365e0a6ea586f03d83))
+
+### 📚 Documentation
+
+* **examples:** rename _ENABLE -> _ENABLED ([d8360af](https://github.com/inference-gateway/grafana-agent/commit/d8360af74e19f2ae77ad7832a4a6382c4b794da9))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump ADL CLI v0.57.1 -> v0.57.2 ([#111](https://github.com/inference-gateway/grafana-agent/issues/111)) ([cf2e4d7](https://github.com/inference-gateway/grafana-agent/commit/cf2e4d713a8a52b93e2cfca42c69c5a3800e9cec))
+* **deps:** bump ADL CLI v0.57.2 -> v0.58.0 ([#112](https://github.com/inference-gateway/grafana-agent/issues/112)) ([941e220](https://github.com/inference-gateway/grafana-agent/commit/941e2209f9043e7ca1a531ffd3815c37cb1e2249))
+* **deps:** bump ADL CLI v0.58.0 -> v0.58.1 ([#113](https://github.com/inference-gateway/grafana-agent/issues/113)) ([c93ffa7](https://github.com/inference-gateway/grafana-agent/commit/c93ffa73d20d7a0ddba77087f4512ac4f5d97b10))
+* **deps:** bump ADL CLI v0.58.1 -> v0.59.0 ([#116](https://github.com/inference-gateway/grafana-agent/issues/116)) ([efb3c60](https://github.com/inference-gateway/grafana-agent/commit/efb3c600e6615f85de3f2cbf43c1e1042e504692))
+
 ## [0.3.3](https://github.com/inference-gateway/grafana-agent/compare/v0.3.2...v0.3.3) (2026-07-29)
 
 ### 👷 CI
