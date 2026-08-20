@@ -291,7 +291,7 @@ spec:
       version: "1.26.4"
       vendor:
         deps:
-          - github.com/stretchr/testify@v1.11.1
+          - github.com/stretchr/testify@v1.12.1
         devdeps:
           - github.com/maxbrunsfeld/counterfeiter/v6@v6.11.2
   hooks:
