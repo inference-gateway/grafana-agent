@@ -6,7 +6,7 @@ dashboards. This guide gets a local instance running and answering requests.
 
 ## Prerequisites
 
-- Go 1.26.4+ (or Docker) to run the agent.
+- Go 1.26.7+ (or Docker) to run the agent.
 - An API key for an LLM provider (`openai`, `anthropic`, `azure`, `ollama`,
   or `deepseek`).
 - A reachable Prometheus server — required by the metric and PromQL tools.
