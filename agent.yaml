@@ -292,6 +292,7 @@ spec:
       vendor:
         deps:
           - github.com/stretchr/testify@v1.12.1
+          - google.golang.org/grpc@v1.83.2
         devdeps:
           - github.com/maxbrunsfeld/counterfeiter/v6@v6.11.2
   hooks:
