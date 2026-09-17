@@ -3,7 +3,7 @@ module github.com/inference-gateway/grafana-agent
 go 1.26.7
 
 require (
-	github.com/inference-gateway/adk v0.27.0
+	github.com/inference-gateway/adk v0.28.0
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.12.2 // indirect
 	github.com/sethvargo/go-envconfig v1.4.3
 	github.com/spf13/cobra v1.10.2
