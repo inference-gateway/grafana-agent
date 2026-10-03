@@ -33,7 +33,7 @@ spec:
             - name: A2A_DEBUG
               value: "true"
             - name: A2A_AGENT_URL
-              value: "http://grafana-agent:8080"
+              value: "http://grafana-agent.grafana-agent.svc.cluster.local:8080/a2a"
             - name: A2A_STREAMING_STATUS_UPDATE_INTERVAL
               value: "1s"
             - name: A2A_SERVER_READ_TIMEOUT
@@ -67,8 +67,6 @@ spec:
             - name: A2A_CAPABILITIES_STREAMING
               value: "true"
             - name: A2A_CAPABILITIES_PUSH_NOTIFICATIONS
-              value: "false"
-            - name: A2A_CAPABILITIES_STATE_TRANSITION_HISTORY
               value: "false"
             - name: A2A_TASK_RETENTION_MAX_COMPLETED_TASKS
               value: "100"
