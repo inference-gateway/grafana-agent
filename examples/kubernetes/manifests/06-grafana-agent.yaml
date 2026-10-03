@@ -86,7 +86,11 @@ spec:
               value: "false"
             - name: A2A_TELEMETRY_ENABLED
               value: "true"
-            - name: A2A_TELEMETRY_METRICS_PORT
+            - name: A2A_OTEL_TRACES_EXPORTER
+              value: "none"
+            - name: A2A_OTEL_METRICS_EXPORTER
+              value: "prometheus"
+            - name: A2A_OTEL_EXPORTER_PROMETHEUS_PORT
               value: "9090"
             - name: A2A_ARTIFACTS_ENABLED
               value: "true"
