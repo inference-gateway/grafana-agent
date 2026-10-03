@@ -33,7 +33,7 @@ spec:
             - name: A2A_DEBUG
               value: "true"
             - name: A2A_AGENT_URL
-              value: "http://grafana-agent:8080"
+              value: "http://grafana-agent.grafana-agent.svc.cluster.local:8080/a2a"
             - name: A2A_STREAMING_STATUS_UPDATE_INTERVAL
               value: "1s"
             - name: A2A_SERVER_READ_TIMEOUT
@@ -68,8 +68,6 @@ spec:
               value: "true"
             - name: A2A_CAPABILITIES_PUSH_NOTIFICATIONS
               value: "false"
-            - name: A2A_CAPABILITIES_STATE_TRANSITION_HISTORY
-              value: "false"
             - name: A2A_TASK_RETENTION_MAX_COMPLETED_TASKS
               value: "100"
             - name: A2A_TASK_RETENTION_MAX_FAILED_TASKS
@@ -88,7 +86,11 @@ spec:
               value: "false"
             - name: A2A_TELEMETRY_ENABLED
               value: "true"
-            - name: A2A_TELEMETRY_METRICS_PORT
+            - name: A2A_OTEL_TRACES_EXPORTER
+              value: "none"
+            - name: A2A_OTEL_METRICS_EXPORTER
+              value: "prometheus"
+            - name: A2A_OTEL_EXPORTER_PROMETHEUS_PORT
               value: "9090"
             - name: A2A_ARTIFACTS_ENABLED
               value: "true"
