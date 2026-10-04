@@ -1,6 +1,6 @@
 module github.com/inference-gateway/grafana-agent/example/demo-service
 
-go 1.26.7
+go 1.26.8
 
 require (
 	github.com/prometheus/client_golang v1.20.5

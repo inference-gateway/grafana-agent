@@ -2,7 +2,7 @@
 services:
   agent:
     build:
-      context: ..
+      context: ../..
       dockerfile: Dockerfile
     container_name: grafana-agent
     environment:

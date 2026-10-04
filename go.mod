@@ -1,9 +1,9 @@
 module github.com/inference-gateway/grafana-agent
 
-go 1.26.7
+go 1.26.8
 
 require (
-	github.com/inference-gateway/adk v0.32.1
+	github.com/inference-gateway/adk v0.32.2
 	github.com/sethvargo/go-envconfig v1.4.3
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1

@@ -5,6 +5,7 @@ vars:
   K3D_CLUSTER_NAME: grafana-agent
   REGISTRY_PORT: 5000
   NAMESPACE: grafana-agent
+  GATEWAY_NAMESPACE: inference-gateway
 
 tasks:
   check-requirements:
@@ -50,7 +51,7 @@ tasks:
       - echo "📦 Installing Grafana Operator (cluster-scoped)..."
       - kubectl create -f https://github.com/grafana/grafana-operator/releases/latest/download/kustomize-cluster_scoped.yaml || kubectl replace -f https://github.com/grafana/grafana-operator/releases/latest/download/kustomize-cluster_scoped.yaml
       - echo "⏳ Waiting for Grafana Operator to be ready..."
-      - kubectl wait --for=condition=available --timeout=300s deployment/grafana-operator-controller-manager -n grafana-operator-system || true
+      - kubectl wait --for=condition=available --timeout=300s deployment/grafana-operator-controller-manager -n grafana || true
       - echo "✅ Grafana Operator installed"
       - echo ""
       - echo "📦 Installing Inference Gateway Operator..."
@@ -141,7 +142,7 @@ tasks:
       - echo "⏳ Waiting for Grafana to be ready (this may take a minute)..."
       - kubectl wait --for=condition=available --timeout=300s deployment/grafana-deployment -n {{.NAMESPACE}} || true
       - echo "⏳ Waiting for Inference Gateway to be ready..."
-      - kubectl wait --for=condition=available --timeout=300s deployment/inference-gateway -n {{.NAMESPACE}} || true
+      - kubectl wait --for=condition=available --timeout=300s deployment/inference-gateway -n {{.GATEWAY_NAMESPACE}} || true
       - echo "✅ All services are ready!"
 
   show-urls:
@@ -187,7 +188,7 @@ tasks:
   logs-gateway:
     desc: Show logs for inference-gateway
     cmds:
-      - kubectl logs -f deployment/inference-gateway -n {{.NAMESPACE}}
+      - kubectl logs -f deployment/inference-gateway -n {{.GATEWAY_NAMESPACE}}
 
   logs-grafana:
     desc: Show logs for Grafana
@@ -207,7 +208,7 @@ tasks:
       - kubectl get svc -n {{.NAMESPACE}}
       - echo ""
       - echo "🎯 Gateway resources:"
-      - kubectl get gateway -n {{.NAMESPACE}}
+      - kubectl get gateway -n {{.GATEWAY_NAMESPACE}}
       - echo ""
       - echo "📊 Grafana resources:"
       - kubectl get grafana,grafanadatasource,grafanadashboard -n {{.NAMESPACE}}

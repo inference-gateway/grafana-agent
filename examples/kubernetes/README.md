@@ -130,8 +130,11 @@ The Grafana Agent exposes an A2A (Agent-to-Agent) API that you can interact with
 # Install the CLI (if not already installed)
 # See: https://github.com/inference-gateway/cli
 
+# Expose the gateway on localhost:8081 (localhost:8080 is the grafana-agent)
+kubectl port-forward -n inference-gateway svc/inference-gateway 8081:8080 &
+
 # Set environment variables
-export INFER_GATEWAY_URL=http://localhost:8080
+export INFER_GATEWAY_URL=http://localhost:8081
 export INFER_A2A_ENABLED=true
 export INFER_A2A_AGENTS=http://localhost:8080
 
@@ -157,7 +160,7 @@ kubectl run -n grafana-agent --rm -it infer-cli \
   --env="INFER_GATEWAY_URL=http://inference-gateway.inference-gateway.svc.cluster.local:8080" \
   --env="INFER_A2A_ENABLED=true" \
   --env="INFER_A2A_AGENTS=http://grafana-agent.grafana-agent.svc.cluster.local:8080" \
-  -- agent --model deepseek/deepseek-v4-flash \
+  -- headless --model deepseek/deepseek-v4-flash \
   "Create a dashboard showing HTTP request rates and latencies from demo-service"
 ```
 
@@ -284,7 +287,7 @@ This example installs the operator using the official cluster-scoped installatio
 kubectl create -f https://github.com/grafana/grafana-operator/releases/latest/download/kustomize-cluster_scoped.yaml
 ```
 
-The operator is installed in the `grafana-operator-system` namespace and watches for Grafana resources cluster-wide.
+The operator is installed in the `grafana` namespace and watches for Grafana resources cluster-wide.
 
 **Alternative installation methods:**
 - **Helm**: `helm upgrade -i grafana-operator oci://ghcr.io/grafana/helm-charts/grafana-operator --version v5.20.0`
@@ -373,8 +376,8 @@ task port-forward-prometheus
 
 ```bash
 # Check operator status
-kubectl get pods -n grafana-operator-system
-kubectl logs -n grafana-operator-system deployment/grafana-operator-controller-manager
+kubectl get pods -n grafana
+kubectl logs -n grafana deployment/grafana-operator-controller-manager
 
 # Reinstall operator
 kubectl delete -f https://github.com/grafana/grafana-operator/releases/latest/download/kustomize-cluster_scoped.yaml
@@ -386,7 +389,7 @@ kubectl create -f https://github.com/grafana/grafana-operator/releases/latest/do
 ```bash
 # Check operator status
 kubectl get pods -n inference-gateway-system
-kubectl logs -n inference-gateway-system deployment/operator
+kubectl logs -n inference-gateway-system deployment/operator-inference-gateway
 
 # Check CRDs are installed
 kubectl get crd | grep gateway
@@ -398,15 +401,15 @@ kubectl get crd | grep gateway
 
 ```bash
 # Check gateway status
-kubectl get gateway -n grafana-agent
-kubectl describe gateway inference-gateway -n grafana-agent
+kubectl get gateway -n inference-gateway
+kubectl describe gateway inference-gateway -n inference-gateway
 
 # Check gateway logs
 task logs-gateway
 
 # Check secrets are created
-kubectl get secret api-keys -n grafana-agent
-kubectl describe secret api-keys -n grafana-agent
+kubectl get secret api-keys -n inference-gateway
+kubectl describe secret api-keys -n inference-gateway
 ```
 
 **Problem**: No metrics in Prometheus
@@ -470,13 +473,13 @@ task rebuild-agent
 
 ```bash
 # Check if secrets exist
-kubectl get secret api-keys -n grafana-agent -o yaml
+kubectl get secret api-keys -n inference-gateway -o yaml
 
 # Update secrets
-kubectl edit secret api-keys -n grafana-agent
+kubectl edit secret api-keys -n inference-gateway
 
 # Or recreate from .env
-kubectl delete secret api-keys -n grafana-agent
+kubectl delete secret api-keys -n inference-gateway
 task create-secrets
 ```
 
