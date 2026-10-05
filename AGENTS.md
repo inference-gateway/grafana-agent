@@ -5,7 +5,7 @@ This file describes the agents available in this A2A (Agent-to-Agent) system.
 ## Agent Overview
 
 ### grafana-agent
-**Version**: 0.3.16  
+**Version**: 0.3.17  
 **Description**: A2A agent server for grafana dashboards automation tasks
 
 This agent is built using the Agent Definition Language (ADL) and provides A2A communication capabilities.
@@ -207,7 +207,7 @@ task test:coverage
 
 ## Agent Metadata
 
-This agent was generated using ADL CLI v0.3.16 with the following configuration:
+This agent was generated using ADL CLI v0.3.17 with the following configuration:
 
 - **Language**: Go
 - **Template**: Minimal A2A Agent

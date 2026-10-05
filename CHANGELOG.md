@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.17](https://github.com/inference-gateway/grafana-agent/compare/v0.3.16...v0.3.17) (2026-10-05)
+
+### 👷 CI
+
+* **deps:** bump the gomod group across 1 directory with 2 updates ([#171](https://github.com/inference-gateway/grafana-agent/issues/171)) ([d50838a](https://github.com/inference-gateway/grafana-agent/commit/d50838a82c5272b782e8a10a56879403fbbccc5f))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump ADL CLI v0.67.0 -> v0.67.1 ([#172](https://github.com/inference-gateway/grafana-agent/issues/172)) ([38c3fa2](https://github.com/inference-gateway/grafana-agent/commit/38c3fa2dbae08026fcfd027854728e474f5def9b))
+
 ## [0.3.16](https://github.com/inference-gateway/grafana-agent/compare/v0.3.15...v0.3.16) (2026-10-05)
 
 ### 🔧 Miscellaneous
