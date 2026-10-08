@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.19](https://github.com/inference-gateway/grafana-agent/compare/v0.3.18...v0.3.19) (2026-10-08)
+
+### 🔧 Miscellaneous
+
+* **deps:** bump ADL CLI v0.67.2 -> v0.67.3 ([#175](https://github.com/inference-gateway/grafana-agent/issues/175)) ([5c546a2](https://github.com/inference-gateway/grafana-agent/commit/5c546a2b5a5d8302b807d1be0ec1b19f48c87d2b))
+
 ## [0.3.18](https://github.com/inference-gateway/grafana-agent/compare/v0.3.17...v0.3.18) (2026-10-05)
 
 ### 🔧 Miscellaneous
