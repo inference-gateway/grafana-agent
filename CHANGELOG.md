@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.21](https://github.com/inference-gateway/grafana-agent/compare/v0.3.20...v0.3.21) (2026-11-15)
+
+### 👷 CI
+
+* **deps:** bump github.com/go-jose/go-jose/v4 from 4.1.5 to 4.1.6 ([#187](https://github.com/inference-gateway/grafana-agent/issues/187)) ([1bfa0d7](https://github.com/inference-gateway/grafana-agent/commit/1bfa0d7ad1e062487c792aa79905fbc98d4c2dc4))
+* **deps:** bump github.com/klauspost/compress ([#182](https://github.com/inference-gateway/grafana-agent/issues/182)) ([84ada7f](https://github.com/inference-gateway/grafana-agent/commit/84ada7fd5e26dc2485b5a609d677ad0f673cd72b))
+* **deps:** bump go.opentelemetry.io/otel/sdk ([#194](https://github.com/inference-gateway/grafana-agent/issues/194)) ([996fe2c](https://github.com/inference-gateway/grafana-agent/commit/996fe2c7724d4c039bc043413f2bfaa653f802db))
+* **deps:** bump go.opentelemetry.io/otel/trace ([#195](https://github.com/inference-gateway/grafana-agent/issues/195)) ([4a06648](https://github.com/inference-gateway/grafana-agent/commit/4a0664876d813c55e46a454b02819c6dcdfabf4f))
+* **release:** label issues and PRs shipped in an rc with rc ([#188](https://github.com/inference-gateway/grafana-agent/issues/188)) ([e952442](https://github.com/inference-gateway/grafana-agent/commit/e95244264b3b9de03a5bc3af8c3330d12a240a5a))
+
+### 🔧 Miscellaneous
+
+* **deps:** bump ADL CLI v0.68.0 -> v0.68.1 ([#180](https://github.com/inference-gateway/grafana-agent/issues/180)) ([2eaef81](https://github.com/inference-gateway/grafana-agent/commit/2eaef819eff730561d68d5011cca8a7ee3d4441b))
+* **deps:** bump ADL CLI v0.68.1 -> v0.68.2 ([#184](https://github.com/inference-gateway/grafana-agent/issues/184)) ([5c87bba](https://github.com/inference-gateway/grafana-agent/commit/5c87bbace917af0523ff914c6fa12f6eac72e3b6))
+* **deps:** bump ADL CLI v0.68.2 -> v0.68.3 ([#186](https://github.com/inference-gateway/grafana-agent/issues/186)) ([d23165e](https://github.com/inference-gateway/grafana-agent/commit/d23165e6eaed9c30fbd35261e35a755a891bf0a7))
+* **deps:** bump ADL CLI v0.68.3 -> v0.68.4 ([#189](https://github.com/inference-gateway/grafana-agent/issues/189)) ([3846216](https://github.com/inference-gateway/grafana-agent/commit/3846216ae1b858d33d890c50daebec538128a887))
+* **deps:** bump ADL CLI v0.68.4 -> v0.68.5 ([#191](https://github.com/inference-gateway/grafana-agent/issues/191)) ([48fc293](https://github.com/inference-gateway/grafana-agent/commit/48fc2939c613755fe6b6cba15288d0bd74d26720))
+* **deps:** bump ADL CLI v0.68.5 -> v0.68.7 ([#193](https://github.com/inference-gateway/grafana-agent/issues/193)) ([cbdbca4](https://github.com/inference-gateway/grafana-agent/commit/cbdbca4b235f8199ae6a9a5786a8bf733cdb0bd2))
+* **deps:** bump ADL CLI v0.68.7 -> v0.68.8 ([#197](https://github.com/inference-gateway/grafana-agent/issues/197)) ([d4ca206](https://github.com/inference-gateway/grafana-agent/commit/d4ca206ff0975b8122cbd9f25558cf9356b9752f))
+* **deps:** bump flox dependencies to latest ([#196](https://github.com/inference-gateway/grafana-agent/issues/196)) ([fa1339b](https://github.com/inference-gateway/grafana-agent/commit/fa1339b2800c9954ccb0d009a05291d1e6d595e4))
+* remove CLAUDE.md file ([#181](https://github.com/inference-gateway/grafana-agent/issues/181)) ([f10e7fc](https://github.com/inference-gateway/grafana-agent/commit/f10e7fcb22fe9b5f5c23c6c279cfa182b330f4ed))
+
 ## [0.3.20](https://github.com/inference-gateway/grafana-agent/compare/v0.3.19...v0.3.20) (2026-10-15)
 
 ### 🔧 Miscellaneous
